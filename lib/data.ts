@@ -1,4 +1,5 @@
 import goldRushImg from "@/public/gold_rush.png";
+import serviceJournalImg from "@/public/service_journal.png";
 import React from "react";
 import { CgWorkAlt } from "react-icons/cg";
 import { FaReact } from "react-icons/fa";
@@ -40,9 +41,17 @@ export const projectsData = [
     title: "Gold Rush",
     description:
       "I worked on a team of 3 to create a 2D minigame dungeon crawler in Unity. I was the lead programmer and was responsible for the player movement, game ui, and the level design.",
-    tags: ["Unity", "C#", "Game Development"],
+    tags: ["Unity", "C#", "Photoshop", "Game Design"],
     imageUrl: goldRushImg,
     siteUrl: "https://abe-54.itch.io/gold-rush",
+  },
+  {
+    title: "Service Journal",
+    description:
+      "I built a prototype app that allows users to track their services and it's current status for their customers. I used React, React Native, Express, Prisma, and MySQL.",
+    tags: ["React", "React Native", "Express", "Prisma", "MySQL", "TypeScript"],
+    imageUrl: serviceJournalImg,
+    siteUrl: "",
   },
 ] as const;
 
