@@ -7,7 +7,7 @@ const Footer = () => {
         &copy; 2030 Abraham Rubio. All rights reserved.
       </small>
       <p className="text-xs">
-        <span className="font-semibold">About this website:</span>built with
+        <span className="font-semibold">About this website:</span> Built with
         React & Next.js (App Router & Server Actions), Typescript, Tailwind CSS,
         Framer Motion, React Email & Resend, Netlify Hosting
       </p>

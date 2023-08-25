@@ -1,3 +1,4 @@
+import gemHunterImg from "@/public/gem_hunter.png";
 import goldRushImg from "@/public/gold_rush.png";
 import serviceJournalImg from "@/public/service_journal.png";
 import React from "react";
@@ -53,6 +54,14 @@ export const projectsData = [
     imageUrl: serviceJournalImg,
     siteUrl: "",
   },
+  {
+    title: "Gem Hunter",
+    description:
+      "I challenged myself to create a game in 1 month. I used Unity and C# to create a 2D platformer.",
+    tags: ["Unity", "C#", "Game Design", "Photoshop", "Pixel Art"],
+    imageUrl: gemHunterImg,
+    siteUrl: "https://abe-54.itch.io/gem-hunter",
+  },
 ] as const;
 
 export const skillsData = [
@@ -69,7 +78,16 @@ export const skillsData = [
   "Express",
   "MySQL",
   "Python",
-  "Framer Motion",
+  "Unity",
+  "C#",
+  "Game Design",
+  "Pixel Art",
+  "UI/UX",
+  "Mobile Development",
+  "Android Studio",
+  "VS Code",
+  "Github",
+  "Java",
 ] as const;
 
 export const technlogiesData = [
