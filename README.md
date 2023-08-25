@@ -6,6 +6,10 @@ I made this website to further my knowledge of React, Typescript, and NextJS. I 
  
 ## Screenshots
 <p float="left">
+
+ <img src="https://github.com/Abe-54/Abraham-Portfolio-Site/assets/93175657/98b77365-4914-465e-bdc4-88d15f8dad45" width="600" />
+ <img src="https://github.com/Abe-54/Abraham-Portfolio-Site/assets/93175657/64533a88-fad8-4f2f-950d-9ceb9f2a14d2" width="600" />
+
 </p>
 
 ## What did I learn from making it?
