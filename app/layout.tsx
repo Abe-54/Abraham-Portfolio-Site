@@ -3,11 +3,12 @@ import Header from "@/components/header";
 import ThemeSwitch from "@/components/theme-switch";
 import ActiveSectionContextProvider from "@/context/active-section-context";
 import ThemeContextProvider from "@/context/theme-context";
-import { Inter } from "next/font/google";
+import { Inter, Lexend } from "next/font/google";
 import { Toaster } from "react-hot-toast";
 import "./globals.css";
 
 const inter = Inter({ subsets: ["latin"] });
+const lexend = Lexend({ subsets: ["latin"], display: "swap" });
 
 export const metadata = {
   title: "Abraham | Personal Portfolio",
@@ -30,7 +31,7 @@ export default function RootLayout({
 
       <html lang="en" className="!scroll-smooth">
         <body
-          className={`${inter.className}
+          className={`${lexend.className}
       bg-gray-50 text-lightMode-accent relative pt-10 sm:pt-0 dark:bg-darkMode-background dark:text-gray-50 dark:text-opacity-90 transition-all`}
         >
           <div className="bg-[#e2fbf8] absolute top-[-6rem] -z-10 right-[11rem] h-[25.25rem] w-[25.25rem] rounded-full blur-[10rem] sm:w-[68.75rem] dark:bg-[#627194]" />

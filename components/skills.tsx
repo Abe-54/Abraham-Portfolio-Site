@@ -1,23 +1,11 @@
 "use client";
 
-import { skillsData, technlogiesData } from "@/lib/data";
+import { skillsData } from "@/lib/data";
 import { useSectionInView } from "@/lib/hooks";
 import { motion } from "framer-motion";
 import React from "react";
 import SectionHeading from "./section-heading";
-
-const fadeInAnimationVariants = {
-  initial: {
-    opacity: 0,
-  },
-  animate: (index: number) => ({
-    opacity: 1,
-    y: 0,
-    transition: {
-      delay: 0.05 * index,
-    },
-  }),
-};
+import SkillsList from "./skills-list";
 
 const Skills = () => {
   const { ref } = useSectionInView("Skills");
@@ -26,24 +14,14 @@ const Skills = () => {
     <section
       ref={ref}
       id="skills"
-      className="mb-28 max-w-[53rem] scroll-mt-28 text-center sm:mb-40 h-full"
+      className="mb-28 max-w-[60rem] scroll-mt-28 text-center sm:mb-40 h-full"
     >
       <SectionHeading>Skills</SectionHeading>
-      <ul className="flex flex-wrap justify-center gap-2 text-lg text-white">
-        {skillsData.map((skill, index) => (
-          <motion.li
-            className="bg-lightMode-accent/[0.7] dark:bg-darkMode-accent/[0.7] border border-black/[0.1] rounded-xl px-5 py-3  dark:text-white/80"
-            key={index}
-            variants={fadeInAnimationVariants}
-            initial="initial"
-            whileInView="animate"
-            viewport={{ once: true }}
-            custom={index}
-          >
-            {skill}
-          </motion.li>
-        ))}
-      </ul>
+      <div className="flex gap-4 flex-wrap justify-center">
+        <SkillsList skills={skillsData.technologies} title="Technologies" />
+        <SkillsList skills={skillsData.tools} title="Tools" />
+        <SkillsList skills={skillsData.learning} title="Currently Learning" />
+      </div>
 
       {/* <div className="rounded-lg overflow-hidden w-[32rem] h-max bg-lightMode-secondary/80 dark:bg-darkMode-secondary/80">
         <h3 className="text-3xl px-2 py-3 font-semibold dark:text-white ">

@@ -16,13 +16,14 @@ export const links = [
     hash: "#about",
   },
   {
-    name: "Projects",
-    hash: "#projects",
-  },
-  {
     name: "Skills",
     hash: "#skills",
   },
+  {
+    name: "Projects",
+    hash: "#projects",
+  },
+
   {
     name: "Contact",
     hash: "#contact",
@@ -36,6 +37,73 @@ export const personalData = [
   "Game Programmer^1000",
   "Designer^1000",
 ];
+
+export const skillsData = {
+  technologies: [
+    {
+      name: "Java",
+      icon: React.createElement("i", { className: "devicon-java-plain" }),
+    },
+    {
+      name: "C#",
+      icon: React.createElement("i", { className: "devicon-csharp-plain" }),
+    },
+    {
+      name: "Python",
+      icon: React.createElement("i", { className: "devicon-python-plain" }),
+    },
+    {
+      name: "JavaScript",
+      icon: React.createElement("i", { className: "devicon-javascript-plain" }),
+    },
+    {
+      name: "TypeScript",
+      icon: React.createElement("i", { className: "devicon-typescript-plain" }),
+    },
+    {
+      name: "CSS",
+      icon: React.createElement("i", { className: "devicon-css3-plain" }),
+    },
+  ] as const,
+  tools: [
+    {
+      name: "Unity",
+      icon: React.createElement("i", { className: "devicon-unity-original" }),
+    },
+    {
+      name: "VS Code",
+      icon: React.createElement("i", { className: "devicon-vscode-plain" }),
+    },
+    {
+      name: "Python",
+      icon: React.createElement("i", { className: "devicon-python-plain" }),
+    },
+    {
+      name: "Github",
+      icon: React.createElement("i", { className: "devicon-github-original" }),
+    },
+    {
+      name: "Android Studio",
+      icon: React.createElement("i", {
+        className: "devicon-androidstudio-plain",
+      }),
+    },
+  ] as const,
+  learning: [
+    {
+      name: "Next.js",
+      icon: React.createElement("i", { className: "devicon-nextjs-plain" }),
+    },
+    {
+      name: "My SQL",
+      icon: React.createElement("i", { className: "devicon-mysql-plain" }),
+    },
+    {
+      name: "Framer Motion",
+      icon: React.createElement(LuFramer),
+    },
+  ] as const,
+} as const;
 
 export const projectsData = [
   {
@@ -61,98 +129,5 @@ export const projectsData = [
     tags: ["Unity", "C#", "Game Design", "Photoshop", "Pixel Art"],
     imageUrl: gemHunterImg,
     siteUrl: "https://abe-54.itch.io/gem-hunter",
-  },
-] as const;
-
-export const skillsData = [
-  "HTML",
-  "CSS",
-  "JavaScript",
-  "TypeScript",
-  "React",
-  "Next.js",
-  "Node.js",
-  "Git",
-  "Tailwind",
-  "Prisma",
-  "Express",
-  "MySQL",
-  "Python",
-  "Unity",
-  "C#",
-  "Game Design",
-  "Pixel Art",
-  "UI/UX",
-  "Mobile Development",
-  "Android Studio",
-  "VS Code",
-  "Github",
-  "Java",
-] as const;
-
-export const technlogiesData = [
-  {
-    name: "Java",
-    icon: React.createElement("i", { className: "devicon-java-plain" }),
-  },
-  {
-    name: "C#",
-    icon: React.createElement("i", { className: "devicon-csharp-plain" }),
-  },
-  {
-    name: "Python",
-    icon: React.createElement("i", { className: "devicon-python-plain" }),
-  },
-  {
-    name: "JavaScript",
-    icon: React.createElement("i", { className: "devicon-javascript-plain" }),
-  },
-  {
-    name: "TypeScript",
-    icon: React.createElement("i", { className: "devicon-typescript-plain" }),
-  },
-  {
-    name: "CSS",
-    icon: React.createElement("i", { className: "devicon-css3-plain" }),
-  },
-] as const;
-
-export const toolsData = [
-  {
-    name: "Unity",
-    icon: React.createElement("i", { className: "devicon-unity-original" }),
-  },
-  {
-    name: "VS Code",
-    icon: React.createElement("i", { className: "devicon-vscode-plain" }),
-  },
-  {
-    name: "Python",
-    icon: React.createElement("i", { className: "devicon-python-plain" }),
-  },
-  {
-    name: "Github",
-    icon: React.createElement("i", { className: "devicon-github-original" }),
-  },
-  {
-    name: "Android Studio",
-    icon: React.createElement("i", {
-      className: "devicon-androidstudio-plain",
-    }),
-  },
-] as const;
-
-export const learningData = [
-  {
-    name: "Next.js",
-    icon: React.createElement("i", { className: "devicon-nextjs-plain" }),
-  },
-  {
-    name: "My SQL",
-    icon: React.createElement("i", { className: "devicon-mysql-plain" }),
-  },
-  {
-    name: "Framer Motion",
-    icon: React.createElement(LuFramer),
   },
 ] as const;
