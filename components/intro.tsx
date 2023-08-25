@@ -1,7 +1,7 @@
 "use client";
 
 import { useActiveSectionContext } from "@/context/active-section-context";
-import { personalData } from "@/lib/data";
+import { personalAdjectives } from "@/lib/data";
 import { useSectionInView } from "@/lib/hooks";
 import profilePic from "@/public/abraham_professional.jpg";
 import { motion } from "framer-motion";
@@ -22,7 +22,7 @@ const Intro = () => {
 
   useEffect(() => {
     const typed = new Typed(typingAnim.current, {
-      strings: personalData,
+      strings: personalAdjectives,
       typeSpeed: 100,
       backSpeed: 50,
       loop: true,

@@ -30,7 +30,7 @@ export const links = [
   },
 ] as const;
 
-export const personalData = [
+export const personalAdjectives = [
   "Fullstack Developer^1000",
   "Software Engineer^1000",
   "Mobile Developer^1000",
@@ -120,7 +120,7 @@ export const projectsData = [
       "I built a prototype app that allows users to track their services and it's current status for their customers. I used React, React Native, Express, Prisma, and MySQL.",
     tags: ["React", "React Native", "Express", "Prisma", "MySQL", "TypeScript"],
     imageUrl: serviceJournalImg,
-    siteUrl: "",
+    siteUrl: "https://github.com/Abe-54/Service-Journal-App",
   },
   {
     title: "Gem Hunter",
