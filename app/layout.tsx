@@ -3,11 +3,11 @@ import Header from "@/components/header";
 import ThemeSwitch from "@/components/theme-switch";
 import ActiveSectionContextProvider from "@/context/active-section-context";
 import ThemeContextProvider from "@/context/theme-context";
+import { Analytics } from "@vercel/analytics/react";
 import { Inter, Lexend } from "next/font/google";
 import { Toaster } from "react-hot-toast";
 import "./globals.css";
 
-const inter = Inter({ subsets: ["latin"] });
 const lexend = Lexend({ subsets: ["latin"], display: "swap" });
 
 export const metadata = {
@@ -41,6 +41,7 @@ export default function RootLayout({
             <ActiveSectionContextProvider>
               <Header />
               {children}
+              <Analytics />
               <Toaster position="top-right" />
               <Footer />
               <ThemeSwitch />
