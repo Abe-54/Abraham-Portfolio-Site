@@ -28,6 +28,9 @@ module.exports = {
           accent: "#428aa9",
         },
       },
+      height: {
+        screen: ["100vh", "100dvh"],
+      },
     },
   },
   plugins: [],
