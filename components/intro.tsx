@@ -41,7 +41,7 @@ const Intro = () => {
     <section
       ref={ref}
       id="home"
-      className="h-screen-small sm:h-screen flex flex-col  justify-center mb-28 max-w-[70rem] sm:mb-0 scroll-mt-[100rem] relative"
+      className="h-screen flex flex-col  justify-center mb-28 max-w-[70rem] sm:mb-0 scroll-mt-[100rem] relative"
     >
       <div className="flex flex-col w-full lg:flex-row items-center gap-5 sm:gap-32 mb-10 text-center lg:text-start">
         <motion.h1
