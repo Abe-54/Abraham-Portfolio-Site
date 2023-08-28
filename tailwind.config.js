@@ -30,6 +30,7 @@ module.exports = {
       },
       height: {
         screen: ["100vh", "100dvh"],
+        "screen-small": "100svh",
       },
     },
   },
