@@ -3,7 +3,7 @@
 import { sendEmail } from "@/actions/sendEmail";
 import { useSectionInView } from "@/lib/hooks";
 import { motion } from "framer-motion";
-import React, { useRef} from "react";
+import React, { useRef } from "react";
 
 import toast from "react-hot-toast";
 import SectionHeading from "./section-heading";
