@@ -11,8 +11,7 @@ import SubmitBtn from "./submit-btn";
 
 const Contact = () => {
   const { ref } = useSectionInView("Contact");
-
-  formRef = useRef();
+  const formRef = useRef();
 
   return (
     <motion.section
