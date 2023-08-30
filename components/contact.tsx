@@ -34,8 +34,9 @@ const Contact = () => {
 
       <form
         className="mt-10 flex flex-col dark:text-black"
+        ref={formRef}
         action={async (formData) => {
-          formRef.current.reset();
+          formRef?.current.reset();
           const { data, error } = await sendEmail(formData);
 
           if (error) {
@@ -45,7 +46,6 @@ const Contact = () => {
 
           toast.success("Email sent successfully! I'll get back to you soon.");
         }}
-        ref={formRef}
       >
         <input
           className="h-14 px-4 rounded-lg borderBlack dark:bg-white dark:bg-opacity-80 dark:focus:bg-opacity-100 transition-all dark:outline-none"
