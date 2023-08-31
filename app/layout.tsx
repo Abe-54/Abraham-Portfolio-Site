@@ -32,7 +32,7 @@ export default function RootLayout({
       <html lang="en" className="!scroll-smooth">
         <body
           className={`${lexend.className}
-      bg-gray-50 text-lightMode-accent relative pt-5 sm:pt-0 dark:bg-darkMode-background dark:text-gray-50 dark:text-opacity-90 transition-all`}
+      bg-gray-50 text-lightMode-accent relative pt-10 sm:pt-0 dark:bg-darkMode-background dark:text-gray-50 dark:text-opacity-90 transition-all`}
         >
           <div className="bg-[#e2fbf8] absolute top-[-6rem] -z-10 right-[11rem] h-[25.25rem] w-[25.25rem] rounded-full blur-[10rem] sm:w-[68.75rem] dark:bg-[#627194]" />
           <div className="bg-[#dbd7fb] absolute top-[-1rem] -z-10 left-[-35rem] h-[25.25rem] w-[30rem] rounded-full blur-[10rem] sm:w-[68.75rem] md:left-[-33rem] lg:left-[-28rem] xl:left-[-15rem] 2xl:left-[-5rem] dark:bg-[#676394]" />

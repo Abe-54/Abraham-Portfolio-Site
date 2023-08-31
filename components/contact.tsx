@@ -3,7 +3,7 @@
 import { sendEmail } from "@/actions/sendEmail";
 import { useSectionInView } from "@/lib/hooks";
 import { motion } from "framer-motion";
-import React from "react";
+import React, { useEffect, useRef } from "react";
 
 import toast from "react-hot-toast";
 import SectionHeading from "./section-heading";
@@ -11,6 +11,7 @@ import SubmitBtn from "./submit-btn";
 
 const Contact = () => {
   const { ref } = useSectionInView("Contact");
+  const formRef = useRef<HTMLFormElement>(null);
 
   return (
     <motion.section
@@ -33,15 +34,18 @@ const Contact = () => {
 
       <form
         className="mt-10 flex flex-col dark:text-black"
+        ref={formRef}
         action={async (formData) => {
           const { data, error } = await sendEmail(formData);
-
           if (error) {
             toast.error(error);
             return;
           }
 
           toast.success("Email sent successfully! I'll get back to you soon.");
+          if (formRef.current !== null) {
+            formRef.current.reset();
+          }
         }}
       >
         <input
