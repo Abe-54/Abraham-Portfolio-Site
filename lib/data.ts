@@ -75,10 +75,6 @@ export const skillsData = {
       icon: React.createElement("i", { className: "devicon-vscode-plain" }),
     },
     {
-      name: "Python",
-      icon: React.createElement("i", { className: "devicon-python-plain" }),
-    },
-    {
       name: "Github",
       icon: React.createElement("i", { className: "devicon-github-original" }),
     },
