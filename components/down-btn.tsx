@@ -1,5 +1,6 @@
 "use client";
 
+import { Button } from "@/components/ui/button";
 import { useActiveSectionContext } from "@/context/active-section-context";
 import { motion } from "framer-motion";
 import React from "react";
@@ -13,16 +14,21 @@ const DownButton = () => {
       initial={{ opacity: 0, y: 100 }}
       animate={{ opacity: 1, y: 0 }}
     >
-      <a
-        className="absolute bottom-40 sm:bottom-10 text-4xl bg-light-mode-secondary dark:bg-dark-mode-secondary rounded-full p-2 hover:scale-[1.15] focus:scale-[1.15] active:scale-105 cursor-pointer transition"
-        href="#about"
-        onClick={() => {
-          setActiveSection("About");
-          setTimeOfLastClick(Date.now());
-        }}
+      <Button
+        asChild
+        variant="secondary"
+        className="absolute bottom-40 sm:bottom-10 text-4xl rounded-full p-2 h-auto"
       >
-        <TfiAngleDown className="pt-1" />
-      </a>
+        <a
+          href="#about"
+          onClick={() => {
+            setActiveSection("About");
+            setTimeOfLastClick(Date.now());
+          }}
+        >
+          <TfiAngleDown className="pt-1" />
+        </a>
+      </Button>
     </motion.div>
   );
 };

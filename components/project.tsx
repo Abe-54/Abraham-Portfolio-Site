@@ -1,5 +1,6 @@
 "use client";
 
+import { Card, CardContent } from "@/components/ui/card";
 import { projectsData } from "@/lib/data";
 import { motion, useScroll, useTransform } from "framer-motion";
 import Image from "next/image";
@@ -36,11 +37,11 @@ const Project = ({
         siteUrl.length > 0 ? window.open(siteUrl, "_blank") : null;
       }}
     >
-      <section
+      <Card
         ref={ref}
-        className="bg-light-mode-secondary/80 max-w-2xl border border-black/5 rounded-lg overflow-hidden sm:pr-8 relative sm:h-max-[30rem] sm:group-even:pl-8 hover:bg-light-mode-secondary transition dark:bg-dark-mode-text/[0.05] dark:hover:bg-dark-mode-text/[0.03] dark:text-white"
+        className="max-w-2xl overflow-hidden sm:pr-8 relative sm:h-max-[30rem] sm:group-even:pl-8"
       >
-        <div className="py-4 pb-7 px-5 sm:pl-10 sm:pr-2 sm:pt-10 sm:max-w-[50%] flex flex-col h-full sm:group-even:ml-72">
+        <CardContent className="py-4 pb-7 px-5 sm:pl-10 sm:pr-2 sm:pt-10 sm:max-w-[50%] flex flex-col h-full sm:group-even:ml-72">
           <h3 className="text-2xl font-semibold">{title}</h3>
           <p className="mt-2 leading-relaxed text-gray-700 dark:text-white/70">
             {description}
@@ -55,7 +56,7 @@ const Project = ({
               </li>
             ))}
           </ul>
-        </div>
+        </CardContent>
 
         <Image
           src={imageUrl}
@@ -63,7 +64,7 @@ const Project = ({
           className="absolute hidden sm:block top-8 -right-5 w-85 rounded-lg shadow-2xl 
         transition group-hover:scale-[1.04] group-hover:-translate-x-3 group-hover:translate-y-3 group-hover:-rotate-2 group-even:group-hover:translate-x-3 group-even:group-hover:translate-y-3 group-even:group-hover:rotate-2 group-even:right-[initial] group-even:-left-5"
         />
-      </section>
+      </Card>
     </motion.div>
   );
 };

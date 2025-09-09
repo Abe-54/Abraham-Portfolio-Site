@@ -4,6 +4,9 @@ import { useSectionInView } from "@/lib/hooks";
 import { motion } from "framer-motion";
 import React, { useRef, useState } from "react";
 
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import toast from "react-hot-toast";
 import SectionHeading from "./section-heading";
 import SubmitBtn from "./submit-btn";
@@ -61,26 +64,35 @@ const Contact = () => {
       </p>
 
       <form
-        className="mt-10 flex flex-col dark:text-black"
+        className="mt-10 grid gap-4 text-left"
         ref={formRef}
         onSubmit={handleSubmit}
       >
-        <input
-          className="h-14 px-4 rounded-lg borderBlack dark:bg-white dark:bg-opacity-80 dark:focus:bg-opacity-100 transition-all dark:outline-none"
-          name="senderEmail"
-          type="email"
-          placeholder="Your email"
-          required
-          maxLength={500}
-        />
-        <textarea
-          className="h-52 my-3 rounded-lg borderBlack p-4 dark:bg-white dark:bg-opacity-80 dark:focus:bg-opacity-100 transition-all dark:outline-none"
-          name="message"
-          placeholder="Your message"
-          required
-          maxLength={5000}
-        />
-        <SubmitBtn pending={pending} />
+        <div className="grid gap-2">
+          <Label htmlFor="senderEmail">Your email</Label>
+          <Input
+            id="senderEmail"
+            name="senderEmail"
+            type="email"
+            placeholder="name@example.com"
+            required
+            maxLength={500}
+          />
+        </div>
+        <div className="grid gap-2">
+          <Label htmlFor="message">Your message</Label>
+          <Textarea
+            id="message"
+            name="message"
+            placeholder="How can I help?"
+            required
+            maxLength={5000}
+            className="min-h-52"
+          />
+        </div>
+        <div className="pt-2">
+          <SubmitBtn pending={pending} />
+        </div>
       </form>
     </motion.section>
   );

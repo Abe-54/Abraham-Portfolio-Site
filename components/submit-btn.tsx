@@ -1,5 +1,6 @@
+import { Button } from "@/components/ui/button";
+import { Loader2, Send } from "lucide-react";
 import React from "react";
-import { FaPaperPlane } from "react-icons/fa";
 
 type Props = {
   pending?: boolean;
@@ -7,20 +8,30 @@ type Props = {
 
 const SubmitBtn: React.FC<Props> = ({ pending = false }) => {
   return (
-    <button
-      className="group flex items-center justify-center gap-2 h-12 w-32 bg-gray-900 text-white rounded-full outline-none transition-all focus:scale-110 hover:scale-110 hover:bg-gray-950 dark:hover:bg-white/15 active:scale-105 disabled:scale-100 disabled:bg-opacity-65 dark:bg-white/10"
+    <Button
       type="submit"
+      // Use shadcn default variant then hard-override bg to avoid transparency issues
+      variant="default"
+      className="group h-12 w-32 rounded-full text-white bg-gray-900 dark:bg-white/10 hover:bg-[var(--color-primary-hover)] dark:hover:bg-white/15 disabled:opacity-60 active:scale-105 transition-all"
       disabled={pending}
+      aria-busy={pending}
+      aria-live="polite"
     >
       {pending ? (
-        <div className="h-5 w-5 animate-spin rounded-full border-b-2 border-white"></div>
+        <>
+          <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" />
+          Sending...
+        </>
       ) : (
         <>
-          Submit{" "}
-          <FaPaperPlane className="text-xs opacity-70 transition-all group-hover:translate-x-1 group-hover:-translate-y-1" />
+          Submit
+          <Send
+            className="ml-2 h-4 w-4 opacity-80 transition-transform group-hover:translate-x-1 group-hover:-translate-y-0.5"
+            aria-hidden="true"
+          />
         </>
       )}
-    </button>
+    </Button>
   );
 };
 

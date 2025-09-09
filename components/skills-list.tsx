@@ -1,5 +1,6 @@
 "use client";
 
+import { Badge } from "@/components/ui/badge";
 import { skillsData } from "@/lib/data";
 import { motion } from "framer-motion";
 import React from "react";
@@ -31,10 +32,10 @@ const SkillsList = ({ skills, title }: SkillsListProps) => {
         {title}
         <div className="-z-10 absolute top-5 bg-light-mode-accent dark:bg-dark-mode-accent w-full h-3 rounded-lg" />
       </h3>
-      <ul className="flex flex-wrap justify-center gap-2 text-lg text-white">
+      <ul className="flex flex-wrap justify-center gap-2 text-lg">
         {skills.map((skill, index) => (
           <motion.li
-            className="flex justify-center gap-4 items-center bg-light-mode-accent/[0.7] dark:bg-dark-mode-accent/[0.7] border border-black/10 rounded-xl px-5 py-2  dark:text-white/80"
+            className=""
             key={index}
             variants={fadeInAnimationVariants}
             initial="initial"
@@ -42,8 +43,13 @@ const SkillsList = ({ skills, title }: SkillsListProps) => {
             viewport={{ once: true }}
             custom={index}
           >
-            <span className="text-2xl">{skill.icon}</span>
-            <span className="">{skill.name}</span>
+            <Badge
+              variant="secondary"
+              className="flex items-center gap-3 rounded-xl px-5 py-2 text-base"
+            >
+              <span className="text-2xl">{skill.icon}</span>
+              <span>{skill.name}</span>
+            </Badge>
           </motion.li>
         ))}
       </ul>

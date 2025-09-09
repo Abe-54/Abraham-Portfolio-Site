@@ -1,5 +1,6 @@
 "use client";
 
+import { Button } from "@/components/ui/button";
 import { useActiveSectionContext } from "@/context/active-section-context";
 import { personalAdjectives } from "@/lib/data";
 import { useSectionInView } from "@/lib/hooks";
@@ -62,50 +63,70 @@ const Intro = () => {
             <span className="italic">sites, apps, & games</span>.
           </>
           <motion.div
-            className="flex flex-col sm:flex-row items-center justify-center gap-2 px-4 text-lg font-medium mt-5"
+            className="flex flex-col sm:flex-row items-center justify-center gap-4 px-4 font-medium mt-5"
             initial={{ opacity: 0, y: 100 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{
               delay: 0.1,
             }}
           >
-            <Link
-              href="#contact"
-              className="group bg-primary text-white px-7 py-3 flex items-center gap-2 rounded-full outline-none focus:scale-110 hover:scale-110 hover:bg-[#1e6f94] active:scale-105 transition sm:text-center"
-              onClick={() => {
-                setActiveSection("Contact");
-                setTimeOfLastClick(Date.now());
-              }}
+            <Button
+              asChild
+              size="wide"
+              className="group flex items-center gap-2 bg-[var(--color-primary)] text-white hover:bg-[var(--color-primary-hover)] outline-none focus:scale-110 hover:scale-110 active:scale-105 transition text-lg"
             >
-              Contact me here{" "}
-              <BsArrowRight className="opacity-70 group-hover:translate-x-1 transition" />
-            </Link>
+              <Link
+                href="#contact"
+                onClick={() => {
+                  setActiveSection("Contact");
+                  setTimeOfLastClick(Date.now());
+                }}
+              >
+                Contact me here{" "}
+                <BsArrowRight className="opacity-80 transition-transform group-hover:translate-x-1" />
+              </Link>
+            </Button>
 
-            <a
-              className="group bg-light-mode-secondary px-7 py-3 flex items-center gap-2 rounded-full outline-none focus:scale-110 hover:scale-110  active:scale-105 transition cursor-pointer border border-dark-mode-background/10 dark:bg-dark-mode-secondary sm:text-center"
-              href="/resume.pdf"
-              download
+            <Button
+              asChild
+              size="wide"
+              variant="secondary"
+              className="group border border-dark-mode-background/10 bg-[var(--color-light-mode-secondary)] text-[var(--color-light-mode-accent)] outline-none focus:scale-110 hover:scale-110 active:scale-105 transition text-lg  dark:bg-[var(--color-dark-mode-secondary)] dark:text-white/60"
             >
-              Download Resume{" "}
-              <HiDownload className="opacity-60 group-hover:translate-y-1 transition" />
-            </a>
+              <a href="/resume.pdf" download>
+                Download Resume{" "}
+                <HiDownload className="opacity-80 transition-transform group-hover:translate-y-0.5 text-xl sm:text-2xl" />
+              </a>
+            </Button>
 
             <div className="flex gap-4 sm:gap-2">
-              <a
-                className="bg-light-mode-secondary p-4 text-light-mode-text flex items-center gap-2 rounded-full focus:scale-[1.15] hover:scale-[1.15] hover:text-gray-950 dark:hover:text-gray-300 active:scale-105 transition cursor-pointer border border-dark-mode-background/10 dark:bg-dark-mode-secondary dark:text-white/60"
-                href="https://www.linkedin.com/in/abraham-rubio/"
-                target="_blank"
+              <Button
+                asChild
+                variant="secondary"
+                className="rounded-full size-14 sm:size-16 p-0 flex items-center justify-center border border-dark-mode-background/10 bg-[var(--color-light-mode-secondary)] text-[var(--color-light-mode-text)] focus:scale-[1.15] hover:scale-[1.15] active:scale-105 transition dark:bg-[var(--color-dark-mode-secondary)] dark:text-white/60"
               >
-                <BsLinkedin />
-              </a>
+                <a
+                  href="https://www.linkedin.com/in/abraham-rubio/"
+                  target="_blank"
+                  rel="noreferrer noopener"
+                >
+                  <BsLinkedin className="text-2xl sm:text-3xl" />
+                </a>
+              </Button>
 
-              <a
-                className="bg-light-mode-secondary p-4 text-light-mode-text flex items-center gap-2 text-[1.35rem] rounded-full focus:scale-[1.15] hover:scale-[1.15] hover:text-gray-950 dark:hover:text-gray-300  active:scale-105 transition cursor-pointer border border-dark-mode-background/10 dark:bg-dark-mode-secondary dark:text-white/60"
-                href="https:github.com/abe-54"
-                target="_blank"
+              <Button
+                asChild
+                variant="secondary"
+                className="rounded-full size-14 sm:size-16 p-0 flex items-center justify-center border border-dark-mode-background/10 bg-[var(--color-light-mode-secondary)] text-[var(--color-light-mode-text)] focus:scale-[1.15] hover:scale-[1.15] active:scale-105 transition dark:bg-[var(--color-dark-mode-secondary)] dark:text-white/60"
               >
-                <FaGithubSquare />
-              </a>
+                <a
+                  href="https://github.com/abe-54"
+                  target="_blank"
+                  rel="noreferrer noopener"
+                >
+                  <FaGithubSquare className="text-3xl sm:text-4xl" />
+                </a>
+              </Button>
             </div>
           </motion.div>
         </motion.h1>
