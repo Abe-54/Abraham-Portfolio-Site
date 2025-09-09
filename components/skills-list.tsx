@@ -26,15 +26,15 @@ type SkillsListProps = { skills: SkillsCategory; title: string };
 
 const SkillsList = ({ skills, title }: SkillsListProps) => {
   return (
-    <div className="flex flex-col items-center gap-y-4 bg-lightMode-secondary/80 dark:bg-darkMode-secondary/80  max-w-md p-4 rounded-lg">
+    <div className="flex flex-col items-center gap-y-4 bg-light-mode-secondary/80 dark:bg-dark-mode-secondary/80  max-w-md p-4 rounded-lg">
       <h3 className="text-2xl max-w-max font-normal dark:text-white relative">
         {title}
-        <div className="-z-10 absolute top-5 bg-lightMode-accent dark:bg-darkMode-accent w-full h-3 rounded-lg" />
+        <div className="-z-10 absolute top-5 bg-light-mode-accent dark:bg-dark-mode-accent w-full h-3 rounded-lg" />
       </h3>
       <ul className="flex flex-wrap justify-center gap-2 text-lg text-white">
         {skills.map((skill, index) => (
           <motion.li
-            className="flex justify-center gap-4 items-center bg-lightMode-accent/[0.7] dark:bg-darkMode-accent/[0.7] border border-black/[0.1] rounded-xl px-5 py-2  dark:text-white/80"
+            className="flex justify-center gap-4 items-center bg-light-mode-accent/[0.7] dark:bg-dark-mode-accent/[0.7] border border-black/10 rounded-xl px-5 py-2  dark:text-white/80"
             key={index}
             variants={fadeInAnimationVariants}
             initial="initial"

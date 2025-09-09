@@ -41,11 +41,11 @@ const Intro = () => {
     <section
       ref={ref}
       id="home"
-      className="h-screen flex flex-col justify-center mb-28 max-w-[70rem] sm:mb-0 scroll-mt-[100rem] relative"
+      className="h-screen flex flex-col justify-center mb-28 max-w-280 sm:mb-0 scroll-mt-400 relative"
     >
       <div className="flex flex-col w-full lg:flex-row items-center gap-5 sm:gap-32 mb-10 text-center lg:text-start">
         <motion.h1
-          className="mt-4 px-4 text-2xl font-medium !leading-[1.5] sm:text-4xl"
+          className="mt-4 px-4 text-2xl font-medium leading-normal! sm:text-4xl"
           initial={{ opacity: 0, y: 100 }}
           animate={{ opacity: 1, y: 0 }}
         >
@@ -54,7 +54,7 @@ const Intro = () => {
             I'm a{" "}
             <span
               ref={typingAnim}
-              className="bg-gradient-to-r from-primary to-lightMode-accent dark:from-sky-400 dark:to-sky-200 bg-clip-text font-bold text-transparent"
+              className="bg-linear-to-r from-primary to-light-mode-accent dark:from-sky-400 dark:to-sky-200 bg-clip-text font-bold text-transparent"
             />{" "}
           </div>
           <>
@@ -82,7 +82,7 @@ const Intro = () => {
             </Link>
 
             <a
-              className="group bg-lightMode-secondary px-7 py-3 flex items-center gap-2 rounded-full outline-none focus:scale-110 hover:scale-110  active:scale-105 transition cursor-pointer border border-darkMode-background/10 dark:bg-darkMode-secondary sm:text-center"
+              className="group bg-light-mode-secondary px-7 py-3 flex items-center gap-2 rounded-full outline-none focus:scale-110 hover:scale-110  active:scale-105 transition cursor-pointer border border-dark-mode-background/10 dark:bg-dark-mode-secondary sm:text-center"
               href="/resume.pdf"
               download
             >
@@ -92,7 +92,7 @@ const Intro = () => {
 
             <div className="flex gap-4 sm:gap-2">
               <a
-                className="bg-lightMode-secondary p-4 text-lightMode-text flex items-center gap-2 rounded-full focus:scale-[1.15] hover:scale-[1.15] hover:text-gray-950 active:scale-105 transition cursor-pointer border border-darkMode-background/10 dark:bg-darkMode-secondary dark:text-white/60"
+                className="bg-light-mode-secondary p-4 text-light-mode-text flex items-center gap-2 rounded-full focus:scale-[1.15] hover:scale-[1.15] hover:text-gray-950 dark:hover:text-gray-300 active:scale-105 transition cursor-pointer border border-dark-mode-background/10 dark:bg-dark-mode-secondary dark:text-white/60"
                 href="https://www.linkedin.com/in/abraham-rubio/"
                 target="_blank"
               >
@@ -100,7 +100,7 @@ const Intro = () => {
               </a>
 
               <a
-                className="bg-lightMode-secondary p-4 text-lightMode-text flex items-center gap-2 text-[1.35rem] rounded-full focus:scale-[1.15] hover:scale-[1.15] hover:text-gray-950 active:scale-105 transition cursor-pointer border border-darkMode-background/10 dark:bg-darkMode-secondary dark:text-white/60"
+                className="bg-light-mode-secondary p-4 text-light-mode-text flex items-center gap-2 text-[1.35rem] rounded-full focus:scale-[1.15] hover:scale-[1.15] hover:text-gray-950 dark:hover:text-gray-300  active:scale-105 transition cursor-pointer border border-dark-mode-background/10 dark:bg-dark-mode-secondary dark:text-white/60"
                 href="https:github.com/abe-54"
                 target="_blank"
               >
@@ -120,12 +120,7 @@ const Intro = () => {
                 duration: 0.2,
               }}
             >
-              <Image
-                src={profilePic}
-                alt="Abraham Portrait"
-                quality={95}
-                priority
-              />
+              <Image src={profilePic} alt="Abraham Portrait" priority />
             </motion.div>
             <motion.span
               className="absolute bottom-3 right-3 text-5xl"

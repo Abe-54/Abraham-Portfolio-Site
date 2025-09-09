@@ -1,15 +1,40 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
 
+/* Custom dark variant */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* Base variables */
 html {
   --line-color: #e5e7eb;
 }
 
 html.dark {
-  --line-color: rgb(255, 255, 255, 0.2);
+  --line-color: rgba(255, 255, 255, 0.2);
 }
 
+/* Tailwind v4 theme variables */
+@theme {
+  --color-primary: #599fc0;
+  --color-primary-hover: #0b2735;
+
+  --color-light-mode-text: #081d27;
+  --color-light-mode-background: #ffffff;
+  --color-light-mode-secondary: #cae2ec;
+  --color-light-mode-accent: #17303b;
+
+  --color-dark-mode-text: #ffffff;
+  --color-dark-mode-background: #081d27;
+  --color-dark-mode-secondary: #081216;
+  --color-dark-mode-accent: #428aa9;
+
+  --background-image-gradient-radial: radial-gradient(var(--tw-gradient-stops));
+  --background-image-gradient-conic: conic-gradient(
+    from 180deg at 50% 50%,
+    var(--tw-gradient-stops)
+  );
+}
+
+/* Custom utility using CSS var */
 .borderBlack {
-  @apply border border-black/10;
+  border: 1px solid var(--line-color);
 }

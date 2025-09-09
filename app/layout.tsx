@@ -29,13 +29,13 @@ export default function RootLayout({
         />
       </head>
 
-      <html lang="en" className="!scroll-smooth">
+      <html lang="en" className="scroll-smooth">
         <body
-          className={`${lexend.className}
-      bg-gray-50 text-lightMode-accent relative pt-10 sm:pt-0 dark:bg-darkMode-background dark:text-gray-50 dark:text-opacity-90 transition-all`}
+          suppressHydrationWarning={true}
+          className={`${lexend.className} bg-gray-50 text-light-mode-accent relative pt-10 sm:pt-0 dark:bg-dark-mode-background dark:text-gray-50 dark:text-opacity-90 transition-all`}
         >
-          <div className="bg-[#e2fbf8] absolute top-[-6rem] -z-10 right-[11rem] h-[25.25rem] w-[25.25rem] rounded-full blur-[10rem] sm:w-[68.75rem] dark:bg-[#627194]" />
-          <div className="bg-[#dbd7fb] absolute top-[-1rem] -z-10 left-[-35rem] h-[25.25rem] w-[30rem] rounded-full blur-[10rem] sm:w-[68.75rem] md:left-[-33rem] lg:left-[-28rem] xl:left-[-15rem] 2xl:left-[-5rem] dark:bg-[#676394]" />
+          <div className="bg-[#e2fbf8] absolute -top-24 -z-10 right-44 h-101 w-101 rounded-full blur-[10rem] sm:w-275 dark:bg-[#627194]" />
+          <div className="bg-[#dbd7fb] absolute -top-4 -z-10 -left-140 h-101 w-120 rounded-full blur-[10rem] sm:w-275 md:-left-132 lg:-left-112 xl:-left-60 2xl:-left-20 dark:bg-[#676394]" />
 
           <ThemeContextProvider>
             <ActiveSectionContextProvider>
@@ -44,7 +44,7 @@ export default function RootLayout({
               <Analytics />
               <Toaster position="top-right" />
               <Footer />
-              <ThemeSwitch />
+              <ThemeSwitch aria-pressed="false" aria-label="Toggle theme" />
             </ActiveSectionContextProvider>
           </ThemeContextProvider>
         </body>
