@@ -60,7 +60,7 @@ const Project = ({
         <Image
           src={imageUrl}
           alt="Project I worked on"
-          className="absolute hidden sm:block top-8 -right-5 w-85 rounded-t-lg shadow-2xl 
+          className="absolute hidden sm:block top-8 -right-5 w-85 rounded-lg shadow-2xl 
         transition group-hover:scale-[1.04] group-hover:-translate-x-3 group-hover:translate-y-3 group-hover:-rotate-2 group-even:group-hover:translate-x-3 group-even:group-hover:translate-y-3 group-even:group-hover:rotate-2 group-even:right-[initial] group-even:-left-5"
         />
       </section>

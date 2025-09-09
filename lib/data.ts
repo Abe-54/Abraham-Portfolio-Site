@@ -1,5 +1,5 @@
 import gemHunterImg from "@/public/gem_hunter.png";
-import goldRushImg from "@/public/gold_rush.png";
+import marketDash from "@/public/market_dash.png";
 import serviceJournalImg from "@/public/service_journal.png";
 import React from "react";
 import { CgWorkAlt } from "react-icons/cg";
@@ -102,13 +102,21 @@ export const skillsData = {
 } as const;
 
 export const projectsData = [
+  // {
+  //   title: "Schedule Reader (Discord Bot)",
+  //   description:
+  //     "A Discord bot that uses Google Gemini AI to extract employee schedules from images and automatically update calendars from a single command.",
+  //   tags: ["Python", "Google Gemini AI", "Image Processing"],
+  //   imageUrl: null, // replace with your screenshot path
+  //   siteUrl: "https://github.com/Abe-54/ScheduleDiscordBot", // replace with your repo link
+  // },
   {
-    title: "Gold Rush",
+    title: "Market Dash",
     description:
-      "I worked on a team of 3 to create a 2D minigame dungeon crawler in Unity. I was the lead programmer and was responsible for the player movement, game ui, and the level design.",
+      "I worked on a team of 5 to create a Third-Person Platformer in Unity. I was the lead programmer and was responsible for the player movement, game ui, and the level design.",
     tags: ["Unity", "C#", "Photoshop", "Game Design"],
-    imageUrl: goldRushImg,
-    siteUrl: "https://abe-54.itch.io/gold-rush",
+    imageUrl: marketDash,
+    siteUrl: "https://abe-54.itch.io/market-dash",
   },
   {
     title: "Service Journal",
@@ -117,13 +125,5 @@ export const projectsData = [
     tags: ["React", "React Native", "Express", "Prisma", "MySQL", "TypeScript"],
     imageUrl: serviceJournalImg,
     siteUrl: "https://github.com/Abe-54/Service-Journal-App",
-  },
-  {
-    title: "Gem Hunter",
-    description:
-      "I challenged myself to create a game in 1 month. I used Unity and C# to create a 2D platformer.",
-    tags: ["Unity", "C#", "Game Design", "Photoshop", "Pixel Art"],
-    imageUrl: gemHunterImg,
-    siteUrl: "https://abe-54.itch.io/gem-hunter",
   },
 ] as const;
