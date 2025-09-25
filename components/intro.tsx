@@ -20,42 +20,23 @@ const Intro = () => {
   const [isHovering, setIsHovering] = useState(false);
   const [hasWaved, setHasWaved] = useState(false);
 
-  // const typingAnim = useRef(null);
-
-  // useEffect(() => {
-  //   const typed = new Typed(typingAnim.current, {
-  //     strings: personalAdjectives,
-  //     typeSpeed: 100,
-  //     backSpeed: 50,
-  //     loop: true,
-  //     cursorChar: "|",
-  //     backDelay: 600,
-  //     showCursor: true,
-  //     smartBackspace: true,
-  //   });
-
-  //   return () => {
-  //     typed.destroy();
-  //   };
-  // }, []);
-
   return (
     <section
       ref={ref}
       id="home"
-      className="h-screen flex flex-col justify-center mb-28 max-w-280 sm:mb-0 scroll-mt-400 relative"
+      className="min-h-screen flex flex-col justify-center max-w-280 relative"
     >
-      <div className="flex flex-col w-full lg:flex-row items-center gap-5 sm:gap-28 mb-10 text-center lg:text-start">
+      <div className="flex flex-col w-full lg:flex-row items-center gap-5 md:gap-28 mb-10 lg:text-start">
         <motion.h1
           className="mt-4 px-4 text-2xl font-medium leading-normal! sm:text-4xl"
           initial={{ opacity: 0, y: 100 }}
           animate={{ opacity: 1, y: 0 }}
         >
-          <div className="font-medium sm:text-2xl text-cyan-600 dark:text-primary/90">
+          <div className="font-medium text-lg sm:text-2xl text-cyan-600 dark:text-primary/90">
             Hi, my name is
           </div>
-          <div className="font-bold my-2">Abraham Rubio</div>
-          <div className="sm:text-xl leading-relaxed">
+          <div className="font-bold my-2">Abraham Rubio.</div>
+          <div className="text-lg sm:text-xl leading-relaxed">
             <span className="underline decoration-[var(--color-primary)] decoration-2 underline-offset-4">
               By day
             </span>
@@ -87,7 +68,7 @@ const Intro = () => {
             </span>
           </div>
           <motion.div
-            className="flex flex-col sm:flex-row items-center justify-center gap-4 px-4 font-medium mt-5"
+            className="flex flex-col sm:flex-row items-start justify-center gap-4 md:px-4 font-medium mt-5"
             initial={{ opacity: 0, y: 100 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{
@@ -98,7 +79,7 @@ const Intro = () => {
               asChild
               size="wide"
               svgSize="sm"
-              className="group flex items-center gap-2 bg-[var(--color-primary)] text-white hover:bg-[var(--color-primary-hover)] outline-none focus:scale-110 hover:scale-110 active:scale-105 transition text-lg"
+              className="group flex items-center gap-2 bg-[var(--color-primary)] text-white hover:bg-[var(--color-primary-hover)] outline-none focus:scale-110 hover:scale-110 active:scale-105 transition h-10 px-4 text-sm sm:h-14 sm:px-7 sm:text-lg"
             >
               <Link
                 href="#projects"
@@ -112,49 +93,49 @@ const Intro = () => {
               </Link>
             </Button>
 
-            <Button
-              asChild
-              size="wide"
-              variant="secondary"
-              svgSize="sm"
-              className="group border border-dark-mode-background/10 bg-[var(--color-light-mode-secondary)] text-[var(--color-light-mode-accent)] outline-none focus:scale-110 hover:scale-110 active:scale-105 transition text-lg  dark:bg-[var(--color-dark-mode-secondary)] dark:text-white/60"
-            >
-              <a href="/resume.pdf" download>
-                Download Resume{" "}
-                <HiDownload className="opacity-80 transition-transform group-hover:translate-y-0.5 text-xl sm:text-2xl" />
-              </a>
-            </Button>
-
-            <div className="flex gap-4 sm:gap-2">
+            <div className="flex items-center gap-3 sm:contents">
               <Button
                 asChild
+                size="wide"
                 variant="secondary"
-                svgSize="md"
-                className="group rounded-full size-14 sm:size-16 p-0 flex items-center justify-center border border-dark-mode-background/10 bg-[var(--color-light-mode-secondary)] text-[var(--color-light-mode-text)] focus:scale-[1.15] hover:scale-[1.15] active:scale-105 transition dark:bg-[var(--color-dark-mode-secondary)] dark:text-white/60"
+                svgSize="sm"
+                className="group border border-dark-mode-background/10 bg-[var(--color-light-mode-secondary)] text-[var(--color-light-mode-accent)] outline-none focus:scale-110 hover:scale-110 active:scale-105 transition h-10 px-4 text-sm sm:h-14 sm:px-7 sm:text-lg dark:bg-[var(--color-dark-mode-secondary)] dark:text-white/60"
               >
-                <a
-                  href="https://www.linkedin.com/in/abraham-rubio/"
-                  target="_blank"
-                  rel="noreferrer noopener"
-                >
-                  <BsLinkedin className="text-2xl sm:text-3xl group-hover:text-blue-500" />
+                <a href="/resume.pdf" download>
+                  Download Resume{" "}
+                  <HiDownload className="opacity-80 transition-transform group-hover:translate-y-0.5 text-xl sm:text-2xl" />
                 </a>
               </Button>
 
-              <Button
-                asChild
-                variant="secondary"
-                svgSize="md"
-                className="group rounded-full size-14 sm:size-16 p-0 flex items-center justify-center border border-dark-mode-background/10 bg-[var(--color-light-mode-secondary)] text-[var(--color-light-mode-text)] focus:scale-[1.15] hover:scale-[1.15] active:scale-105 transition dark:bg-[var(--color-dark-mode-secondary)] dark:text-white/60"
-              >
-                <a
-                  href="https://github.com/abe-54"
-                  target="_blank"
-                  rel="noreferrer noopener"
+              <div className="flex gap-3 sm:gap-2">
+                <Button
+                  asChild
+                  variant="secondary"
+                  className="group rounded-full size-10 sm:size-14 p-0 flex items-center justify-center border border-dark-mode-background/10 bg-[var(--color-light-mode-secondary)] text-[var(--color-light-mode-text)] focus:scale-[1.15] hover:scale-[1.15] active:scale-105 transition dark:bg-[var(--color-dark-mode-secondary)] dark:text-white/60"
                 >
-                  <FaGithubSquare className="text-3xl sm:text-4xl group-hover:text-purple-900/80 dark:group-hover:text-purple-400/80" />
-                </a>
-              </Button>
+                  <a
+                    href="https://www.linkedin.com/in/abraham-rubio/"
+                    target="_blank"
+                    rel="noreferrer noopener"
+                  >
+                    <BsLinkedin className="text-lg sm:text-2xl group-hover:text-blue-500" />
+                  </a>
+                </Button>
+
+                <Button
+                  asChild
+                  variant="secondary"
+                  className="group rounded-full size-10 sm:size-14 p-0 flex items-center justify-center border border-dark-mode-background/10 bg-[var(--color-light-mode-secondary)] text-[var(--color-light-mode-text)] focus:scale-[1.15] hover:scale-[1.15] active:scale-105 transition dark:bg-[var(--color-dark-mode-secondary)] dark:text-white/60"
+                >
+                  <a
+                    href="https://github.com/abe-54"
+                    target="_blank"
+                    rel="noreferrer noopener"
+                  >
+                    <FaGithubSquare className="text-xl sm:text-3xl group-hover:text-purple-900/80 dark:group-hover:text-purple-400/80" />
+                  </a>
+                </Button>
+              </div>
             </div>
           </motion.div>
         </motion.h1>

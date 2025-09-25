@@ -32,7 +32,7 @@ export default function RootLayout({
       <html lang="en" className="scroll-smooth">
         <body
           suppressHydrationWarning={true}
-          className={`${lexend.className} relative pt-10 sm:pt-0 transition-all`}
+          className={`${lexend.className} relative sm:pt-14 lg:pt-0 transition-all`}
         >
           <div className="bg-[#e2fbf8] absolute -top-24 -z-10 right-44 h-101 w-101 rounded-full blur-[10rem] sm:w-275 dark:bg-[#627194]" />
           <div className="bg-[#dbd7fb] absolute -top-4 -z-10 -left-140 h-101 w-120 rounded-full blur-[10rem] sm:w-275 md:-left-132 lg:-left-112 xl:-left-60 2xl:-left-20 dark:bg-[#676394]" />
