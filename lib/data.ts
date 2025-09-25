@@ -102,14 +102,14 @@ export const skillsData = {
 } as const;
 
 export const projectsData = [
-  // {
-  //   title: "Schedule Reader (Discord Bot)",
-  //   description:
-  //     "A Discord bot that uses Google Gemini AI to extract employee schedules from images and automatically update calendars from a single command.",
-  //   tags: ["Python", "Google Gemini AI", "Image Processing"],
-  //   imageUrl: null, // replace with your screenshot path
-  //   siteUrl: "https://github.com/Abe-54/ScheduleDiscordBot", // replace with your repo link
-  // },
+  {
+    title: "Schedule Reader (Discord Bot)",
+    description:
+      "A Discord bot that uses Google Gemini AI to extract employee schedules from images and automatically update calendars from a single command.",
+    tags: ["Python", "Google Gemini AI", "Image Processing"],
+    imageUrl: null, // replace with your screenshot path
+    siteUrl: "https://github.com/Abe-54/ScheduleDiscordBot", // replace with your repo link
+  },
   {
     title: "Market Dash",
     description:

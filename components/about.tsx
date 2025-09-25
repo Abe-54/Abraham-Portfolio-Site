@@ -11,7 +11,7 @@ const About = () => {
   return (
     <motion.section
       ref={ref}
-      className="mb-32 max-w-180 text-center leading-8 sm:mb-40 scroll-mt-28"
+      className="mb-32 max-w-180 leading-8 sm:mb-40 scroll-mt-28"
       initial={{ opacity: 0, y: 100 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.175 }}
@@ -20,29 +20,64 @@ const About = () => {
       <SectionHeading>About Me</SectionHeading>
 
       <p className="mb-3">
-        I’m a <span className="font-medium">Front-End Developer</span> and{" "}
-        <span className="font-medium">Game Programmer</span> passionate about
-        crafting clean, engaging, and user-friendly digital experiences. I
-        recently graduated from{" "}
+        I’m a{" "}
+        <span className="font-medium text-[var(--color-primary)]">
+          full‑stack developer
+        </span>{" "}
+        who builds{" "}
+        <span className="underline decoration-[var(--color-primary)] decoration-2 underline-offset-4">
+          user‑focused software
+        </span>{" "}
+        and thoughtful experiences. I graduated from{" "}
         <span className="font-medium">
           Bloomfield College of Montclair State University
         </span>{" "}
         with a degree in <span className="font-medium">Computer Science</span>{" "}
-        and <span className="font-medium">Game Programming</span>. In 2024, I
-        interned at <span className="font-medium">NASA</span> as a{" "}
-        <span className="font-medium">Climate Game Developer</span>, where I
-        combined design, interactivity, and technology to bring complex ideas to
-        life.
+        and <span className="font-medium">Game Programming</span>, grounding my
+        work in both solid engineering and creative design.
+      </p>
+
+      <p className="mb-3">
+        In 2024, I interned at <span className="font-medium">NASA</span> as a{" "}
+        <span className="underline decoration-[var(--color-primary)] decoration-2 underline-offset-4">
+          Climate Game Developer
+        </span>
+        , blending interactivity, design, and code to translate complex climate
+        concepts into engaging, playable experiences.
+      </p>
+
+      <p className="mb-3">
+        These days I’m focused on building fast, accessible{" "}
+        <span className="underline decoration-[var(--color-primary)] decoration-2 underline-offset-4">
+          front‑end applications
+        </span>{" "}
+        with{" "}
+        <span className="font-medium text-[var(--color-primary)]">React</span>,{" "}
+        <span className="font-medium text-[var(--color-primary)]">
+          TypeScript
+        </span>
+        , and{" "}
+        <span className="font-medium text-[var(--color-primary)]">Next.js</span>
+        , while continuing to grow across the{" "}
+        <span className="font-medium">full stack</span>. I care about{" "}
+        <span className="font-medium text-[var(--color-primary)]">
+          clean, scalable code
+        </span>
+        ,{" "}
+        <span className="font-medium text-[var(--color-primary)]">
+          clear UX
+        </span>
+        , and shipping reliably.
       </p>
 
       <p>
-        My current focus is building{" "}
-        <span className="font-medium">responsive front-end applications</span>{" "}
-        with modern tools like React, TypeScript, and Next.js, while continuing
-        to grow as a developer who values both performance and creativity.{" "}
-        <span className="italic">Outside of coding</span>, you’ll probably find
-        me designing or playing video games, watching anime, and experimenting
-        with new creative projects.
+        Outside of work, you’ll find me{" "}
+        <span className="font-medium">designing or playing games</span>,{" "}
+        <span className="font-medium">watching anime</span>, and{" "}
+        <span className="font-medium">
+          tinkering with small creative projects
+        </span>{" "}
+        that fuel my curiosity.
       </p>
     </motion.section>
   );

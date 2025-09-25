@@ -5,6 +5,7 @@ import { projectsData } from "@/lib/data";
 import { motion, useScroll, useTransform } from "framer-motion";
 import Image from "next/image";
 import { useRef } from "react";
+import { FaDiscord } from "react-icons/fa";
 
 type ProjectProps = (typeof projectsData)[number];
 
@@ -58,12 +59,28 @@ const Project = ({
           </ul>
         </CardContent>
 
-        <Image
-          src={imageUrl}
-          alt="Project I worked on"
-          className="absolute hidden sm:block top-8 -right-5 w-85 rounded-lg shadow-2xl 
+        {imageUrl ? (
+          <Image
+            src={imageUrl}
+            alt="Project I worked on"
+            className="absolute hidden sm:block top-8 -right-5 w-85 rounded-lg shadow-2xl 
         transition group-hover:scale-[1.04] group-hover:-translate-x-3 group-hover:translate-y-3 group-hover:-rotate-2 group-even:group-hover:translate-x-3 group-even:group-hover:translate-y-3 group-even:group-hover:rotate-2 group-even:right-[initial] group-even:-left-5"
-        />
+          />
+        ) : (
+          <div className="absolute sm:block top-8 -right-5 w-85 h-52 rounded-lg shadow-2xl bg-gradient-to-br from-slate-200 to-slate-300 dark:from-slate-700 dark:to-slate-800 border border-slate-300 dark:border-slate-600 transition group-hover:scale-[1.04] group-hover:-translate-x-3 group-hover:translate-y-3 group-hover:-rotate-2 group-even:group-hover:translate-x-3 group-even:group-hover:translate-y-3 group-even:group-hover:rotate-2 group-even:right-[initial] group-even:-left-5 flex items-center justify-center">
+            <div className="flex flex-col items-center justify-center h-full">
+              <div className="text-4xl mb-3 opacity-60">
+                <FaDiscord />
+              </div>
+              <p className="text-sm font-medium text-slate-600 dark:text-slate-300">
+                Discord Bot
+              </p>
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                AI-Powered Schedule Reader
+              </p>
+            </div>
+          </div>
+        )}
       </Card>
     </motion.div>
   );

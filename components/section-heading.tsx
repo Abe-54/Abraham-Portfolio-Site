@@ -6,7 +6,7 @@ type SectionHeadingProps = {
 
 const SectionHeading = ({ children }: SectionHeadingProps) => {
   return (
-    <h2 className="text-3xl font-medium uppercase mb-8 text-center tracking-wide">
+    <h2 className="text-3xl font-bold uppercase mb-8 text-center tracking-wide">
       {children}
     </h2>
   );

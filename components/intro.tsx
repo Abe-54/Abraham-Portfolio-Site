@@ -2,41 +2,42 @@
 
 import { Button } from "@/components/ui/button";
 import { useActiveSectionContext } from "@/context/active-section-context";
-import { personalAdjectives } from "@/lib/data";
 import { useSectionInView } from "@/lib/hooks";
 import profilePic from "@/public/abraham_professional.jpg";
 import { motion } from "framer-motion";
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useRef } from "react";
+import { useState } from "react";
 import { BsArrowRight, BsLinkedin } from "react-icons/bs";
 import { FaGithubSquare } from "react-icons/fa";
 import { HiDownload } from "react-icons/hi";
 import { TfiAngleDown } from "react-icons/tfi";
-import Typed from "typed.js";
+import DownButton from "./down-btn";
 
 const Intro = () => {
   const { ref } = useSectionInView("Home", 0.5);
   const { setActiveSection, setTimeOfLastClick } = useActiveSectionContext();
+  const [isHovering, setIsHovering] = useState(false);
+  const [hasWaved, setHasWaved] = useState(false);
 
-  const typingAnim = useRef(null);
+  // const typingAnim = useRef(null);
 
-  useEffect(() => {
-    const typed = new Typed(typingAnim.current, {
-      strings: personalAdjectives,
-      typeSpeed: 100,
-      backSpeed: 50,
-      loop: true,
-      cursorChar: "|",
-      backDelay: 600,
-      showCursor: true,
-      smartBackspace: true,
-    });
+  // useEffect(() => {
+  //   const typed = new Typed(typingAnim.current, {
+  //     strings: personalAdjectives,
+  //     typeSpeed: 100,
+  //     backSpeed: 50,
+  //     loop: true,
+  //     cursorChar: "|",
+  //     backDelay: 600,
+  //     showCursor: true,
+  //     smartBackspace: true,
+  //   });
 
-    return () => {
-      typed.destroy();
-    };
-  }, []);
+  //   return () => {
+  //     typed.destroy();
+  //   };
+  // }, []);
 
   return (
     <section
@@ -44,24 +45,47 @@ const Intro = () => {
       id="home"
       className="h-screen flex flex-col justify-center mb-28 max-w-280 sm:mb-0 scroll-mt-400 relative"
     >
-      <div className="flex flex-col w-full lg:flex-row items-center gap-5 sm:gap-32 mb-10 text-center lg:text-start">
+      <div className="flex flex-col w-full lg:flex-row items-center gap-5 sm:gap-28 mb-10 text-center lg:text-start">
         <motion.h1
           className="mt-4 px-4 text-2xl font-medium leading-normal! sm:text-4xl"
           initial={{ opacity: 0, y: 100 }}
           animate={{ opacity: 1, y: 0 }}
         >
-          <span className="font-bold">Hello, I'm Abraham.</span>
-          <div>
-            I'm a{" "}
-            <span
-              ref={typingAnim}
-              className="bg-linear-to-r from-primary to-light-mode-accent dark:from-sky-400 dark:to-sky-200 bg-clip-text font-bold text-transparent"
-            />{" "}
+          <div className="font-medium sm:text-2xl text-cyan-600 dark:text-primary/90">
+            Hi, my name is
           </div>
-          <>
-            I enjoy creating{" "}
-            <span className="italic">sites, apps, & games</span>.
-          </>
+          <div className="font-bold my-2">Abraham Rubio</div>
+          <div className="sm:text-xl leading-relaxed">
+            <span className="underline decoration-[var(--color-primary)] decoration-2 underline-offset-4">
+              By day
+            </span>
+            , I’m a
+            <span className="mx-1 font-semibold text-[var(--color-primary)]">
+              full‑stack developer
+            </span>
+            building
+            <span className="mx-1 underline decoration-[var(--color-primary)] decoration-2 underline-offset-4">
+              user‑focused software
+            </span>
+            that ships.
+            <span className="block mt-3">
+              <span className="underline decoration-[var(--color-primary)] decoration-2 underline-offset-4">
+                By night
+              </span>
+              , I’m an
+              <span className="mx-1 font-medium text-[var(--color-primary)]">
+                indie game developer
+              </span>
+              building playful worlds where code and creativity meet.
+            </span>
+            <span className="block mt-3">
+              I bring{" "}
+              <span className="font-semibold text-[var(--color-primary)]">
+                precision
+              </span>
+              , passion, and attention to detail to every build.
+            </span>
+          </div>
           <motion.div
             className="flex flex-col sm:flex-row items-center justify-center gap-4 px-4 font-medium mt-5"
             initial={{ opacity: 0, y: 100 }}
@@ -73,16 +97,17 @@ const Intro = () => {
             <Button
               asChild
               size="wide"
+              svgSize="sm"
               className="group flex items-center gap-2 bg-[var(--color-primary)] text-white hover:bg-[var(--color-primary-hover)] outline-none focus:scale-110 hover:scale-110 active:scale-105 transition text-lg"
             >
               <Link
-                href="#contact"
+                href="#projects"
                 onClick={() => {
-                  setActiveSection("Contact");
+                  setActiveSection("Projects");
                   setTimeOfLastClick(Date.now());
                 }}
               >
-                Contact me here{" "}
+                Look at my work{" "}
                 <BsArrowRight className="opacity-80 transition-transform group-hover:translate-x-1" />
               </Link>
             </Button>
@@ -91,6 +116,7 @@ const Intro = () => {
               asChild
               size="wide"
               variant="secondary"
+              svgSize="sm"
               className="group border border-dark-mode-background/10 bg-[var(--color-light-mode-secondary)] text-[var(--color-light-mode-accent)] outline-none focus:scale-110 hover:scale-110 active:scale-105 transition text-lg  dark:bg-[var(--color-dark-mode-secondary)] dark:text-white/60"
             >
               <a href="/resume.pdf" download>
@@ -103,39 +129,54 @@ const Intro = () => {
               <Button
                 asChild
                 variant="secondary"
-                className="rounded-full size-14 sm:size-16 p-0 flex items-center justify-center border border-dark-mode-background/10 bg-[var(--color-light-mode-secondary)] text-[var(--color-light-mode-text)] focus:scale-[1.15] hover:scale-[1.15] active:scale-105 transition dark:bg-[var(--color-dark-mode-secondary)] dark:text-white/60"
+                svgSize="md"
+                className="group rounded-full size-14 sm:size-16 p-0 flex items-center justify-center border border-dark-mode-background/10 bg-[var(--color-light-mode-secondary)] text-[var(--color-light-mode-text)] focus:scale-[1.15] hover:scale-[1.15] active:scale-105 transition dark:bg-[var(--color-dark-mode-secondary)] dark:text-white/60"
               >
                 <a
                   href="https://www.linkedin.com/in/abraham-rubio/"
                   target="_blank"
                   rel="noreferrer noopener"
                 >
-                  <BsLinkedin className="text-2xl sm:text-3xl" />
+                  <BsLinkedin className="text-2xl sm:text-3xl group-hover:text-blue-500" />
                 </a>
               </Button>
 
               <Button
                 asChild
                 variant="secondary"
-                className="rounded-full size-14 sm:size-16 p-0 flex items-center justify-center border border-dark-mode-background/10 bg-[var(--color-light-mode-secondary)] text-[var(--color-light-mode-text)] focus:scale-[1.15] hover:scale-[1.15] active:scale-105 transition dark:bg-[var(--color-dark-mode-secondary)] dark:text-white/60"
+                svgSize="md"
+                className="group rounded-full size-14 sm:size-16 p-0 flex items-center justify-center border border-dark-mode-background/10 bg-[var(--color-light-mode-secondary)] text-[var(--color-light-mode-text)] focus:scale-[1.15] hover:scale-[1.15] active:scale-105 transition dark:bg-[var(--color-dark-mode-secondary)] dark:text-white/60"
               >
                 <a
                   href="https://github.com/abe-54"
                   target="_blank"
                   rel="noreferrer noopener"
                 >
-                  <FaGithubSquare className="text-3xl sm:text-4xl" />
+                  <FaGithubSquare className="text-3xl sm:text-4xl group-hover:text-purple-900/80 dark:group-hover:text-purple-400/80" />
                 </a>
               </Button>
             </div>
           </motion.div>
         </motion.h1>
         <div className="flex items-center justify-center">
-          <div className="relative">
+          <div
+            className="relative"
+            onMouseEnter={() => {
+              if (!hasWaved) {
+                setIsHovering(true);
+                setHasWaved(true);
+              }
+            }}
+            onMouseLeave={() => {
+              setIsHovering(false);
+              setHasWaved(false);
+            }}
+          >
             <motion.div
               className="w-72 aspect-square rounded-full border-[0.35rem] border-white shadow-xl overflow-hidden"
               initial={{ opacity: 0, scale: 0 }}
               animate={{ opacity: 1, scale: 1 }}
+              // whileHover={{ scale: 1.05 }}
               transition={{
                 type: "spring",
                 duration: 0.2,
@@ -144,14 +185,19 @@ const Intro = () => {
               <Image src={profilePic} alt="Abraham Portrait" priority />
             </motion.div>
             <motion.span
-              className="absolute bottom-3 right-3 text-5xl"
+              className="absolute bottom-3 right-3 text-5xl pointer-events-none"
+              style={{ transformOrigin: "70% 70%" }}
               initial={{ opacity: 0, scale: 0 }}
-              animate={{ opacity: 1, scale: 1 }}
+              animate={{
+                opacity: 1,
+                scale: 1,
+                rotate: isHovering ? [0, 14, -8, 14, -4, 10, 0] : 0,
+              }}
               transition={{
-                type: "spring",
+                type: isHovering ? "keyframes" : "spring",
                 stiffness: 125,
-                delay: 0.1,
-                duration: 0.7,
+                delay: isHovering ? 0 : 0.1,
+                duration: isHovering ? 0.6 : 0.7,
               }}
             >
               👋
@@ -159,6 +205,7 @@ const Intro = () => {
           </div>
         </div>
       </div>
+      <DownButton />
     </section>
   );
 };

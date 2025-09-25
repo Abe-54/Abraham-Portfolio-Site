@@ -10,14 +10,16 @@ const DownButton = () => {
   const { setActiveSection, setTimeOfLastClick } = useActiveSectionContext();
   return (
     <motion.div
-      className="relative w-full h-0 flex justify-center"
+      className="absolute bottom-44 left-1/2 transform -translate-x-1/2 animate-bounce"
       initial={{ opacity: 0, y: 100 }}
       animate={{ opacity: 1, y: 0 }}
     >
       <Button
         asChild
-        variant="secondary"
-        className="absolute bottom-40 sm:bottom-10 text-4xl rounded-full p-2 h-auto"
+        variant="outline"
+        size={"lg"}
+        svgSize="lg"
+        className="rounded-full w-11 h-11 p-0 shadow-2xl"
       >
         <a
           href="#about"

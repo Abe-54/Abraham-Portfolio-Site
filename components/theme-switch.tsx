@@ -17,6 +17,7 @@ const ThemeSwitch = () => {
       }
       className="fixed bottom-5 right-5 size-12 rounded-full p-0"
       variant="secondary"
+      svgSize="sm"
     >
       {theme === "light" ? <BsSun aria-hidden /> : <BsMoon aria-hidden />}
     </Button>
