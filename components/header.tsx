@@ -11,10 +11,9 @@ import { links } from "@/lib/data";
 import clsx from "clsx";
 import { motion } from "framer-motion";
 import Link from "next/link";
-import { useEffect, useRef, useState } from "react";
 
 const Header = () => {
-  const { activeSection, setActiveSection } = useActiveSectionContext();
+  const { activeSection } = useActiveSectionContext();
 
   return (
     <header className="relative z-[99]">
@@ -49,7 +48,6 @@ const Header = () => {
                             const newUrl = `${window.location.pathname}${window.location.search}`;
                             window.history.replaceState(null, "", newUrl);
                           }
-                          setActiveSection(link.name);
                         }}
                         className={clsx(
                           "relative inline-flex items-center justify-center px-3 py-3 mt-1 rounded-full transition",
