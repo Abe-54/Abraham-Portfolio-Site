@@ -1,0 +1,56 @@
+---
+import SectionHeading from "@/components/SectionHeading.astro";
+import { skillGroups } from "@/data/skills";
+---
+
+<section id="skills" class="px-6 py-24 sm:py-32">
+  <div class="mx-auto max-w-6xl">
+    <SectionHeading
+      index="03"
+      kicker="Skills"
+      title="The toolkit I build with."
+    />
+
+    <div class="mt-14 grid gap-5 [grid-template-columns:repeat(auto-fit,minmax(260px,1fr))]">
+      {
+        skillGroups.map((g, i) => (
+          <div
+            class:list={[
+              "reveal group/skill flex flex-col gap-4 rounded-2xl border p-6 transition-colors",
+              g.label === "AI"
+                ? "border-accent/40 bg-accent/[0.06]"
+                : "border-border bg-surface/60 hover:border-border/100",
+            ]}
+            style={`--reveal-delay:${i * 90}ms`}
+          >
+            <div class="flex items-baseline justify-between gap-3">
+              <h3 class="text-base font-semibold tracking-tight text-foreground">
+                {g.heading}
+              </h3>
+              <span class="hud">{g.label}</span>
+            </div>
+
+            {g.blurb && (
+              <p class="text-sm text-muted-foreground">{g.blurb}</p>
+            )}
+
+            <ul class="mt-auto flex flex-wrap gap-2">
+              {g.items.map((item) => (
+                <li
+                  class:list={[
+                    "rounded-lg px-3 py-1.5 text-sm font-medium",
+                    g.label === "AI"
+                      ? "bg-accent/15 text-foreground"
+                      : "bg-secondary text-secondary-foreground",
+                  ]}
+                >
+                  {item}
+                </li>
+              ))}
+            </ul>
+          </div>
+        ))
+      }
+    </div>
+  </div>
+</section>

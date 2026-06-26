@@ -1,0 +1,137 @@
+---
+import SectionHeading from "@/components/SectionHeading.astro";
+import { timeline } from "@/data/experience";
+import { Briefcase, GraduationCap, Flag } from "@lucide/astro";
+
+const entries = [...timeline].sort((a, b) => b.order - a.order);
+
+const kindIcon = {
+  work: Briefcase,
+  education: GraduationCap,
+  milestone: Flag,
+} as const;
+---
+
+<section id="timeline" class="px-6 py-24 sm:py-32">
+  <div class="mx-auto max-w-4xl">
+    <SectionHeading index="02" kicker="Timeline" title="The path so far." />
+
+    <ol class="timeline mt-14">
+      {
+        entries.map((e, i) => {
+          const Icon = kindIcon[e.kind];
+          return (
+            <li
+              class="reveal node"
+              style={`--reveal-delay:${i * 90}ms`}
+            >
+              <span class="marker" data-current={e.current ? "true" : "false"}>
+                <Icon class="size-[0.95rem]" />
+              </span>
+
+              <div class="content">
+                <div class="flex flex-wrap items-center gap-x-3 gap-y-1">
+                  <span class="hud tabular">{e.period}</span>
+                  {e.current && <span class="now">● Now</span>}
+                </div>
+
+                <h3 class="mt-1.5 text-xl font-semibold tracking-tight text-foreground">
+                  {e.role}
+                </h3>
+                <p class="text-sm font-medium text-primary">
+                  {e.org}
+                  {e.location && (
+                    <span class="text-muted-foreground"> · {e.location}</span>
+                  )}
+                </p>
+
+                <p class="mt-3 max-w-[60ch] text-pretty text-muted-foreground">
+                  {e.summary}
+                </p>
+
+                <ul class="mt-3 flex flex-col gap-2">
+                  {e.bullets.map((b) => (
+                    <li class="flex gap-3 text-sm text-muted-foreground">
+                      <span class="mt-2 size-1.5 shrink-0 rounded-full bg-accent/70" />
+                      <span class="text-pretty">{b}</span>
+                    </li>
+                  ))}
+                </ul>
+
+                <ul class="mt-4 flex flex-wrap gap-2">
+                  {e.tags.map((t) => (
+                    <li class="rounded-full bg-secondary px-2.5 py-0.5 text-xs font-medium text-secondary-foreground">
+                      {t}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </li>
+          );
+        })
+      }
+    </ol>
+  </div>
+</section>
+
+<style>
+  .timeline {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 2.75rem;
+    padding-left: 2.75rem;
+  }
+  /* the spine */
+  .timeline::before {
+    content: "";
+    position: absolute;
+    top: 0.4rem;
+    bottom: 0.4rem;
+    left: 0.95rem;
+    width: 2px;
+    background: linear-gradient(
+      to bottom,
+      var(--accent),
+      var(--border) 12%,
+      var(--border) 88%,
+      transparent
+    );
+  }
+
+  .node {
+    position: relative;
+  }
+
+  .marker {
+    position: absolute;
+    left: -2.75rem;
+    top: 0;
+    display: flex;
+    width: 2rem;
+    height: 2rem;
+    align-items: center;
+    justify-content: center;
+    border-radius: 999px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    color: var(--muted-foreground);
+    z-index: 1;
+  }
+  .marker[data-current="true"] {
+    color: var(--accent-foreground);
+    background: var(--accent);
+    border-color: transparent;
+    box-shadow: 0 0 0 4px color-mix(in oklch, var(--accent) 22%, transparent);
+  }
+
+  .now {
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    color: var(--accent-foreground);
+    background: var(--accent);
+    padding: 0.1rem 0.5rem;
+    border-radius: 999px;
+  }
+</style>

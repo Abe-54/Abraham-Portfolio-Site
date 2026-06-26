@@ -1,0 +1,87 @@
+---
+import SectionHeading from "@/components/SectionHeading.astro";
+import { site, socials } from "@/data/site";
+import { Copy, Check, ArrowUpRight, FileDown } from "@lucide/astro";
+---
+
+<section id="contact" class="px-6 py-24 sm:py-32">
+  <div class="mx-auto max-w-4xl">
+    <SectionHeading
+      index="06"
+      kicker="Contact"
+      title="Let's build something."
+    />
+
+    <p class="reveal mt-6 max-w-[55ch] text-lead text-muted-foreground" style="--reveal-delay:80ms">
+      Open to full-stack roles, freelance builds, and the occasional game-jam
+      partner. The fastest way to reach me is email.
+    </p>
+
+    <div class="reveal mt-10 flex flex-col gap-4" style="--reveal-delay:140ms">
+      <div class="flex flex-wrap items-center gap-3">
+        <a
+          href={`mailto:${site.email}`}
+          class="font-display text-2xl font-semibold tracking-tight text-foreground underline-offset-8 hover:underline sm:text-4xl"
+        >
+          {site.email}
+        </a>
+        <button
+          id="copy-email"
+          type="button"
+          data-email={site.email}
+          class="keycap inline-flex h-9 items-center gap-1.5 rounded-md border border-border bg-card/50 px-3 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
+        >
+          <Copy class="size-4 copy-idle" />
+          <Check class="size-4 copy-done hidden text-accent" />
+          <span class="copy-label">Copy</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="reveal mt-10 flex flex-wrap gap-3" style="--reveal-delay:200ms">
+      {
+        socials.map((s) => (
+          <a
+            href={s.href}
+            target="_blank"
+            rel="noopener"
+            class="keycap inline-flex h-11 items-center gap-2 rounded-md border border-border bg-card/50 px-4 text-sm font-medium text-foreground transition-colors hover:bg-secondary"
+          >
+            <span class="hud">{s.label}</span>
+            <span class="text-muted-foreground">{s.handle}</span>
+            <ArrowUpRight class="size-4 text-muted-foreground" />
+          </a>
+        ))
+      }
+      <a
+        href={site.resume}
+        target="_blank"
+        rel="noopener"
+        class="keycap inline-flex h-11 items-center gap-2 rounded-md bg-accent px-4 text-sm font-semibold text-accent-foreground transition-colors hover:bg-accent/90"
+      >
+        <FileDown class="size-4" /> Résumé
+      </a>
+    </div>
+  </div>
+</section>
+
+<script>
+  const btn = document.getElementById("copy-email");
+  btn?.addEventListener("click", async () => {
+    const email = btn.getAttribute("data-email") ?? "";
+    try {
+      await navigator.clipboard.writeText(email);
+      btn.querySelector(".copy-idle")?.classList.add("hidden");
+      btn.querySelector(".copy-done")?.classList.remove("hidden");
+      const label = btn.querySelector(".copy-label");
+      if (label) label.textContent = "Copied";
+      setTimeout(() => {
+        btn.querySelector(".copy-idle")?.classList.remove("hidden");
+        btn.querySelector(".copy-done")?.classList.add("hidden");
+        if (label) label.textContent = "Copy";
+      }, 1800);
+    } catch {
+      /* clipboard unavailable */
+    }
+  });
+</script>

@@ -1,0 +1,96 @@
+---
+import "@fontsource-variable/hubot-sans";
+import "@fontsource-variable/mona-sans";
+import "@fontsource/silkscreen";
+import "@/styles/global.css";
+import Nav from "@/components/Nav.tsx";
+import Backdrop from "@/components/Backdrop.astro";
+import { site } from "@/data/site";
+
+interface Props {
+  title?: string;
+  description?: string;
+}
+
+const {
+  title = `${site.name} — ${site.role}`,
+  description = site.description,
+} = Astro.props;
+
+const canonical = new URL(Astro.url.pathname, Astro.site ?? site.url);
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="icon" type="image/jpeg" href="/abraham_professional.jpg" />
+    <meta name="generator" content={Astro.generator} />
+
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical.toString()} />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical.toString()} />
+    <meta property="og:image" content="/abraham_professional.jpg" />
+    <meta name="twitter:card" content="summary_large_image" />
+
+    {/* No-flash theme: dark-first, honor stored preference */}
+    <script is:inline>
+      (() => {
+        try {
+          const stored = localStorage.getItem("theme");
+          const isDark = stored ? stored === "dark" : true;
+          document.documentElement.classList.toggle("dark", isDark);
+        } catch {
+          document.documentElement.classList.add("dark");
+        }
+      })();
+    </script>
+  </head>
+  <body>
+    <Backdrop />
+    <Nav client:load />
+
+    <main id="top">
+      <slot />
+    </main>
+
+    <script>
+      // Scroll-reveal: reveal elements as they enter the viewport.
+      const items = document.querySelectorAll<HTMLElement>(".reveal");
+      const prefersReduced = window.matchMedia(
+        "(prefers-reduced-motion: reduce)"
+      ).matches;
+
+      if (prefersReduced || !("IntersectionObserver" in window)) {
+        items.forEach((el) => el.classList.add("is-visible"));
+      } else {
+        const io = new IntersectionObserver(
+          (entries, obs) => {
+            entries.forEach((entry) => {
+              if (entry.isIntersecting) {
+                entry.target.classList.add("is-visible");
+                obs.unobserve(entry.target);
+              }
+            });
+          },
+          { rootMargin: "0px 0px -10% 0px", threshold: 0.15 }
+        );
+        items.forEach((el) => io.observe(el));
+      }
+    </script>
+
+    <style>
+      main {
+        position: relative;
+        z-index: 1;
+        isolation: isolate;
+      }
+    </style>
+  </body>
+</html>

@@ -1,49 +1,61 @@
-## Personal Website
-This is the 3rd version of my personal website I made to show off my current skillset and to showcase my projects.
+# Abraham Rubio — Portfolio
 
-## Motivation
-I made this website to further my knowledge of React, Typescript, and NextJS. I also wanted to have a central online location to post my projects and see how I improve.
- 
-## Screenshots
-<p float="left">
+A fast, static personal portfolio for a full-stack developer (currently at the New Jersey Department of Community Affairs) who also makes indie games and builds with an AI-assisted workflow.
 
- <img src="https://github.com/Abe-54/Abraham-Portfolio-Site/assets/93175657/98b77365-4914-465e-bdc4-88d15f8dad45" width="600" />
- <img src="https://github.com/Abe-54/Abraham-Portfolio-Site/assets/93175657/64533a88-fad8-4f2f-950d-9ceb9f2a14d2" width="600" />
+Refined, dark-first design with subtle gaming flair — the signature being a **gooey / metaball navigation**.
 
-</p>
+## Tech stack
 
-## What did I learn from making it?
-- How to properly use Tailwind to style a website
-- What is state and how to use it properly
-- How to use typescript effectively when dealing with multiple components
-- How to send emails using React Send
+- **[Astro 5](https://astro.build)** — static output, fast by default
+- **TypeScript**
+- **[Tailwind CSS v4](https://tailwindcss.com)** (CSS-first config, OKLCH palette)
+- **React islands** — only where interactivity is needed (the nav + theme toggle)
+- **[shadcn/ui](https://ui.shadcn.com)** primitives (Button, Badge)
+- **[Motion](https://motion.dev)** — gooey nav animation
+- Self-hosted fonts via Fontsource: **Hubot Sans** (display), **Mona Sans** (body), **Silkscreen** (pixel HUD accents)
 
-## Where To view?
-The website can be viewed at https://abraham-r.vercel.app/
+## Getting started
 
-## Credits
-- Abraham Rubio (Web Programmer & Web Designer)
+```bash
+pnpm install
+pnpm dev      # http://localhost:4321
+pnpm build    # static output to ./dist
+pnpm preview  # preview the production build
+```
 
+## Editing content
 
-## License
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+All content is centralized and typed under `src/data/`:
 
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
+- `site.ts` — name, role, headline, email, socials, nav links
+- `experience.ts` — the timeline (NJDCA, education, NASA, early work)
+- `projects.ts` — project cards
+- `skills.ts` — skill groups (including the AI workflow group)
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
+Images and the resume live in `public/`.
 
-MIT License
+## Design system
 
-Copyright (c) [2023] [Abraham Rubio]
+Design context and principles are documented in [`.impeccable.md`](./.impeccable.md). Color tokens, type scale, spacing, and gaming-flair utilities live in `src/styles/global.css`.
+
+## Deployment
+
+Configured for static hosting on **Vercel** — connect the repo and deploy; no adapter or server runtime required.
+
+## Project structure
+
+```
+src/
+  components/
+    Nav.tsx              # gooey navigation (React island)
+    Footer.astro
+    SectionHeading.astro
+    sections/            # Hero, About, Timeline, Skills, Projects, Contact
+    ui/                  # shadcn primitives
+  data/                  # typed content
+  layouts/Layout.astro   # head, fonts, theme script, goo SVG filter
+  pages/index.astro
+  styles/global.css
+public/                  # images + resume.pdf
+legacy/                  # archived previous Next.js site
+```

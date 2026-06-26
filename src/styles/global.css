@@ -1,0 +1,262 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* ------------------------------------------------------------------ *
+ * Palette — OKLCH, blue brand (#599fc0) evolved, neutrals tinted
+ * toward the brand hue, with a single warm arcade-amber accent.
+ * :root = light theme, .dark = dark theme (site defaults to dark).
+ * ------------------------------------------------------------------ */
+:root {
+  --radius: 0.625rem;
+
+  /* light theme */
+  --background: oklch(0.991 0.004 235);
+  --foreground: oklch(0.24 0.035 240);
+
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.24 0.035 240);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.24 0.035 240);
+
+  --primary: oklch(0.55 0.105 235);
+  --primary-foreground: oklch(0.99 0.004 235);
+
+  --secondary: oklch(0.93 0.022 232);
+  --secondary-foreground: oklch(0.32 0.05 238);
+
+  --muted: oklch(0.95 0.012 232);
+  --muted-foreground: oklch(0.5 0.03 236);
+
+  --accent: oklch(0.7 0.16 58);
+  --accent-foreground: oklch(0.24 0.06 60);
+
+  --destructive: oklch(0.58 0.22 27);
+  --destructive-foreground: oklch(0.99 0.004 235);
+
+  --border: oklch(0.88 0.015 235);
+  --input: oklch(0.9 0.012 235);
+  --ring: oklch(0.55 0.105 235);
+
+  /* surface used behind the page for subtle depth */
+  --surface: oklch(0.97 0.008 234);
+}
+
+.dark {
+  --background: oklch(0.17 0.02 240);
+  --foreground: oklch(0.95 0.006 232);
+
+  --card: oklch(0.21 0.022 240);
+  --card-foreground: oklch(0.95 0.006 232);
+  --popover: oklch(0.21 0.022 240);
+  --popover-foreground: oklch(0.95 0.006 232);
+
+  --primary: oklch(0.72 0.105 233);
+  --primary-foreground: oklch(0.16 0.02 240);
+
+  --secondary: oklch(0.26 0.025 240);
+  --secondary-foreground: oklch(0.93 0.008 232);
+
+  --muted: oklch(0.25 0.023 240);
+  --muted-foreground: oklch(0.72 0.022 233);
+
+  --accent: oklch(0.79 0.155 64);
+  --accent-foreground: oklch(0.2 0.04 60);
+
+  --destructive: oklch(0.7 0.19 22);
+  --destructive-foreground: oklch(0.16 0.02 240);
+
+  --border: oklch(0.32 0.022 240);
+  --input: oklch(0.34 0.022 240);
+  --ring: oklch(0.72 0.105 233);
+
+  --surface: oklch(0.2 0.021 240);
+}
+
+/* ------------------------------------------------------------------ *
+ * Tailwind theme: expose palette as utilities + fonts + radii.
+ * ------------------------------------------------------------------ */
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-surface: var(--surface);
+
+  --font-sans: "Mona Sans Variable", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Hubot Sans Variable", "Mona Sans Variable", ui-sans-serif,
+    system-ui, sans-serif;
+  --font-pixel: "Silkscreen", ui-monospace, monospace;
+
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+
+  /* fluid display scale (clamp, ~1.25+ ratio) */
+  --text-display: clamp(2.75rem, 1.6rem + 5.6vw, 6rem);
+  --text-display--line-height: 0.98;
+  --text-h1: clamp(2.1rem, 1.4rem + 3.2vw, 3.6rem);
+  --text-h1--line-height: 1.05;
+  --text-h2: clamp(1.6rem, 1.2rem + 1.8vw, 2.4rem);
+  --text-h2--line-height: 1.1;
+  --text-lead: clamp(1.1rem, 1rem + 0.6vw, 1.4rem);
+  --text-lead--line-height: 1.55;
+}
+
+/* semantic spacing scale (4pt) for custom CSS / inline use */
+:root {
+  --space-2xs: 0.25rem;
+  --space-xs: 0.5rem;
+  --space-sm: 0.75rem;
+  --space-md: 1rem;
+  --space-lg: 1.5rem;
+  --space-xl: 2rem;
+  --space-2xl: 3rem;
+  --space-3xl: 4rem;
+  --space-4xl: 6rem;
+}
+
+@layer base {
+  * {
+    border-color: var(--border);
+  }
+
+  html {
+    scroll-behavior: smooth;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    background-color: var(--background);
+    color: var(--foreground);
+    font-family: var(--font-sans);
+    font-synthesis-weight: none;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    line-height: 1.65;
+  }
+
+  .dark body {
+    line-height: 1.7; /* light type on dark needs more breathing room */
+  }
+
+  h1,
+  h2,
+  h3,
+  .font-display {
+    font-family: var(--font-display);
+    letter-spacing: -0.02em;
+  }
+
+  ::selection {
+    background-color: var(--accent);
+    color: var(--accent-foreground);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 2px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}
+
+/* ------------------------------------------------------------------ *
+ * Gaming-flair utilities (used sparingly).
+ * ------------------------------------------------------------------ */
+
+/* pixel HUD micro-label */
+.hud {
+  font-family: var(--font-pixel);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 0.7rem;
+  line-height: 1;
+  color: var(--accent);
+}
+
+/* keycap-style tactile press feedback */
+.keycap {
+  --keycap-shadow: oklch(0.3 0.02 240 / 0.35);
+  transition: transform 140ms cubic-bezier(0.2, 0.8, 0.2, 1),
+    box-shadow 140ms cubic-bezier(0.2, 0.8, 0.2, 1),
+    background-color 140ms ease;
+  box-shadow: 0 2px 0 0 var(--keycap-shadow);
+}
+.keycap:active {
+  transform: translateY(2px);
+  box-shadow: 0 0 0 0 var(--keycap-shadow);
+}
+
+/* subtle CRT scanline overlay for one signature surface only */
+.scanlines {
+  position: relative;
+}
+.scanlines::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: repeating-linear-gradient(
+    to bottom,
+    transparent 0,
+    transparent 2px,
+    oklch(0 0 0 / 0.04) 3px,
+    transparent 4px
+  );
+  mix-blend-mode: overlay;
+  border-radius: inherit;
+}
+
+/* scroll / load reveal */
+.reveal {
+  opacity: 0;
+  transform: translateY(16px);
+  transition: opacity 700ms cubic-bezier(0.16, 1, 0.3, 1),
+    transform 700ms cubic-bezier(0.16, 1, 0.3, 1);
+  transition-delay: var(--reveal-delay, 0ms);
+  will-change: opacity, transform;
+}
+.reveal.is-visible {
+  opacity: 1;
+  transform: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .reveal {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+}
+
+.tabular {
+  font-variant-numeric: tabular-nums;
+}

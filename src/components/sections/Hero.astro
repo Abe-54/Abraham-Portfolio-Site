@@ -1,0 +1,217 @@
+---
+import { site, socials } from "@/data/site";
+import { ArrowDown, FileDown } from "@lucide/astro";
+import BrandIcon from "@/components/BrandIcon.astro";
+
+const brandFor: Record<string, "github" | "linkedin" | "itch"> = {
+  GitHub: "github",
+  LinkedIn: "linkedin",
+  "itch.io": "itch",
+};
+---
+
+<section
+  id="home"
+  class="relative flex min-h-[100svh] items-center overflow-hidden px-6 pt-28 pb-20 sm:pt-32"
+>
+  {/* ambient background: faint grid + soft brand glow (no neon) */}
+  <div class="hero-bg" aria-hidden="true"></div>
+
+  <div class="mx-auto grid w-full max-w-6xl items-center gap-12 md:grid-cols-[1.3fr_1fr]">
+    <div class="hero-in flex flex-col items-start gap-6">
+      <span class="hud" data-i="0">Full-stack engineer · Indie games · Newark, NJ</span>
+
+      <h1 class="text-display font-display font-bold leading-[0.98]" data-i="1">
+        {site.name}
+      </h1>
+
+      <p
+        class="text-lead max-w-[32ch] font-medium text-foreground/90"
+        data-i="2"
+      >
+        {site.headline}
+      </p>
+
+      <p class="max-w-[60ch] text-pretty text-muted-foreground" data-i="3">
+        {site.intro}
+      </p>
+
+      <div class="flex flex-wrap items-center gap-3" data-i="4">
+        <a
+          href="#projects"
+          class="keycap inline-flex h-11 items-center gap-2 rounded-md bg-accent px-5 text-sm font-semibold text-accent-foreground transition-colors hover:bg-accent/90"
+        >
+          View my work
+        </a>
+        <a
+          href={site.resume}
+          target="_blank"
+          rel="noopener"
+          class="keycap inline-flex h-11 items-center gap-2 rounded-md border border-border bg-card/50 px-5 text-sm font-medium text-foreground transition-colors hover:bg-secondary"
+        >
+          <FileDown class="size-4" /> Résumé
+        </a>
+      </div>
+
+      <ul class="flex items-center gap-2" data-i="5">
+        {
+          socials.map((s) => (
+            <li>
+              <a
+                href={s.href}
+                target="_blank"
+                rel="noopener"
+                aria-label={s.label}
+                class="keycap flex size-10 items-center justify-center rounded-full bg-secondary text-secondary-foreground transition-colors hover:text-foreground"
+              >
+                <BrandIcon name={brandFor[s.label]} class="size-[1.05rem]" />
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+
+    <div class="hero-in flex justify-center md:justify-end" data-i="3">
+      <div class="portrait scanlines">
+        <img
+          src="/abraham_professional.jpg"
+          alt={`${site.name}, full-stack developer`}
+          width="440"
+          height="520"
+          fetchpriority="high"
+          decoding="async"
+        />
+        <span class="status-chip">
+          <span class="dot" aria-hidden="true"></span>
+          Currently @ NJDCA
+        </span>
+      </div>
+    </div>
+  </div>
+
+  <a href="#about" class="scroll-cue" aria-label="Scroll to about">
+    <ArrowDown class="size-4" />
+  </a>
+</section>
+
+<style>
+  .hero-bg {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background-image: radial-gradient(
+      55% 45% at 78% 2%,
+      color-mix(in oklch, var(--accent) 12%, transparent),
+      transparent 70%
+    );
+  }
+
+  .portrait {
+    position: relative;
+    width: clamp(15rem, 38vw, 22rem);
+    aspect-ratio: 11 / 13;
+    border-radius: 1.25rem;
+    overflow: hidden;
+    border: 1px solid var(--border);
+    box-shadow:
+      0 1px 0 0 color-mix(in oklch, var(--foreground) 8%, transparent) inset,
+      0 30px 60px -30px oklch(0 0 0 / 0.5);
+    rotate: 1.5deg;
+  }
+  .portrait img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center top;
+  }
+  .status-chip {
+    position: absolute;
+    left: 0.75rem;
+    bottom: 0.75rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.4rem 0.7rem;
+    border-radius: 999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--foreground);
+    background: color-mix(in oklch, var(--card) 75%, transparent);
+    backdrop-filter: blur(8px);
+    border: 1px solid var(--border);
+  }
+  .status-chip .dot {
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: 999px;
+    background: var(--accent);
+    box-shadow: 0 0 0 0 color-mix(in oklch, var(--accent) 70%, transparent);
+    animation: pulse 2.4s ease-out infinite;
+  }
+
+  .scroll-cue {
+    position: absolute;
+    left: 50%;
+    bottom: 1.5rem;
+    translate: -50% 0;
+    display: flex;
+    width: 2.25rem;
+    height: 2.25rem;
+    align-items: center;
+    justify-content: center;
+    border-radius: 999px;
+    border: 1px solid var(--border);
+    color: var(--muted-foreground);
+    background: color-mix(in oklch, var(--card) 60%, transparent);
+    animation: float 2.6s ease-in-out infinite;
+  }
+
+  /* orchestrated load-in */
+  .hero-in > * {
+    opacity: 0;
+    transform: translateY(18px);
+    animation: riseIn 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+  .hero-in > [data-i="0"] { animation-delay: 0.05s; }
+  .hero-in > [data-i="1"] { animation-delay: 0.14s; }
+  .hero-in > [data-i="2"] { animation-delay: 0.24s; }
+  .hero-in > [data-i="3"] { animation-delay: 0.34s; }
+  .hero-in > [data-i="4"] { animation-delay: 0.44s; }
+  .hero-in > [data-i="5"] { animation-delay: 0.54s; }
+
+  @keyframes riseIn {
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+  @keyframes pulse {
+    0% {
+      box-shadow: 0 0 0 0 color-mix(in oklch, var(--accent) 60%, transparent);
+    }
+    70%,
+    100% {
+      box-shadow: 0 0 0 8px transparent;
+    }
+  }
+  @keyframes float {
+    0%,
+    100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(5px);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .hero-in > *,
+    .status-chip .dot,
+    .scroll-cue {
+      animation: none;
+      opacity: 1;
+      transform: none;
+    }
+  }
+</style>
