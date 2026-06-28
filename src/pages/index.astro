@@ -18,16 +18,20 @@ import { work, projects } from "@/data/projects";
   <ProjectsSection
     id="work"
     index="04"
-    kicker="Work"
+    command="ls ~/work"
+    comment="shipping at NJDCA"
     title="What I'm building at NJDCA."
     items={work}
+    variant="work"
   />
   <ProjectsSection
     id="projects"
     index="05"
-    kicker="Projects"
-    title="Things I build for fun."
+    command="ls ~/projects"
+    comment="things I build for fun"
+    title="Side quests."
     items={projects}
+    variant="projects"
   />
   <Contact />
   <Footer />
