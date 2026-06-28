@@ -6,138 +6,315 @@ import { ArrowUpRight } from "@lucide/astro";
 interface Props {
   id: string;
   index: string;
-  kicker: string;
+  command: string;
+  comment?: string;
   title: string;
   items: Project[];
+  variant: "work" | "projects";
 }
 
-const { id, index, kicker, title, items } = Astro.props;
+const { id, index, command, comment, title, items, variant } = Astro.props;
 
 const kindLabel = {
-  web: "Web App",
-  game: "Game",
-  ai: "AI Platform",
-  infra: "Cloud / Infra",
-  bot: "Discord Bot",
-  app: "Mobile App",
+  web: "web",
+  game: "game",
+  ai: "ai",
+  infra: "infra",
+  bot: "bot",
+  app: "app",
 } as const;
+
+const slug = (s: string) =>
+  s
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/(^-|-$)/g, "");
 ---
 
-<section id={id} class="px-6 py-24 sm:py-32">
+<section id={id} class="px-4 py-20 sm:px-6 sm:py-28">
   <div class="mx-auto max-w-6xl">
-    <SectionHeading index={index} kicker={kicker} title={title} />
+    <SectionHeading index={index} command={command} comment={comment} title={title} />
 
-    <div class="mt-16 flex flex-col gap-20">
-      {
-        items.map((p, i) => (
-          <article
-            class:list={[
-              "reveal grid items-center gap-8 md:grid-cols-2 md:gap-12",
-              i % 2 === 1 && "md:[&>.media]:order-2",
-            ]}
-          >
-            <div class="media">
-              <div class="frame scanlines" data-kind={p.kind}>
-                {p.image ? (
+    {
+      variant === "work" ? (
+        <div class="mt-12 flex flex-col gap-8">
+          {items.map((p, i) => (
+            <article class="reveal win" style={`--reveal-delay:${i * 90}ms`}>
+              <div class="win-bar">
+                <span class="dots" aria-hidden="true">
+                  <i />
+                  <i />
+                  <i />
+                </span>
+                <span class="win-title">
+                  ~/work/{slug(p.title)}
+                </span>
+                <span class="kind">[{kindLabel[p.kind]}]</span>
+              </div>
+
+              <div class="pane">
+                <p class="prompt-line">
+                  <span class="tok-green">$</span> cat README.md
+                </p>
+                <h3 class="ptitle">{p.title}</h3>
+                <p class="pmeta tok-muted">
+                  {p.role} · {p.period}
+                </p>
+                <p class="pdesc prose-sans">{p.description}</p>
+
+                {p.placeholder && (
+                  <p class="okline">
+                    <span class="tok-green">✓</span>{" "}
+                    <span class="tok-muted">{p.placeholder.note.replace(/^✓\s*/, "")}</span>
+                  </p>
+                )}
+
+                <p class="tags">
+                  {p.tags.map((t) => (
+                    <span class="tag">
+                      <span class="tok-muted">#</span>
+                      {t.replace(/\s+/g, "-").toLowerCase()}
+                    </span>
+                  ))}
+                </p>
+
+                {p.links.length > 0 && (
+                  <div class="links">
+                    {p.links.map((l) => (
+                      <a
+                        href={l.href}
+                        target="_blank"
+                        rel="noopener"
+                        class="keycap linkbtn"
+                      >
+                        {l.label}
+                        <ArrowUpRight class="size-4" />
+                      </a>
+                    ))}
+                  </div>
+                )}
+
+              </div>
+            </article>
+          ))}
+        </div>
+      ) : (
+        <div class="mt-12 grid items-stretch gap-6 [grid-template-columns:repeat(auto-fit,minmax(20rem,1fr))]">
+          {items.map((p, i) => (
+            <article
+              class="reveal win card"
+              style={`--reveal-delay:${i * 90}ms`}
+            >
+              <div class="win-bar">
+                <span class="dots" aria-hidden="true">
+                  <i />
+                  <i />
+                  <i />
+                </span>
+                <span class="win-title">~/projects/{slug(p.title)}</span>
+                <span class="kind">[{kindLabel[p.kind]}]</span>
+              </div>
+
+              <div class="media-slot">
+              {p.image ? (
+                <div class="viewport scanlines">
                   <img
                     src={p.image}
                     alt={`${p.title} — screenshot`}
                     loading="lazy"
                     decoding="async"
                   />
-                ) : (
-                  <div class="placeholder">
-                    <span class="hud">{p.tags[0]}</span>
-                    <code class="cmd">{p.placeholder?.line ?? p.title}</code>
-                    <span class="ok">{p.placeholder?.note ?? "✓ shipped"}</span>
-                  </div>
-                )}
-              </div>
-            </div>
-
-            <div class="flex flex-col items-start gap-3">
-              <span class="hud">{kindLabel[p.kind]}</span>
-              <h3 class="text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
-                {p.title}
-              </h3>
-              <p class="text-sm font-medium text-muted-foreground">
-                {p.role} · {p.period}
-              </p>
-              <p class="max-w-[55ch] text-pretty text-muted-foreground">
-                {p.description}
-              </p>
-
-              <ul class="mt-1 flex flex-wrap gap-2">
-                {p.tags.map((t) => (
-                  <li class="rounded-full bg-secondary px-2.5 py-0.5 text-xs font-medium text-secondary-foreground">
-                    {t}
-                  </li>
-                ))}
-              </ul>
-
-              {p.links.length > 0 && (
-                <div class="mt-3 flex flex-wrap gap-3">
-                  {p.links.map((l) => (
-                    <a
-                      href={l.href}
-                      target="_blank"
-                      rel="noopener"
-                      class="keycap inline-flex h-10 items-center gap-1.5 rounded-md border border-border bg-card/50 px-4 text-sm font-medium text-foreground transition-colors hover:bg-secondary"
-                    >
-                      {l.label}
-                      <ArrowUpRight class="size-4" />
-                    </a>
-                  ))}
+                </div>
+              ) : (
+                <div class="output">
+                  <p>
+                    <span class="tok-green">$</span> {p.placeholder?.line ?? p.title}
+                  </p>
+                  <p class="tok-muted">{p.placeholder?.note ?? "✓ shipped"}</p>
                 </div>
               )}
-            </div>
-          </article>
-        ))
-      }
-    </div>
+              </div>
+
+              <div class="pane">
+                <div class="copy">
+                <h3 class="ptitle sm">{p.title}</h3>
+                <p class="pmeta tok-muted">
+                  {p.role} · {p.period}
+                </p>
+                <p class="pdesc prose-sans">{p.blurb}</p>
+                </div>
+
+                <div class="card-foot">
+                <p class="tags">
+                  {p.tags.slice(0, 4).map((t) => (
+                    <span class="tag">
+                      <span class="tok-muted">#</span>
+                      {t.replace(/\s+/g, "-").toLowerCase()}
+                    </span>
+                  ))}
+                </p>
+
+                {p.links.length > 0 && (
+                  <div class="links">
+                    {p.links.map((l) => (
+                      <a
+                        href={l.href}
+                        target="_blank"
+                        rel="noopener"
+                        class="keycap linkbtn"
+                      >
+                        {l.label}
+                        <ArrowUpRight class="size-4" />
+                      </a>
+                    ))}
+                  </div>
+                )}
+                </div>
+              </div>
+            </article>
+          ))}
+        </div>
+      )
+    }
   </div>
 </section>
 
 <style>
-  .frame {
-    position: relative;
-    aspect-ratio: 16 / 10;
-    border-radius: 1rem;
-    overflow: hidden;
-    border: 1px solid var(--border);
-    background: var(--surface);
-    box-shadow: 0 24px 50px -28px oklch(0 0 0 / 0.45);
+  .kind {
+    margin-left: auto;
+    font-size: 0.72rem;
+    color: var(--accent);
+    flex-shrink: 0;
   }
-  .frame img {
+
+  .card {
+    display: flex;
+    height: 100%;
+    min-width: 0;
+    flex-direction: column;
+  }
+  .card .win-body {
+    flex: 1;
+  }
+  .card .win-body-inner {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+  }
+
+  .pane {
+    padding: clamp(1.2rem, 3vw, 1.9rem);
+  }
+  .card .pane {
+    padding: 1.25rem;
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+  }
+  .card .copy {
+    min-height: 0;
+  }
+  .card-foot {
+    margin-top: auto;
+    padding-top: 1rem;
+  }
+
+  .prompt-line {
+    color: var(--muted-foreground);
+    font-size: 0.85rem;
+    margin-bottom: 0.6rem;
+  }
+  .ptitle {
+    font-size: clamp(1.4rem, 1.1rem + 1.4vw, 2rem);
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    color: var(--foreground);
+  }
+  .ptitle.sm {
+    font-size: 1.2rem;
+  }
+  .pmeta {
+    margin-top: 0.3rem;
+    font-size: 0.82rem;
+  }
+  .pdesc {
+    margin-top: 0.85rem;
+    max-width: 64ch;
+    color: var(--muted-foreground);
+  }
+  .okline {
+    margin-top: 0.9rem;
+    font-size: 0.85rem;
+  }
+  .tags {
+    margin-top: 1rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem 0.85rem;
+  }
+  .card .tags {
+    margin-top: 0;
+  }
+  .tag {
+    color: var(--term-cyan);
+    font-size: 0.78rem;
+  }
+  .links {
+    margin-top: 1.1rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+  }
+  .linkbtn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    height: 2.4rem;
+    padding: 0 0.95rem;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border);
+    background: var(--secondary);
+    color: var(--foreground);
+    font-size: 0.82rem;
+    font-weight: 500;
+  }
+  .linkbtn:hover {
+    border-color: color-mix(in oklch, var(--primary) 50%, var(--border));
+  }
+
+  /* project card media */
+  .media-slot {
+    height: clamp(9.5rem, 15vw, 11.5rem);
+    flex: 0 0 auto;
+    overflow: hidden;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface);
+  }
+  .viewport {
+    position: relative;
+    height: 100%;
+    overflow: hidden;
+    background: var(--surface);
+  }
+  .viewport img {
     width: 100%;
     height: 100%;
     object-fit: cover;
   }
-
-  .placeholder {
-    position: absolute;
-    inset: 0;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    gap: 0.85rem;
-    padding: 2rem;
+  .output {
+    height: 100%;
+    padding: 1.5rem 1.25rem;
     background:
       radial-gradient(
-        80% 70% at 20% 0%,
-        color-mix(in oklch, var(--primary) 18%, transparent),
+        90% 80% at 15% 0%,
+        color-mix(in oklch, var(--primary) 14%, transparent),
         transparent 70%
       ),
       var(--surface);
-  }
-  .placeholder .cmd {
-    font-family: var(--font-pixel);
-    font-size: clamp(1rem, 3.5vw, 1.6rem);
-    color: var(--foreground);
-  }
-  .placeholder .ok {
-    font-family: var(--font-pixel);
-    font-size: 0.8rem;
-    color: var(--accent);
+    font-size: 0.9rem;
+    line-height: 1.7;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
   }
 </style>
