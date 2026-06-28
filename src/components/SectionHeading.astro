@@ -1,0 +1,28 @@
+---
+interface Props {
+  index: string;
+  /** the "command" shown after the prompt, e.g. "cat about.md" */
+  command: string;
+  /** the human title rendered large below */
+  title: string;
+  /** optional inline comment shown after the command */
+  comment?: string;
+}
+
+const { index, command, title, comment } = Astro.props;
+---
+
+<div class="reveal flex flex-col gap-3">
+  <div class="flex flex-wrap items-baseline gap-x-2 gap-y-1 text-[0.82rem]">
+    <span class="tok-muted select-none">{index}</span>
+    <span class="tok-green select-none">abraham@portfolio</span>
+    <span class="tok-muted select-none">:</span>
+    <span class="tok-blue select-none">~</span>
+    <span class="tok-green select-none">$</span>
+    <span class="text-foreground">{command}</span>
+    {comment && <span class="tok-muted"># {comment}</span>}
+  </div>
+  <h2 class="text-h2 font-semibold tracking-tight text-balance text-foreground">
+    {title}
+  </h2>
+</div>

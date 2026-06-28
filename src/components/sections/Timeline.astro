@@ -1,0 +1,189 @@
+---
+import SectionHeading from "@/components/SectionHeading.astro";
+import { timeline } from "@/data/experience";
+
+const entries = [...timeline].sort((a, b) => b.order - a.order);
+
+// deterministic 7-char "commit hash" from an id
+function hash(id: string): string {
+  let h = 0;
+  for (let i = 0; i < id.length; i++) h = (h * 31 + id.charCodeAt(i)) >>> 0;
+  return h.toString(16).padStart(7, "0").slice(0, 7);
+}
+
+const refs: Record<string, { text: string; tone: string }[]> = {
+  njdca: [
+    { text: "HEAD -> ", tone: "tok-cyan" },
+    { text: "main", tone: "tok-green" },
+    { text: ", ", tone: "tok-muted" },
+    { text: "origin/njdca", tone: "tok-amber" },
+  ],
+  education: [{ text: "tag: v2025.grad", tone: "tok-cyan" }],
+  nasa: [{ text: "tag: nasa-intern", tone: "tok-cyan" }],
+  indie: [{ text: "tag: first-ship", tone: "tok-cyan" }],
+};
+---
+
+<section id="timeline" class="px-4 py-20 sm:px-6 sm:py-28">
+  <div class="mx-auto max-w-4xl">
+    <SectionHeading
+      index="02"
+      command="git log --graph --all"
+      title="The path so far."
+    />
+
+    <ol class="gitlog reveal mt-12" style="--reveal-delay:80ms">
+      {
+        entries.map((e, i) => (
+          <li class="commit" style={`--reveal-delay:${i * 80}ms`}>
+            <span class="node" data-current={e.current ? "true" : "false"}>
+              *
+            </span>
+
+            <div class="body">
+              <p class="cline">
+                <span class="tok-muted">commit</span>{" "}
+                <span class="tok-amber">{hash(e.id)}</span>{" "}
+                {refs[e.id] && (
+                  <span class="tok-muted">
+                    (
+                    {refs[e.id].map((r) => (
+                      <span class={r.tone}>{r.text}</span>
+                    ))}
+                    )
+                  </span>
+                )}
+                {e.current && <span class="now">● HEAD</span>}
+              </p>
+              <p class="meta tok-muted tabular">Date:&nbsp;&nbsp;&nbsp;{e.period}</p>
+
+              <h3 class="title">
+                {e.role}
+                <span class="tok-muted"> @ </span>
+                <span class="tok-blue">{e.org}</span>
+                {e.location && <span class="tok-muted"> · {e.location}</span>}
+              </h3>
+
+              <p class="summary prose-sans">{e.summary}</p>
+
+              <ul class="bullets">
+                {e.bullets.map((b) => (
+                  <li>
+                    <span class="tok-green select-none">- </span>
+                    <span class="prose-sans">{b}</span>
+                  </li>
+                ))}
+              </ul>
+
+              <p class="tags">
+                {e.tags.map((t) => (
+                  <span class="tag">
+                    <span class="tok-muted">#</span>
+                    {t.replace(/\s+/g, "-").toLowerCase()}
+                  </span>
+                ))}
+              </p>
+            </div>
+          </li>
+        ))
+      }
+    </ol>
+  </div>
+</section>
+
+<style>
+  .gitlog {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 2.25rem;
+    padding-left: 1.6rem;
+    font-size: clamp(0.82rem, 0.78rem + 0.3vw, 0.95rem);
+  }
+  /* the continuous graph rail */
+  .gitlog::before {
+    content: "";
+    position: absolute;
+    top: 0.55rem;
+    bottom: 0.55rem;
+    left: 0.34rem;
+    width: 1px;
+    background: linear-gradient(
+      to bottom,
+      var(--term-green),
+      color-mix(in oklch, var(--term-green) 30%, var(--border)) 18%,
+      var(--border) 85%,
+      transparent
+    );
+  }
+
+  .commit {
+    position: relative;
+  }
+  .node {
+    position: absolute;
+    left: -1.6rem;
+    top: -0.1rem;
+    width: 0.85rem;
+    text-align: center;
+    color: var(--term-green);
+    font-weight: 700;
+    background: var(--background);
+  }
+  .node[data-current="true"] {
+    color: var(--accent);
+    font-size: 1.15rem;
+    top: -0.22rem;
+  }
+
+  .cline {
+    word-break: break-word;
+  }
+  .now {
+    margin-left: 0.5rem;
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    color: var(--accent-foreground);
+    background: var(--accent);
+    padding: 0.05rem 0.45rem;
+    border-radius: 3px;
+  }
+  .meta {
+    margin-top: 0.1rem;
+  }
+  .title {
+    margin-top: 0.7rem;
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: var(--foreground);
+    letter-spacing: -0.01em;
+  }
+  .summary {
+    margin-top: 0.45rem;
+    max-width: 64ch;
+    color: var(--muted-foreground);
+  }
+  .bullets {
+    margin-top: 0.7rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    max-width: 66ch;
+  }
+  .bullets li {
+    display: flex;
+    gap: 0.15rem;
+    color: var(--muted-foreground);
+  }
+  .tags {
+    margin-top: 0.8rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem 0.9rem;
+  }
+  .tag {
+    color: var(--term-cyan);
+    font-size: 0.8rem;
+  }
+</style>

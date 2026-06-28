@@ -1,0 +1,99 @@
+---
+import SectionHeading from "@/components/SectionHeading.astro";
+import { skillGroups } from "@/data/skills";
+
+const dirName: Record<string, string> = {
+  LANG: "languages",
+  UI: "frontend",
+  API: "backend",
+  CLOUD: "cloud",
+  TOOLS: "tools",
+};
+
+// a few items get "syntax" emphasis to keep the listing alive
+const green = new Set(["RAG Systems", "Claude", "Authentication"]);
+const amber = new Set(["TypeScript", "Next.js", "AWS", "PostgreSQL", "Unity"]);
+
+const totalItems = skillGroups.reduce((n, g) => n + g.items.length, 0);
+---
+
+<section id="skills" class="px-4 py-20 sm:px-6 sm:py-28">
+  <div class="mx-auto max-w-5xl">
+    <SectionHeading
+      index="03"
+      command="tree ~/skills"
+      comment="what I build with"
+      title="The toolkit."
+    />
+
+    <div class="reveal win mt-10" style="--reveal-delay:80ms">
+      <div class="win-bar">
+        <span class="dots" aria-hidden="true"><i></i><i></i><i></i></span>
+        <span class="win-title">~/skills</span>
+      </div>
+
+      <div class="tree">
+        <p class="line"><span class="tok-blue">.</span></p>
+        {
+          skillGroups.map((g, gi) => {
+            const lastGroup = gi === skillGroups.length - 1;
+            const gBranch = lastGroup ? "└── " : "├── ";
+            const childPad = lastGroup ? "    " : "│   ";
+            return (
+              <>
+                <p class="line">
+                  <span class="con">{gBranch}</span>
+                  <span class="tok-blue">{dirName[g.label] ?? g.heading}/</span>
+                  <span class="tok-muted">
+                    {"  "}# {g.heading}
+                  </span>
+                </p>
+                {g.items.map((item, ii) => {
+                  const lastItem = ii === g.items.length - 1;
+                  const iBranch = lastItem ? "└── " : "├── ";
+                  const tone = green.has(item)
+                    ? "tok-green"
+                    : amber.has(item)
+                      ? "tok-amber"
+                      : "text-foreground";
+                  return (
+                    <p class="line">
+                      <span class="con">
+                        {childPad}
+                        {iBranch}
+                      </span>
+                      <span class={tone}>{item}</span>
+                    </p>
+                  );
+                })}
+              </>
+            );
+          })
+        }
+        <p class="line foot tok-muted">
+          {skillGroups.length} directories, {totalItems} files
+        </p>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<style>
+  .tree {
+    padding: clamp(1.1rem, 3vw, 1.75rem) clamp(1rem, 3vw, 1.75rem);
+    font-size: clamp(0.8rem, 0.74rem + 0.35vw, 0.95rem);
+    line-height: 1.75;
+    overflow-x: auto;
+  }
+  .line {
+    white-space: pre;
+  }
+  .con {
+    color: color-mix(in oklch, var(--muted-foreground) 75%, transparent);
+    white-space: pre;
+  }
+  .foot {
+    margin-top: 0.6rem;
+  }
+</style>

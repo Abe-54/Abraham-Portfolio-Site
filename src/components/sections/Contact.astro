@@ -1,0 +1,162 @@
+---
+import SectionHeading from "@/components/SectionHeading.astro";
+import { site, socials } from "@/data/site";
+import { Copy, Check, ArrowUpRight, FileDown } from "@lucide/astro";
+---
+
+<section id="contact" class="px-4 py-20 sm:px-6 sm:py-28">
+  <div class="mx-auto max-w-4xl">
+    <SectionHeading index="06" command="echo $EMAIL" title="Let's build something." />
+
+    <div class="reveal win mt-10" style="--reveal-delay:80ms">
+      <div class="win-bar">
+        <span class="dots" aria-hidden="true"><i></i><i></i><i></i></span>
+        <span class="win-title">~/contact</span>
+      </div>
+
+      <div class="body">
+        <p class="intro prose-sans">
+          Open to full-stack roles, freelance builds, and the occasional
+          game-jam partner. The fastest way to reach me is email.
+        </p>
+
+        <p class="prompt-line"><span class="tok-green">$</span> echo $EMAIL</p>
+        <div class="email-row">
+          <a href={`mailto:${site.email}`} class="email">{site.email}</a>
+          <button
+            id="copy-email"
+            type="button"
+            data-email={site.email}
+            class="keycap copy"
+          >
+            <Copy class="size-4 copy-idle" />
+            <Check class="size-4 copy-done hidden text-term-green" />
+            <span class="copy-label">copy</span>
+          </button>
+        </div>
+
+        <p class="prompt-line mt-line">
+          <span class="tok-green">$</span> ls ~/links
+        </p>
+        <div class="links">
+          {
+            socials.map((s) => (
+              <a href={s.href} target="_blank" rel="noopener" class="keycap linkbtn">
+                <span class="tok-blue">{s.label.toLowerCase()}/</span>
+                <span class="tok-muted">{s.handle}</span>
+                <ArrowUpRight class="size-4 tok-muted" />
+              </a>
+            ))
+          }
+          <a
+            href={site.resume}
+            target="_blank"
+            rel="noopener"
+            class="keycap linkbtn primary"
+          >
+            <FileDown class="size-4" /> resume.pdf
+          </a>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+  const btn = document.getElementById("copy-email");
+  btn?.addEventListener("click", async () => {
+    const email = btn.getAttribute("data-email") ?? "";
+    try {
+      await navigator.clipboard.writeText(email);
+      btn.querySelector(".copy-idle")?.classList.add("hidden");
+      btn.querySelector(".copy-done")?.classList.remove("hidden");
+      const label = btn.querySelector(".copy-label");
+      if (label) label.textContent = "copied";
+      setTimeout(() => {
+        btn.querySelector(".copy-idle")?.classList.remove("hidden");
+        btn.querySelector(".copy-done")?.classList.add("hidden");
+        if (label) label.textContent = "copy";
+      }, 1800);
+    } catch {
+      /* clipboard unavailable */
+    }
+  });
+</script>
+
+<style>
+  .body {
+    padding: clamp(1.4rem, 4vw, 2.25rem);
+  }
+  .intro {
+    color: var(--muted-foreground);
+    max-width: 58ch;
+    margin-bottom: 1.75rem;
+  }
+  .prompt-line {
+    font-size: 0.85rem;
+    color: var(--muted-foreground);
+  }
+  .mt-line {
+    margin-top: 1.9rem;
+  }
+  .email-row {
+    margin-top: 0.65rem;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.85rem;
+  }
+  .email {
+    font-size: clamp(1.4rem, 1rem + 2.4vw, 2.4rem);
+    font-weight: 600;
+    color: var(--foreground);
+    letter-spacing: -0.01em;
+    word-break: break-all;
+    text-decoration-color: color-mix(in oklch, var(--term-green) 60%, transparent);
+    text-underline-offset: 6px;
+  }
+  .email:hover {
+    text-decoration: underline;
+  }
+  .copy {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    height: 2.25rem;
+    padding: 0 0.8rem;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border);
+    background: var(--secondary);
+    color: var(--muted-foreground);
+    font-size: 0.8rem;
+  }
+  .copy:hover {
+    color: var(--foreground);
+  }
+  .links {
+    margin-top: 0.7rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+  }
+  .linkbtn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    height: 2.6rem;
+    padding: 0 1rem;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border);
+    background: var(--secondary);
+    color: var(--foreground);
+    font-size: 0.85rem;
+  }
+  .linkbtn:hover {
+    border-color: color-mix(in oklch, var(--primary) 50%, var(--border));
+  }
+  .linkbtn.primary {
+    background: color-mix(in oklch, var(--primary) 18%, var(--card));
+    border-color: color-mix(in oklch, var(--primary) 45%, transparent);
+  }
+</style>

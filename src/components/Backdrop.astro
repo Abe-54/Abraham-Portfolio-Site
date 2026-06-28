@@ -1,0 +1,88 @@
+---
+// Global terminal backdrop: a faint engineering grid + corner vignette +
+// whisper-subtle scanlines. Static, no cursor tracking, GPU-cheap. Sits
+// behind all content (fixed, pointer-events:none).
+---
+
+<div class="backdrop" aria-hidden="true">
+  <div class="grid"></div>
+  <div class="glow"></div>
+  <div class="scan"></div>
+</div>
+
+<style>
+  .backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    overflow: hidden;
+    pointer-events: none;
+  }
+
+  /* faint dot/line grid, masked toward the edges */
+  .grid {
+    position: absolute;
+    inset: -2px;
+    background-image:
+      linear-gradient(
+        to right,
+        color-mix(in oklch, var(--foreground) 6%, transparent) 1px,
+        transparent 1px
+      ),
+      linear-gradient(
+        to bottom,
+        color-mix(in oklch, var(--foreground) 6%, transparent) 1px,
+        transparent 1px
+      );
+    background-size: 46px 46px;
+    mask-image: radial-gradient(130% 120% at 50% -10%, black 35%, transparent 80%);
+    -webkit-mask-image: radial-gradient(
+      130% 120% at 50% -10%,
+      black 35%,
+      transparent 80%
+    );
+    opacity: 0.6;
+  }
+
+  /* one soft brand glow up top, very low weight */
+  .glow {
+    position: absolute;
+    top: -28rem;
+    left: 50%;
+    width: 60rem;
+    height: 50rem;
+    translate: -50% 0;
+    border-radius: 999px;
+    filter: blur(120px);
+    opacity: 0.4;
+    background: radial-gradient(
+      circle at center,
+      color-mix(in oklch, var(--primary) 36%, transparent),
+      transparent 62%
+    );
+  }
+
+  /* whisper scanlines across the whole viewport */
+  .scan {
+    position: absolute;
+    inset: 0;
+    background: repeating-linear-gradient(
+      to bottom,
+      transparent 0,
+      transparent 2px,
+      color-mix(in oklch, var(--foreground) 3.5%, transparent) 3px,
+      transparent 4px
+    );
+    opacity: 0.5;
+  }
+
+  :global(:root:not(.dark)) .grid {
+    opacity: 0.5;
+  }
+  :global(:root:not(.dark)) .glow {
+    opacity: 0.22;
+  }
+  :global(:root:not(.dark)) .scan {
+    opacity: 0.25;
+  }
+</style>

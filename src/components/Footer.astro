@@ -1,0 +1,36 @@
+---
+import { site, socials } from "@/data/site";
+const year = new Date().getFullYear();
+---
+
+<footer class="border-t border-border px-4 py-8 sm:px-6">
+  <div class="mx-auto flex max-w-6xl flex-col items-start justify-between gap-4 text-[0.82rem] sm:flex-row sm:items-center">
+    <p class="comment">
+      <span class="tok-green">//</span>
+      © {year} {site.name} — built with Astro, TypeScript &amp; Tailwind. Deployed on
+      Vercel.
+    </p>
+
+    <nav aria-label="Social" class="flex flex-wrap gap-4">
+      {
+        socials.map((s) => (
+          <a
+            href={s.href}
+            target="_blank"
+            rel="noopener"
+            class="text-muted-foreground transition-colors hover:text-foreground"
+          >
+            <span class="tok-muted">./</span>
+            {s.label.toLowerCase()}
+          </a>
+        ))
+      }
+    </nav>
+  </div>
+</footer>
+
+<style>
+  .comment {
+    color: var(--muted-foreground);
+  }
+</style>
