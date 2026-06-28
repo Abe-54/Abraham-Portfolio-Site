@@ -43,6 +43,6 @@ export const skillGroups: SkillGroup[] = [
   {
     label: "TOOLS",
     heading: "Developer Tools",
-    items: ["Git", "GitHub", "Linear", "Figma", "axe", "Claude", "Unity"],
+    items: ["Git", "GitHub", "Linear", "Figma", "axe", "Unity"],
   },
 ];

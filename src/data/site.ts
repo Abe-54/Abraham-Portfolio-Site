@@ -24,9 +24,9 @@ export const site = {
   headline: "Full-stack software engineer building modern web apps.",
   /** longer hero sub-copy */
   intro:
-    "I build production web applications with Next.js, TypeScript, PostgreSQL, AWS, and AI-assisted workflows at the New Jersey Department of Community Affairs — across frontend, backend, accessibility, and deployment. I still make games for fun on the side.",
+    "I build production web applications with Next.js, TypeScript, PostgreSQL, and AWS at the New Jersey Department of Community Affairs - across frontend, backend, accessibility, and deployment. I still make games for fun on the side.",
   description:
-    "Abraham Rubio is a full-stack software engineer building modern TypeScript web applications, with experience in AI-assisted workflows, accessibility, cloud deployment, and production systems.",
+    "Abraham Rubio is a full-stack software engineer building modern TypeScript web applications, with experience in accessibility, cloud deployment, and production systems.",
 } as const;
 
 export const socials: SocialLink[] = [
