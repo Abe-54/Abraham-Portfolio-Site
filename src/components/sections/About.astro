@@ -1,67 +1,211 @@
 ---
 import SectionHeading from "@/components/SectionHeading.astro";
+import { site } from "@/data/site";
 
-const facts = [
-  { k: "Based in", v: "Newark, NJ" },
-  { k: "Focus", v: "Full-stack web + game dev" },
-  { k: "Currently", v: "Building at NJDCA" },
-  { k: "Off the clock", v: "Designing & playing games" },
+const info: { k: string; v: string; tone?: string }[] = [
+  { k: "role", v: site.role, tone: "tok-blue" },
+  { k: "company", v: "NJ Dept. of Community Affairs", tone: "tok-blue" },
+  { k: "uptime", v: "since Feb 2026", tone: "tok-amber" },
+  { k: "education", v: "B.S. Computer Science & Game Programming" },
+  { k: "stack", v: "Next.js - TypeScript - PostgreSQL - AWS", tone: "tok-green" },
+  { k: "tooling", v: "AI-assisted workflows", tone: "tok-green" },
+  { k: "location", v: site.location },
+  { k: "focus", v: "Full-stack web + indie games" },
 ];
 ---
 
-<section id="about" class="px-6 py-24 sm:py-32">
-  <div class="mx-auto grid max-w-6xl gap-12 md:grid-cols-[0.8fr_1.2fr] md:gap-20">
-    <div class="flex flex-col gap-8">
-      <SectionHeading index="01" kicker="About" title="Code with a bit of play." />
+<section id="about" class="px-4 py-20 sm:px-6 sm:py-28">
+  <div class="mx-auto max-w-6xl">
+    <SectionHeading index="01" command="neofetch" title="Code with a bit of play." />
 
-      <dl class="reveal grid grid-cols-2 gap-x-6 gap-y-5" style="--reveal-delay:120ms">
-        {
-          facts.map((f) => (
-            <div class="flex flex-col gap-1">
-              <dt class="hud text-muted-foreground/80">{f.k}</dt>
-              <dd class="text-sm font-medium text-foreground">{f.v}</dd>
-            </div>
-          ))
-        }
-      </dl>
+    <div class="reveal win mt-10" style="--reveal-delay:80ms">
+      <div class="win-bar">
+        <span class="dots" aria-hidden="true"><i></i><i></i><i></i></span>
+        <span class="win-title">~/about</span>
+      </div>
+
+      <div class="neo">
+        <div class="logo">
+          <span class="initials">{site.initials}</span>
+          <span class="tag tok-muted">&gt;_ build - ship - play</span>
+          <div class="swatches" aria-hidden="true">
+            <i style="background:var(--foreground)"></i>
+            <i style="background:var(--primary)"></i>
+            <i style="background:var(--term-green)"></i>
+            <i style="background:var(--accent)"></i>
+            <i style="background:var(--term-cyan)"></i>
+            <i style="background:var(--muted-foreground)"></i>
+          </div>
+        </div>
+
+        <dl class="info">
+          <div class="head">
+            <span class="tok-green">abraham</span><span class="tok-muted">@</span
+            ><span class="tok-blue">portfolio</span>
+          </div>
+          <div class="rule">{"-".repeat(22)}</div>
+          {
+            info.map((row) => (
+              <div class="row">
+                <dt class="tok-amber">{row.k}</dt>
+                <dd class={row.tone ?? "text-foreground"}>{row.v}</dd>
+              </div>
+            ))
+          }
+        </dl>
+      </div>
+
     </div>
 
-    <div class="reveal flex flex-col gap-5 text-pretty leading-relaxed text-muted-foreground" style="--reveal-delay:80ms">
-      <p>
-        I'm a <strong class="font-semibold text-foreground">full-stack software
-        engineer</strong> who likes shipping software people actually use. I
-        graduated from{" "}
-        <strong class="font-semibold text-foreground">Bloomfield College of Montclair
-        State University</strong> with a degree in Computer Science and Game
-        Programming — so I tend to think about both the engineering and the
-        experience.
-      </p>
-      <p>
-        In 2024 I interned at <strong class="font-semibold text-foreground">NASA</strong>{" "}
-        as a climate game developer, turning dense scientific concepts into a
-        playable Unity experience for classrooms. Today I build and ship
-        production web apps — internal tools and constituent-facing government
-        applications — at the{" "}
-        <strong class="font-semibold text-foreground">New Jersey Department of
-        Community Affairs</strong> with Next.js, TypeScript, and PostgreSQL on AWS,
-        owning features from implementation through deployment with an eye for
-        clean, scalable code and clear UX.
-      </p>
-      <p>
-        I build with AI in the loop. At NJDCA I shipped full-stack features for an
-        AI-assisted document system using{" "}
-        <strong class="font-semibold text-foreground">Retrieval-Augmented
-        Generation (RAG)</strong>, and day to day I lean on{" "}
-        <strong class="font-semibold text-foreground">Claude</strong> as a
-        pair-programmer — scaffolding features, reviewing diffs, and pressure-testing
-        approaches — alongside automated AI-assisted PR reviews. It lets me move
-        quickly without lowering the bar on what ships.
-      </p>
-      <p>
-        When I'm off the clock you'll usually find me designing or playing games,
-        watching anime, or tinkering with small creative projects — the same
-        curiosity that got me into this in the first place.
-      </p>
+    <div
+      class="reveal bio prose-sans mt-10 text-pretty"
+      style="--reveal-delay:140ms"
+    >
+      <article>
+        <span class="bio-label">now</span>
+        <p>
+          I'm a <strong>full-stack software engineer</strong> at the{" "}
+          <strong>New Jersey Department of Community Affairs</strong>, building
+          production web apps for internal teams and constituent-facing services.
+        </p>
+      </article>
+
+      <article>
+        <span class="bio-label">path</span>
+        <p>
+          I studied <strong>Computer Science and Game Programming</strong> at
+          Bloomfield College of Montclair State University. In 2024, I interned at
+          <strong> NASA</strong> as a climate game developer, turning dense science
+          concepts into a playable Unity experience for classrooms.
+        </p>
+      </article>
+
+      <article>
+        <span class="bio-label">work style</span>
+        <p>
+          I like owning features end to end: frontend, backend, accessibility,
+          deployment, and the small UX decisions that make software feel clear.
+          At NJDCA, I also shipped full-stack features for an AI-assisted document
+          system using <strong>Retrieval-Augmented Generation (RAG)</strong>.
+        </p>
+      </article>
+
+      <article>
+        <span class="bio-label">off clock</span>
+        <p>
+          Away from work, I'm usually designing or playing games, watching anime,
+          or tinkering with small creative projects - the same curiosity that got
+          me into building software in the first place.
+        </p>
+      </article>
     </div>
   </div>
 </section>
+
+<style>
+  .neo {
+    display: grid;
+    gap: clamp(1.25rem, 4vw, 3rem);
+    padding: clamp(1.5rem, 4vw, 2.5rem);
+    grid-template-columns: 1fr;
+  }
+  @media (min-width: 720px) {
+    .neo {
+      grid-template-columns: auto 1fr;
+      align-items: center;
+    }
+  }
+
+  .logo {
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
+    align-items: flex-start;
+  }
+  .initials {
+    font-family: var(--font-pixel);
+    font-size: clamp(3rem, 2rem + 6vw, 5.5rem);
+    line-height: 0.9;
+    color: var(--primary);
+    text-shadow: 0.18em 0.18em 0 color-mix(in oklch, var(--accent) 70%, transparent);
+  }
+  .tag {
+    font-size: 0.8rem;
+  }
+  .swatches {
+    display: inline-flex;
+    gap: 0.3rem;
+    margin-top: 0.4rem;
+  }
+  .swatches i {
+    width: 1.1rem;
+    height: 1.1rem;
+    border-radius: 3px;
+    display: block;
+  }
+
+  .info {
+    font-size: clamp(0.82rem, 0.78rem + 0.3vw, 0.95rem);
+    line-height: 1.7;
+  }
+  .info .head {
+    font-weight: 600;
+  }
+  .info .rule {
+    color: var(--border);
+    letter-spacing: 0.05em;
+    margin-bottom: 0.35rem;
+  }
+  .info .row {
+    display: grid;
+    grid-template-columns: 6rem 1fr;
+    gap: 0.75rem;
+  }
+  .info dt {
+    text-transform: lowercase;
+  }
+
+  .bio {
+    display: grid;
+    gap: 0.75rem;
+    max-width: 56rem;
+    color: var(--muted-foreground);
+  }
+  .bio article {
+    display: grid;
+    grid-template-columns: 7.5rem minmax(0, 1fr);
+    gap: 1rem;
+    padding: 0.9rem 0;
+    border-top: 1px solid color-mix(in oklch, var(--border) 70%, transparent);
+  }
+  .bio article:last-child {
+    border-bottom: 1px solid color-mix(in oklch, var(--border) 70%, transparent);
+  }
+  .bio-label {
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    line-height: 1.7;
+    color: var(--accent);
+  }
+  .bio p {
+    max-width: 68ch;
+    line-height: 1.75;
+  }
+  .bio strong {
+    color: var(--foreground);
+    font-weight: 650;
+  }
+
+  @media (max-width: 640px) {
+    .bio article {
+      grid-template-columns: 1fr;
+      gap: 0.3rem;
+    }
+  }
+  @media (max-width: 420px) {
+    .info .row {
+      grid-template-columns: 5rem 1fr;
+      gap: 0.5rem;
+    }
+  }
+</style>
