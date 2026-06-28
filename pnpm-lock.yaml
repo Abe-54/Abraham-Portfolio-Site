@@ -11,6 +11,9 @@ dependencies:
   '@fontsource-variable/hubot-sans':
     specifier: ^5.2.8
     version: 5.2.8
+  '@fontsource-variable/jetbrains-mono':
+    specifier: ^5.2.8
+    version: 5.2.8
   '@fontsource-variable/mona-sans':
     specifier: ^5.2.8
     version: 5.2.8
@@ -892,6 +895,10 @@ packages:
 
   /@fontsource-variable/hubot-sans@5.2.8:
     resolution: {integrity: sha512-snt3rHAg6IrE0DKltYvjsIoeB+GSUpQHY3PAkMGUzxp8gN31kTl8yFuyuK6RcknIjtCVo7v0S6i31Oif3QxtjA==}
+    dev: false
+
+  /@fontsource-variable/jetbrains-mono@5.2.8:
+    resolution: {integrity: sha512-WBA9elru6Jdp5df2mES55wuOO0WIrn3kpXnI4+W2ek5u3ZgLS9XS4gmIlcQhiZOWEKl95meYdvK7xI+ETLCq/Q==}
     dev: false
 
   /@fontsource-variable/mona-sans@5.2.8:
