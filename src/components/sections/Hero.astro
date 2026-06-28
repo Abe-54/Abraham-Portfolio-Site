@@ -1,7 +1,8 @@
 ---
 import { site, socials } from "@/data/site";
-import { ArrowDown, FileDown } from "@lucide/astro";
+import { FileDown } from "@lucide/astro";
 import BrandIcon from "@/components/BrandIcon.astro";
+import InteractiveTerminal from "@/components/InteractiveTerminal.tsx";
 
 const brandFor: Record<string, "github" | "linkedin" | "itch"> = {
   GitHub: "github",
@@ -10,175 +11,317 @@ const brandFor: Record<string, "github" | "linkedin" | "itch"> = {
 };
 ---
 
-<section
-  id="home"
-  class="relative flex min-h-[100svh] items-center overflow-hidden px-6 pt-28 pb-20 sm:pt-32"
->
-  {/* ambient background: faint grid + soft brand glow (no neon) */}
-  <div class="hero-bg" aria-hidden="true"></div>
-
-  <div class="mx-auto grid w-full max-w-6xl items-center gap-12 md:grid-cols-[1.3fr_1fr]">
-    <div class="hero-in flex flex-col items-start gap-6">
-      <span class="hud" data-i="0">Full-stack engineer · Indie games · Newark, NJ</span>
-
-      <h1 class="text-display font-display font-bold leading-[0.98]" data-i="1">
-        {site.name}
-      </h1>
-
-      <p
-        class="text-lead max-w-[32ch] font-medium text-foreground/90"
-        data-i="2"
-      >
-        {site.headline}
-      </p>
-
-      <p class="max-w-[60ch] text-pretty text-muted-foreground" data-i="3">
-        {site.intro}
-      </p>
-
-      <div class="flex flex-wrap items-center gap-3" data-i="4">
-        <a
-          href="#projects"
-          class="keycap inline-flex h-11 items-center gap-2 rounded-md bg-accent px-5 text-sm font-semibold text-accent-foreground transition-colors hover:bg-accent/90"
-        >
-          View my work
-        </a>
-        <a
-          href={site.resume}
-          target="_blank"
-          rel="noopener"
-          class="keycap inline-flex h-11 items-center gap-2 rounded-md border border-border bg-card/50 px-5 text-sm font-medium text-foreground transition-colors hover:bg-secondary"
-        >
-          <FileDown class="size-4" /> Résumé
-        </a>
+<section id="home" class="relative px-4 py-14 sm:px-6 sm:py-16 lg:py-20">
+  <div class="mx-auto w-full max-w-6xl">
+    <div class="win scanlines hero-rise hero-window" id="hero-window" data-d="0">
+      <div class="win-bar">
+        <span class="dots" aria-hidden="true"><i></i><i></i><i></i></span>
+        <span class="win-title">abraham@portfolio: ~/bin/zsh - ~/abraham.jpg</span>
       </div>
 
-      <ul class="flex items-center gap-2" data-i="5">
-        {
-          socials.map((s) => (
-            <li>
-              <a
-                href={s.href}
-                target="_blank"
-                rel="noopener"
-                aria-label={s.label}
-                class="keycap flex size-10 items-center justify-center rounded-full bg-secondary text-secondary-foreground transition-colors hover:text-foreground"
+      <div class="hero-body">
+        <div class="hero-copy">
+          <div class="term" id="hero-term">
+            <div class="tline" data-line="0">
+              <span class="prompt-host"
+                ><span class="tok-green">abraham@portfolio</span><span
+                  class="tok-muted">:</span
+                ><span class="tok-blue">~</span><span class="tok-green"> $</span
+                ></span
               >
-                <BrandIcon name={brandFor[s.label]} class="size-[1.05rem]" />
-              </a>
-            </li>
-          ))
-        }
-      </ul>
-    </div>
+              <span class="cmd" data-type="whoami">whoami</span>
+            </div>
+            <div class="tline out" data-line="1">
+              <span class="name">{site.name}</span>
+              <span class="tok-muted"> - </span>{site.role}
+            </div>
 
-    <div class="hero-in flex justify-center md:justify-end" data-i="3">
-      <div class="portrait scanlines">
-        <img
-          src="/abraham_professional.jpg"
-          alt={`${site.name}, full-stack developer`}
-          width="440"
-          height="520"
-          fetchpriority="high"
-          decoding="async"
-        />
-        <span class="status-chip">
-          <span class="dot" aria-hidden="true"></span>
-          Currently @ NJDCA
-        </span>
+            <div class="tline" data-line="2">
+              <span class="prompt-host"
+                ><span class="tok-green">abraham@portfolio</span><span
+                  class="tok-muted">:</span
+                ><span class="tok-blue">~</span><span class="tok-green"> $</span
+                ></span
+              >
+              <span class="cmd" data-type="cat intro.txt">cat intro.txt</span>
+            </div>
+            <div class="tline out lead" data-line="3">{site.intro}</div>
+          </div>
+
+          <InteractiveTerminal scope="home" />
+
+          <div class="cmdbar" data-line="5">
+            <a href="#work" class="keycap btn btn-primary">
+              <span class="tok-green">./</span>view-work
+            </a>
+            <a href="#contact" class="keycap btn">
+              <span class="tok-green">./</span>contact
+            </a>
+            <a href={site.resume} target="_blank" rel="noopener" class="keycap btn">
+              <FileDown class="size-4" /> resume.pdf
+            </a>
+            <span class="grow"></span>
+            <ul class="socials">
+              {
+                socials.map((s) => (
+                  <li>
+                    <a
+                      href={s.href}
+                      target="_blank"
+                      rel="noopener"
+                      aria-label={s.label}
+                      class="keycap ico"
+                    >
+                      <BrandIcon name={brandFor[s.label]} class="size-[1rem]" />
+                    </a>
+                  </li>
+                ))
+              }
+            </ul>
+          </div>
+        </div>
+
+        <div class="portrait-pane">
+          <div class="portrait">
+            <img
+              src="/abraham_professional.jpg"
+              alt={`${site.name}, full-stack developer`}
+              width="440"
+              height="520"
+              fetchpriority="high"
+              decoding="async"
+            />
+          </div>
+          <div class="portrait-foot">
+            <span class="status-dot" aria-hidden="true"></span>
+            <span class="tok-green">online</span>
+            <span class="tok-muted">.</span>
+            <span class="text-muted-foreground">currently @ NJDCA</span>
+          </div>
+        </div>
       </div>
     </div>
   </div>
-
-  <a href="#about" class="scroll-cue" aria-label="Scroll to about">
-    <ArrowDown class="size-4" />
-  </a>
 </section>
 
+<script is:inline>
+  // Mark the terminal for the boot animation only when motion is allowed.
+  (() => {
+    try {
+      if (!window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+        document.getElementById("hero-term")?.classList.add("boot");
+      }
+    } catch {}
+  })();
+</script>
+
+<script>
+  // Typewriter boot sequence. Lines are pre-rendered (works without JS and
+  // with reduced motion); when ".boot" is present we retype them in order.
+  const term = document.getElementById("hero-term");
+  if (term && term.classList.contains("boot")) {
+    const lines = Array.from(term.querySelectorAll<HTMLElement>(".tline"));
+    const cmdbar = document.querySelector<HTMLElement>(".cmdbar");
+
+    const typed = lines.map((line) => {
+      const cmd = line.querySelector<HTMLElement>(".cmd");
+      if (cmd) {
+        const text = cmd.dataset.type ?? cmd.textContent ?? "";
+        cmd.textContent = "";
+        return { line, cmd, text };
+      }
+      return { line, cmd: null, text: line.textContent ?? "" };
+    });
+
+    lines.forEach((l) => (l.style.visibility = "hidden"));
+    if (cmdbar) cmdbar.style.visibility = "hidden";
+
+    const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+
+    async function typeInto(el: HTMLElement, text: string, speed: number) {
+      for (let i = 0; i < text.length; i++) {
+        el.textContent = text.slice(0, i + 1);
+        await sleep(speed);
+      }
+    }
+
+    (async () => {
+      for (const item of typed) {
+        item.line.style.visibility = "visible";
+        if (item.cmd) {
+          await typeInto(item.cmd, item.text, 38);
+          await sleep(220);
+        } else {
+          await sleep(item.text.length > 60 ? 90 : 260);
+        }
+      }
+      if (cmdbar) {
+        cmdbar.style.visibility = "visible";
+        cmdbar.animate(
+          [
+            { opacity: 0, transform: "translateY(8px)" },
+            { opacity: 1, transform: "none" },
+          ],
+          { duration: 420, easing: "cubic-bezier(0.16,1,0.3,1)" }
+        );
+      }
+    })();
+  }
+</script>
+
 <style>
-  .hero-bg {
-    position: absolute;
-    inset: 0;
-    z-index: -1;
-    background-image: radial-gradient(
-      55% 45% at 78% 2%,
-      color-mix(in oklch, var(--accent) 12%, transparent),
-      transparent 70%
-    );
+  .hero-window .win-body-inner {
+    display: block;
+  }
+  .hero-body {
+    display: grid;
+    grid-template-columns: minmax(0, 1.75fr) minmax(16rem, 0.8fr);
+    min-height: 0;
+  }
+  .hero-copy {
+    display: flex;
+    min-width: 0;
+    flex-direction: column;
+  }
+  .portrait-pane {
+    display: flex;
+    min-width: 0;
+    min-height: 0;
+    flex-direction: column;
+    border-left: 1px solid var(--border);
+    background: var(--surface);
+  }
+  .term {
+    padding: 1.25rem clamp(1rem, 3vw, 1.75rem) 0.25rem;
+    font-size: clamp(0.85rem, 0.78rem + 0.4vw, 1rem);
+    line-height: 1.65;
+  }
+  .tline {
+    margin-bottom: 0.5rem;
+    word-break: break-word;
+  }
+  .prompt-host {
+    white-space: nowrap;
+  }
+  .cmd,
+  .cmd-final {
+    color: var(--foreground);
+    margin-left: 0.4rem;
+  }
+  .out {
+    color: var(--muted-foreground);
+    padding-left: 0.1rem;
+  }
+  .out .name {
+    font-family: var(--font-pixel);
+    font-size: clamp(1.3rem, 1rem + 2.4vw, 2.4rem);
+    color: var(--foreground);
+    letter-spacing: 0.01em;
+    line-height: 1.1;
+    display: inline-block;
+    margin: 0.35rem 0 0.15rem;
+  }
+  .out.lead {
+    font-family: var(--font-sans);
+    line-height: 1.7;
+    max-width: 62ch;
+    color: var(--foreground);
+    opacity: 0.85;
+  }
+
+  .cmdbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.6rem;
+    margin-top: auto;
+    padding: 0.85rem clamp(1rem, 3vw, 1.75rem) 1rem;
+    border-top: 1px solid var(--border);
+  }
+  .grow {
+    flex: 1;
+  }
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    height: 2.5rem;
+    padding: 0 1rem;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border);
+    background: var(--secondary);
+    color: var(--foreground);
+    font-size: 0.85rem;
+    font-weight: 500;
+  }
+  .btn:hover {
+    border-color: color-mix(in oklch, var(--primary) 50%, var(--border));
+  }
+  .btn-primary {
+    background: color-mix(in oklch, var(--primary) 18%, var(--card));
+    border-color: color-mix(in oklch, var(--primary) 45%, transparent);
+    color: var(--foreground);
+  }
+  .socials {
+    display: inline-flex;
+    gap: 0.5rem;
+  }
+  .ico {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border);
+    background: var(--secondary);
+    color: var(--muted-foreground);
+  }
+  .ico:hover {
+    color: var(--foreground);
   }
 
   .portrait {
     position: relative;
-    width: clamp(15rem, 38vw, 22rem);
-    aspect-ratio: 11 / 13;
-    border-radius: 1.25rem;
+    flex: 1 1 auto;
+    min-height: 0;
     overflow: hidden;
-    border: 1px solid var(--border);
-    box-shadow:
-      0 1px 0 0 color-mix(in oklch, var(--foreground) 8%, transparent) inset,
-      0 30px 60px -30px oklch(0 0 0 / 0.5);
-    rotate: 1.5deg;
   }
   .portrait img {
     width: 100%;
     height: 100%;
     object-fit: cover;
-    object-position: center top;
+    object-position: center 28%;
   }
-  .status-chip {
-    position: absolute;
-    left: 0.75rem;
-    bottom: 0.75rem;
-    display: inline-flex;
+  .portrait-foot {
+    display: flex;
     align-items: center;
     gap: 0.5rem;
-    padding: 0.4rem 0.7rem;
-    border-radius: 999px;
-    font-size: 0.75rem;
-    font-weight: 600;
-    color: var(--foreground);
-    background: color-mix(in oklch, var(--card) 75%, transparent);
-    backdrop-filter: blur(8px);
-    border: 1px solid var(--border);
+    flex-shrink: 0;
+    padding: 0.6rem 0.9rem;
+    border-top: 1px solid var(--border);
+    background: var(--titlebar);
+    font-size: 0.78rem;
   }
-  .status-chip .dot {
+  .status-dot {
     width: 0.5rem;
     height: 0.5rem;
     border-radius: 999px;
-    background: var(--accent);
-    box-shadow: 0 0 0 0 color-mix(in oklch, var(--accent) 70%, transparent);
+    background: var(--term-green);
+    box-shadow: 0 0 0 0 color-mix(in oklch, var(--term-green) 70%, transparent);
     animation: pulse 2.4s ease-out infinite;
   }
 
-  .scroll-cue {
-    position: absolute;
-    left: 50%;
-    bottom: 1.5rem;
-    translate: -50% 0;
-    display: flex;
-    width: 2.25rem;
-    height: 2.25rem;
-    align-items: center;
-    justify-content: center;
-    border-radius: 999px;
-    border: 1px solid var(--border);
-    color: var(--muted-foreground);
-    background: color-mix(in oklch, var(--card) 60%, transparent);
-    animation: float 2.6s ease-in-out infinite;
-  }
-
-  /* orchestrated load-in */
-  .hero-in > * {
+  .hero-rise {
     opacity: 0;
-    transform: translateY(18px);
-    animation: riseIn 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    transform: translateY(20px);
+    animation: riseIn 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards;
   }
-  .hero-in > [data-i="0"] { animation-delay: 0.05s; }
-  .hero-in > [data-i="1"] { animation-delay: 0.14s; }
-  .hero-in > [data-i="2"] { animation-delay: 0.24s; }
-  .hero-in > [data-i="3"] { animation-delay: 0.34s; }
-  .hero-in > [data-i="4"] { animation-delay: 0.44s; }
-  .hero-in > [data-i="5"] { animation-delay: 0.54s; }
+  .hero-rise.win-interacted {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
 
   @keyframes riseIn {
     to {
@@ -188,30 +331,36 @@ const brandFor: Record<string, "github" | "linkedin" | "itch"> = {
   }
   @keyframes pulse {
     0% {
-      box-shadow: 0 0 0 0 color-mix(in oklch, var(--accent) 60%, transparent);
+      box-shadow: 0 0 0 0 color-mix(in oklch, var(--term-green) 55%, transparent);
     }
     70%,
     100% {
-      box-shadow: 0 0 0 8px transparent;
-    }
-  }
-  @keyframes float {
-    0%,
-    100% {
-      transform: translateY(0);
-    }
-    50% {
-      transform: translateY(5px);
+      box-shadow: 0 0 0 7px transparent;
     }
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .hero-in > *,
-    .status-chip .dot,
-    .scroll-cue {
+    .hero-rise,
+    .status-dot {
       animation: none;
       opacity: 1;
       transform: none;
+    }
+  }
+
+  @media (max-width: 767px) {
+    .hero-body {
+      grid-template-columns: 1fr;
+    }
+    .portrait-pane {
+      border-left: 0;
+      border-top: 1px solid var(--border);
+    }
+    .portrait {
+      aspect-ratio: 11 / 12;
+    }
+    .portrait img {
+      min-height: 0;
     }
   }
 </style>
