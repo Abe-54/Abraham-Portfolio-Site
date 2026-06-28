@@ -1,15 +1,19 @@
-import { useCallback, useEffect, useRef, useState } from "react";
 import {
+  type MouseEvent,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
+import {
+  AnimatePresence,
   motion,
-  useMotionValue,
   useReducedMotion,
   useSpring,
-  useTransform,
-  useVelocity,
 } from "motion/react";
 import { Menu, MoonStar, Sun, X } from "lucide-react";
 
-import { navLinks, site } from "@/data/site";
+import { navLinks } from "@/data/site";
 import { cn } from "@/lib/utils";
 
 function useTheme() {
@@ -20,19 +24,60 @@ function useTheme() {
     setTheme(isDark ? "dark" : "light");
   }, []);
 
-  const toggle = useCallback(() => {
-    setTheme((prev) => {
-      const next = prev === "dark" ? "light" : "dark";
+  const toggle = useCallback(
+    (event?: MouseEvent<HTMLButtonElement>) => {
+      const next = theme === "dark" ? "light" : "dark";
       const root = document.documentElement;
+      const motionSafe = !window.matchMedia(
+        "(prefers-reduced-motion: reduce)"
+      ).matches;
+      const button = event?.currentTarget;
+      const rect = button?.getBoundingClientRect();
+      const x = rect ? rect.left + rect.width / 2 : window.innerWidth - 36;
+      const y = rect ? rect.top + rect.height / 2 : 24;
+      const endRadius = Math.hypot(
+        Math.max(x, window.innerWidth - x),
+        Math.max(y, window.innerHeight - y)
+      );
+      const applyTheme = () => {
       root.classList.toggle("dark", next === "dark");
       try {
         localStorage.setItem("theme", next);
       } catch {
         /* ignore */
       }
-      return next;
-    });
-  }, []);
+        setTheme(next);
+      };
+      const doc = document as Document & {
+        startViewTransition?: (callback: () => void) => {
+          ready: Promise<void>;
+        };
+      };
+
+      if (!motionSafe || !doc.startViewTransition) {
+        applyTheme();
+        return;
+      }
+
+      const transition = doc.startViewTransition(applyTheme);
+      transition.ready.then(() => {
+        root.animate(
+          {
+            clipPath: [
+              `circle(0px at ${x}px ${y}px)`,
+              `circle(${endRadius}px at ${x}px ${y}px)`,
+            ],
+          },
+          {
+            duration: 540,
+            easing: "cubic-bezier(0.16, 1, 0.3, 1)",
+            pseudoElement: "::view-transition-new(root)",
+          }
+        );
+      });
+    },
+    [theme]
+  );
 
   return { theme, toggle };
 }
@@ -49,18 +94,10 @@ export default function Nav() {
   const [ready, setReady] = useState(false);
   const [open, setOpen] = useState(false);
 
-  // single liquid blob driven by springs (one shape, never two)
-  const blobX = useMotionValue(0);
-  const blobW = useMotionValue(0);
-  const spring = { stiffness: 420, damping: 34, mass: 0.9 };
-  const x = useSpring(blobX, spring);
-  const width = useSpring(blobW, spring);
-  // horizontal squash/stretch based on travel speed for a gooey feel
-  const xVelocity = useVelocity(x);
-  const scaleX = useTransform(
-    xVelocity,
-    (v) => 1 + Math.min(Math.abs(v) / 2800, 0.32)
-  );
+  // crisp sliding workspace indicator (snappy, terminal-like — not gooey)
+  const spring = { stiffness: 520, damping: 40, mass: 0.7 };
+  const x = useSpring(0, spring);
+  const width = useSpring(0, spring);
   const firstMeasure = useRef(true);
 
   const measure = useCallback(
@@ -68,23 +105,21 @@ export default function Nav() {
       const el = itemRefs.current[index];
       const list = listRef.current;
       if (!el || !list) return;
-      // rect-based so it's correct regardless of each item's offsetParent
       const elRect = el.getBoundingClientRect();
       const left = elRect.left - list.getBoundingClientRect().left;
-      blobX.set(left);
-      blobW.set(elRect.width);
-      // first paint (and reduced motion) should snap, not animate in
       if (firstMeasure.current || reduce) {
         x.jump(left);
         width.jump(elRect.width);
         firstMeasure.current = false;
+      } else {
+        x.set(left);
+        width.set(elRect.width);
       }
       setReady(true);
     },
-    [blobX, blobW, x, width, reduce]
+    [x, width, reduce]
   );
 
-  // measure on mount + resize, track the active item
   useEffect(() => {
     measure(active);
     const onResize = () => measure(active);
@@ -115,48 +150,78 @@ export default function Nav() {
     return () => observer.disconnect();
   }, []);
 
-  const go = (index: number, id: string) => {
-    setActive(index);
-    setOpen(false);
-    lockUntil.current = Date.now() + 800;
-    const target = document.getElementById(id);
-    if (target) {
-      target.scrollIntoView({
-        behavior: reduce ? "auto" : "smooth",
-        block: "start",
-      });
-    }
-  };
+  const go = useCallback(
+    (index: number, id: string) => {
+      setActive(index);
+      setOpen(false);
+      lockUntil.current = Date.now() + 800;
+      const target = document.getElementById(id);
+      if (target) {
+        target.scrollIntoView({
+          behavior: reduce ? "auto" : "smooth",
+          block: "start",
+        });
+      }
+    },
+    [reduce]
+  );
+
+  // number-key shortcuts (1..n) jump to workspaces — an OS touch
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.metaKey || e.ctrlKey || e.altKey) return;
+      const t = e.target as HTMLElement | null;
+      if (t && /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName)) return;
+      const n = Number(e.key);
+      if (Number.isInteger(n) && n >= 1 && n <= navLinks.length) {
+        e.preventDefault();
+        const link = navLinks[n - 1];
+        go(n - 1, link.id);
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [go]);
 
   return (
-    <header className="pointer-events-none fixed inset-x-0 top-0 z-50 flex justify-center px-4 pt-4 sm:pt-6">
+    <header className="fixed inset-x-0 top-0 z-50 h-[var(--topbar-h)] border-b border-border bg-card/85 backdrop-blur-xl">
       <nav
         aria-label="Primary"
-        className="pointer-events-auto flex w-full max-w-3xl items-center justify-between gap-2 rounded-full border border-border/80 bg-card/70 p-1.5 shadow-lg shadow-black/5 backdrop-blur-xl sm:gap-3"
+        className="mx-auto flex h-full max-w-7xl items-center gap-3 px-3 sm:px-5"
       >
-        {/* brand */}
+        {/* host / brand */}
         <a
           href="#home"
           onClick={(e) => {
             e.preventDefault();
             go(0, "home");
           }}
-          className="keycap ml-1.5 hidden size-9 shrink-0 select-none items-center justify-center rounded-full bg-secondary font-pixel text-[0.7rem] text-foreground sm:flex"
+          className="group flex shrink-0 items-center gap-2.5 rounded-md py-1 pr-1 text-sm"
           aria-label="Home"
         >
-          {site.initials}
+          <span className="dots" aria-hidden="true">
+            <i></i>
+            <i></i>
+            <i></i>
+          </span>
+          <span className="hidden text-muted-foreground transition-colors group-hover:text-foreground md:inline">
+            <span className="tok-green">abraham</span>
+            <span className="tok-muted">@</span>
+            <span className="tok-blue">portfolio</span>
+            <span className="tok-muted">:~</span>
+          </span>
         </a>
 
-        {/* desktop links + single liquid blob */}
+        {/* desktop workspaces + sliding indicator */}
         <ul
           ref={listRef}
-          className="relative hidden flex-1 items-center justify-between px-1 sm:flex"
+          className="relative ml-auto hidden items-center gap-0.5 sm:flex"
         >
           {ready && (
             <motion.span
               aria-hidden
-              className="pointer-events-none absolute left-0 top-1/2 z-0 h-9 rounded-full bg-accent"
-              style={{ x, width, y: "-50%", scaleX: reduce ? 1 : scaleX }}
+              className="pointer-events-none absolute top-1/2 z-0 h-8 rounded-md border border-primary/40 bg-primary/15"
+              style={{ x, width, y: "-50%" }}
             />
           )}
 
@@ -172,33 +237,34 @@ export default function Nav() {
                   go(i, link.id);
                 }}
                 className={cn(
-                  "relative block rounded-full px-3.5 py-2 text-sm font-medium transition-colors duration-300",
+                  "flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-[0.82rem] transition-colors duration-200",
                   active === i
-                    ? // delay the dark-on-amber color until the blob has travelled here,
-                      // so the label never flashes dark text on the dark bar mid-transition
-                      "text-accent-foreground [transition-delay:140ms]"
+                    ? "text-foreground"
                     : "text-muted-foreground hover:text-foreground"
                 )}
                 aria-current={active === i ? "page" : undefined}
               >
-                {link.label}
+                <span
+                  className={cn(
+                    "tabular text-[0.72rem]",
+                    active === i ? "tok-amber" : "text-muted-foreground/60"
+                  )}
+                >
+                  {i + 1}
+                </span>
+                <span>{link.label.toLowerCase()}</span>
               </a>
             </li>
           ))}
         </ul>
 
-        {/* mobile brand */}
-        <span className="ml-2 font-pixel text-[0.7rem] text-foreground sm:hidden">
-          {site.initials}
-        </span>
-
-        <div className="flex items-center gap-1.5">
-          {/* theme toggle */}
+        {/* right cluster */}
+        <motion.div layout className="ml-auto flex shrink-0 items-center gap-1.5 sm:ml-3">
           <button
             type="button"
-            onClick={toggle}
+            onClick={(event) => toggle(event)}
             aria-label={`Switch to ${theme === "dark" ? "light" : "dark"} mode`}
-            className="keycap flex size-9 items-center justify-center rounded-full bg-secondary text-secondary-foreground hover:text-foreground"
+            className="keycap flex size-9 items-center justify-center rounded-md border border-border bg-secondary text-secondary-foreground hover:text-foreground"
           >
             {theme === "dark" ? (
               <Sun className="size-4" />
@@ -207,52 +273,96 @@ export default function Nav() {
             )}
           </button>
 
-          {/* mobile menu button */}
           <button
             type="button"
             onClick={() => setOpen((o) => !o)}
             aria-label={open ? "Close menu" : "Open menu"}
             aria-expanded={open}
-            className="keycap flex size-9 items-center justify-center rounded-full bg-secondary text-secondary-foreground hover:text-foreground sm:hidden"
+            className="keycap flex size-9 items-center justify-center rounded-md border border-border bg-secondary text-secondary-foreground hover:text-foreground sm:hidden"
           >
-            {open ? <X className="size-4" /> : <Menu className="size-4" />}
+            <span className="relative flex size-4 items-center justify-center">
+              <AnimatePresence initial={false} mode="wait">
+                {open ? (
+                  <motion.span
+                    key="close"
+                    className="absolute"
+                    initial={reduce ? false : { opacity: 0, rotate: -45, scale: 0.85 }}
+                    animate={{ opacity: 1, rotate: 0, scale: 1 }}
+                    exit={reduce ? undefined : { opacity: 0, rotate: 45, scale: 0.85 }}
+                    transition={{ duration: 0.16, ease: [0.16, 1, 0.3, 1] }}
+                  >
+                    <X className="size-4" />
+                  </motion.span>
+                ) : (
+                  <motion.span
+                    key="menu"
+                    className="absolute"
+                    initial={reduce ? false : { opacity: 0, rotate: 45, scale: 0.85 }}
+                    animate={{ opacity: 1, rotate: 0, scale: 1 }}
+                    exit={reduce ? undefined : { opacity: 0, rotate: -45, scale: 0.85 }}
+                    transition={{ duration: 0.16, ease: [0.16, 1, 0.3, 1] }}
+                  >
+                    <Menu className="size-4" />
+                  </motion.span>
+                )}
+              </AnimatePresence>
+            </span>
           </button>
-        </div>
+        </motion.div>
       </nav>
 
-      {/* mobile dropdown panel */}
-      {open && (
-        <motion.ul
-          initial={reduce ? false : { opacity: 0, y: -8 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
-          className="pointer-events-auto absolute inset-x-4 top-[4.5rem] z-40 grid gap-1 rounded-2xl border border-border/80 bg-card/95 p-2 shadow-xl backdrop-blur-xl sm:hidden"
-        >
-          {navLinks.map((link, i) => (
-            <li key={link.id}>
-              <a
-                href={link.href}
-                onClick={(e) => {
-                  e.preventDefault();
-                  go(i, link.id);
+      {/* mobile dropdown */}
+      <AnimatePresence initial={false}>
+        {open && (
+          <motion.ul
+            initial={
+              reduce
+                ? false
+                : { opacity: 0, y: -10, scale: 0.98, filter: "blur(3px)" }
+            }
+            animate={{ opacity: 1, y: 0, scale: 1, filter: "blur(0px)" }}
+            exit={
+              reduce
+                ? { opacity: 0 }
+                : { opacity: 0, y: -8, scale: 0.98, filter: "blur(3px)" }
+            }
+            transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
+            className="absolute inset-x-3 top-[calc(var(--topbar-h)+0.5rem)] z-40 grid origin-top gap-0.5 rounded-lg border border-border bg-popover/97 p-2 shadow-xl backdrop-blur-xl sm:hidden"
+          >
+            {navLinks.map((link, i) => (
+              <motion.li
+                key={link.id}
+                initial={reduce ? false : { opacity: 0, x: 6 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{
+                  duration: 0.18,
+                  delay: reduce ? 0 : 0.03 + i * 0.018,
+                  ease: [0.16, 1, 0.3, 1],
                 }}
-                className={cn(
-                  "flex items-center gap-3 rounded-xl px-4 py-3 text-base font-medium transition-colors",
-                  active === i
-                    ? "bg-accent/15 text-foreground"
-                    : "text-muted-foreground hover:bg-secondary hover:text-foreground"
-                )}
-                aria-current={active === i ? "page" : undefined}
               >
-                <span className="font-pixel text-[0.6rem] text-accent">
-                  {String(i + 1).padStart(2, "0")}
-                </span>
-                {link.label}
-              </a>
-            </li>
-          ))}
-        </motion.ul>
-      )}
+                <a
+                  href={link.href}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    go(i, link.id);
+                  }}
+                  className={cn(
+                    "flex items-center gap-3 rounded-md px-3 py-2.5 text-sm transition-colors",
+                    active === i
+                      ? "bg-primary/15 text-foreground"
+                      : "text-muted-foreground hover:bg-secondary hover:text-foreground"
+                  )}
+                  aria-current={active === i ? "page" : undefined}
+                >
+                  <span className="tabular tok-amber text-xs">{i + 1}</span>
+                  <span className="tok-green">~/</span>
+                  {link.label.toLowerCase()}
+                </a>
+              </motion.li>
+            ))}
+          </motion.ul>
+        )}
+      </AnimatePresence>
     </header>
   );
 }
