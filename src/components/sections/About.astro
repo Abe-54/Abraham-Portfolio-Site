@@ -1,6 +1,7 @@
 ---
 import SectionHeading from "@/components/SectionHeading.astro";
 import { site } from "@/data/site";
+import WindowControls from "@/components/WindowControls.astro";
 
 const info: { k: string; v: string; tone?: string }[] = [
   { k: "role", v: site.role, tone: "tok-blue" },
@@ -20,7 +21,7 @@ const info: { k: string; v: string; tone?: string }[] = [
 
     <div class="reveal win mt-10" style="--reveal-delay:80ms">
       <div class="win-bar">
-        <span class="dots" aria-hidden="true"><i></i><i></i><i></i></span>
+        <WindowControls />
         <span class="win-title">~/about</span>
       </div>
 

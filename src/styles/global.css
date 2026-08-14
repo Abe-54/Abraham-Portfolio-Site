@@ -292,6 +292,7 @@
 /* traffic lights — flat, tinted, not glossy */
 .dots {
   display: inline-flex;
+  align-items: center;
   gap: 0.45rem;
   flex-shrink: 0;
 }
@@ -332,6 +333,78 @@
 }
 .win .dots i:active {
   scale: 0.94;
+}
+
+/* Window controls use real buttons with a larger hit area than the visual dot. */
+.win .dots {
+  gap: 0;
+}
+.win .dots button {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  flex-shrink: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  font: inherit;
+  touch-action: manipulation;
+  user-select: none;
+}
+.win .dots button > span {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 0.7rem;
+  height: 0.7rem;
+  border-radius: 999px;
+  transition:
+    scale 120ms cubic-bezier(0.16, 1, 0.3, 1),
+    filter 120ms ease,
+    box-shadow 120ms ease;
+}
+.win .dots button > span::before {
+  color: color-mix(in oklch, var(--background) 72%, black);
+  font-family: var(--font-mono);
+  font-size: 0.48rem;
+  font-weight: 800;
+  line-height: 1;
+  opacity: 0.72;
+  transform: translateY(-0.02rem);
+}
+.win .dots button:hover > span,
+.win .dots button:focus-visible > span {
+  scale: 1.18;
+  filter: saturate(1.2);
+  box-shadow: 0 0 0 3px color-mix(in oklch, currentColor 18%, transparent);
+}
+.win .dots button:active > span {
+  scale: 0.94;
+}
+.win .dots button:nth-child(1) > span {
+  background: oklch(0.66 0.17 25);
+  translate: 0.35rem 0;
+}
+.win .dots button:nth-child(1) > span::before {
+  content: "x";
+}
+.win .dots button:nth-child(2) > span {
+  background: oklch(0.78 0.14 80);
+}
+.win .dots button:nth-child(2) > span::before {
+  content: "-";
+}
+.win .dots button:nth-child(3) > span {
+  background: oklch(0.72 0.15 150);
+  translate: -0.35rem 0;
+}
+.win .dots button:nth-child(3) > span::before {
+  content: "+";
 }
 .dots i:nth-child(1) {
   background: oklch(0.66 0.17 25);

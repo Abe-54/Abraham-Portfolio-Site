@@ -3,6 +3,7 @@ import { site, socials } from "@/data/site";
 import { FileDown } from "@lucide/astro";
 import BrandIcon from "@/components/BrandIcon.astro";
 import InteractiveTerminal from "@/components/InteractiveTerminal.tsx";
+import WindowControls from "@/components/WindowControls.astro";
 
 const brandFor: Record<string, "github" | "linkedin" | "itch"> = {
   GitHub: "github",
@@ -15,7 +16,7 @@ const brandFor: Record<string, "github" | "linkedin" | "itch"> = {
   <div class="mx-auto w-full max-w-6xl">
     <div class="win scanlines hero-rise hero-window" id="hero-window" data-d="0">
       <div class="win-bar">
-        <span class="dots" aria-hidden="true"><i></i><i></i><i></i></span>
+        <WindowControls />
         <span class="win-title">abraham@portfolio: ~/bin/zsh - ~/abraham.jpg</span>
       </div>
 
@@ -32,7 +33,7 @@ const brandFor: Record<string, "github" | "linkedin" | "itch"> = {
               <span class="cmd" data-type="whoami">whoami</span>
             </div>
             <div class="tline out" data-line="1">
-              <span class="name">{site.name}</span>
+              <h1 class="name">{site.name}</h1>
               <span class="tok-muted"> - </span>{site.role}
             </div>
 
