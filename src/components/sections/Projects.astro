@@ -114,6 +114,8 @@ const slug = (s: string) =>
                   <img
                     src={p.image}
                     alt={`${p.title} — screenshot`}
+                    width={p.imageSize?.width}
+                    height={p.imageSize?.height}
                     loading="lazy"
                     decoding="async"
                   />
