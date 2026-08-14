@@ -7,21 +7,55 @@ import Nav from "@/components/Nav.tsx";
 import StatusBar from "@/components/StatusBar.astro";
 import Backdrop from "@/components/Backdrop.astro";
 import GameClickEffects from "@/components/GameClickEffects.tsx";
-import { site } from "@/data/site";
+import { site, socials } from "@/data/site";
 
 interface Props {
   title?: string;
   description?: string;
   gameEffects?: boolean;
+  noindex?: boolean;
 }
 
 const {
   title = `${site.name} — ${site.role}`,
   description = site.description,
+  noindex = false,
 } = Astro.props;
 
 const gameEffects = Astro.props.gameEffects ?? false;
-const canonical = new URL(Astro.url.pathname, Astro.site ?? site.url);
+const origin = new URL(Astro.site ?? site.url);
+const canonical = new URL(Astro.url.pathname, origin);
+const socialImage = new URL("/abraham_professional.jpg", origin);
+const personId = new URL("#person", origin).toString();
+const structuredData = JSON.stringify({
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "ProfilePage",
+      "@id": `${canonical.toString()}#profile`,
+      url: canonical.toString(),
+      name: title,
+      mainEntity: { "@id": personId },
+    },
+    {
+      "@type": "Person",
+      "@id": personId,
+      name: site.name,
+      url: origin.toString(),
+      jobTitle: site.role,
+      image: socialImage.toString(),
+      sameAs: socials.map((social) => social.href),
+    },
+    {
+      "@type": "WebSite",
+      "@id": `${origin.toString()}#website`,
+      url: origin.toString(),
+      name: site.name,
+      description: site.description,
+      publisher: { "@id": personId },
+    },
+  ],
+});
 ---
 
 <!doctype html>
@@ -29,19 +63,28 @@ const canonical = new URL(Astro.url.pathname, Astro.site ?? site.url);
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <link rel="icon" type="image/jpeg" href="/abraham_professional.jpg" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="alternate icon" type="image/jpeg" href="/abraham_professional.jpg" />
     <meta name="generator" content={Astro.generator} />
 
     <title>{title}</title>
     <meta name="description" content={description} />
     <link rel="canonical" href={canonical.toString()} />
+    {noindex && <meta name="robots" content="noindex,follow" />}
 
     <meta property="og:type" content="website" />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
     <meta property="og:url" content={canonical.toString()} />
-    <meta property="og:image" content="/abraham_professional.jpg" />
+    <meta property="og:image" content={socialImage.toString()} />
+    <meta property="og:image:alt" content={`${site.name} — ${site.role}`} />
     <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={socialImage.toString()} />
+    <meta name="twitter:image:alt" content={`${site.name} — ${site.role}`} />
+    <meta name="theme-color" content="#16202d" />
+    <script is:inline type="application/ld+json" set:html={structuredData}></script>
 
     {/* No-flash theme: dark-first, honor stored preference */}
     <script is:inline>
@@ -160,19 +203,57 @@ const canonical = new URL(Astro.url.pathname, Astro.site ?? site.url);
           onFinish();
         };
       };
+      const syncWindowAccessibility = (win: HTMLElement, minimized: boolean) => {
+        const body = win.querySelector<HTMLElement>(":scope > .win-body");
+        body?.toggleAttribute("inert", minimized);
+        if (body) {
+          if (minimized) body.setAttribute("aria-hidden", "true");
+          else body.removeAttribute("aria-hidden");
+        }
+
+        const minimizeButton = win.querySelector<HTMLButtonElement>(
+          '[data-window-action="minimize"]'
+        );
+        if (minimizeButton) {
+          const label = minimized ? "Restore preview" : "Minimize preview";
+          minimizeButton.setAttribute("aria-label", label);
+          minimizeButton.setAttribute("title", label);
+          minimizeButton.setAttribute("aria-pressed", String(minimized));
+        }
+        win.dataset.windowState = minimized ? "minimized" : "open";
+      };
       const restoreWindow = (win: HTMLElement) => {
+        if (prefersReduced) {
+          windowAnimations.get(win)?.cancel();
+          windowAnimations.delete(win);
+          win.classList.remove(
+            "win-is-restoring",
+            "win-is-minimized",
+            "win-minimize"
+          );
+          win.style.height = "";
+          win.style.maxHeight = "";
+          win.style.removeProperty("--win-start-height");
+          win.style.removeProperty("--win-restored-height");
+          syncWindowAccessibility(win, false);
+          window.dispatchEvent(new Event("resize"));
+          return;
+        }
+
         setWindowMotionVars(win, "restore");
         const from = cssNumber(win, "--win-bar-height", win.getBoundingClientRect().height);
         const to = cssNumber(win, "--win-restored-height", win.scrollHeight);
 
         win.classList.add("win-is-restoring");
         win.classList.remove("win-is-minimized");
+        syncWindowAccessibility(win, false);
         tweenWindowHeight(win, from, to, () => {
           win.classList.remove("win-is-restoring");
           win.style.height = "";
           win.style.maxHeight = "";
           win.style.removeProperty("--win-start-height");
           win.style.removeProperty("--win-restored-height");
+          syncWindowAccessibility(win, false);
           window.dispatchEvent(new Event("resize"));
         });
       };
@@ -194,6 +275,10 @@ const canonical = new URL(Astro.url.pathname, Astro.site ?? site.url);
 
             existingBody.appendChild(inner);
           }
+          syncWindowAccessibility(
+            win,
+            win.classList.contains("win-is-minimized")
+          );
           return;
         }
 
@@ -214,21 +299,21 @@ const canonical = new URL(Astro.url.pathname, Astro.site ?? site.url);
 
         body.appendChild(inner);
         win.appendChild(body);
+        syncWindowAccessibility(win, false);
       });
 
       document.querySelectorAll<HTMLElement>(".win .dots").forEach((dots) => {
-        dots.querySelectorAll<HTMLElement>("i").forEach((dot, index) => {
-          const action = windowActions[index];
-          if (!action) return;
-
-          dot.tabIndex = 0;
-          dot.setAttribute("role", "button");
+        dots.querySelectorAll<HTMLButtonElement>("button[data-window-action]").forEach((dot) => {
+          const actionValue = dot.dataset.windowAction;
+          if (!actionValue || !windowActions.includes(actionValue as (typeof windowActions)[number])) return;
+          const action = actionValue as (typeof windowActions)[number];
           dot.setAttribute("aria-label", actionLabels[action]);
           dot.setAttribute("title", actionLabels[action]);
+          let lastKeyboardActivation = -Infinity;
 
           const trigger = () => {
             const win = dot.closest<HTMLElement>(".win");
-            if (!win || prefersReduced) return;
+            if (!win) return;
 
             const className = `win-${action}`;
             win.classList.add("win-interacted");
@@ -246,12 +331,21 @@ const canonical = new URL(Astro.url.pathname, Astro.site ?? site.url);
                 win.getBoundingClientRect().height
               );
               const barHeight = cssNumber(win, "--win-bar-height", 36);
+              if (prefersReduced) {
+                win.classList.add("win-is-minimized");
+                win.classList.remove(className);
+                win.style.removeProperty("--win-start-height");
+                syncWindowAccessibility(win, true);
+                window.dispatchEvent(new Event("resize"));
+                return;
+              }
               win.classList.remove(className);
               void win.offsetWidth;
               win.classList.add(className);
               tweenWindowHeight(win, startHeight, barHeight, () => {
                 win.classList.add("win-is-minimized");
                 win.classList.remove(className);
+                syncWindowAccessibility(win, true);
                 window.dispatchEvent(new Event("resize"));
               });
               return;
@@ -263,6 +357,7 @@ const canonical = new URL(Astro.url.pathname, Astro.site ?? site.url);
                 return;
               }
               win.classList.remove("win-is-minimized");
+              syncWindowAccessibility(win, false);
               window.dispatchEvent(new Event("resize"));
             }
 
@@ -272,6 +367,7 @@ const canonical = new URL(Astro.url.pathname, Astro.site ?? site.url);
                 return;
               }
               win.classList.remove("win-is-minimized");
+              syncWindowAccessibility(win, false);
               window.dispatchEvent(new Event("resize"));
             }
 
@@ -286,21 +382,24 @@ const canonical = new URL(Astro.url.pathname, Astro.site ?? site.url);
           };
 
           dot.addEventListener("pointerdown", (event) => {
-            event.preventDefault();
             event.stopPropagation();
-            trigger();
           });
 
           dot.addEventListener("click", (event) => {
             event.preventDefault();
             event.stopPropagation();
+            if (performance.now() - lastKeyboardActivation < 500) return;
+            trigger();
           });
 
           dot.addEventListener("keydown", (event) => {
             if (event.key !== "Enter" && event.key !== " ") return;
             event.preventDefault();
+            event.stopPropagation();
+            lastKeyboardActivation = performance.now();
             trigger();
           });
+
         });
       });
 

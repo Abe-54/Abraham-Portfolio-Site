@@ -17,6 +17,8 @@ export interface Project {
   links: ProjectLink[];
   /** path under /public, or null for a generated placeholder card */
   image: string | null;
+  /** intrinsic dimensions for image-backed cards, preventing layout shift */
+  imageSize?: { width: number; height: number };
   /** content for the generated card when there is no image */
   placeholder?: { line: string; note: string };
   featured?: boolean;
@@ -85,6 +87,7 @@ export const projects: Project[] = [
     tags: ["Unity", "C#", "Game Design", "Editor Tools"],
     links: [{ label: "Play on itch.io", href: "https://abe-54.itch.io/market-dash" }],
     image: "/market_dash.png",
+    imageSize: { width: 315, height: 250 },
   },
   {
     title: "Service Journal",
@@ -100,5 +103,6 @@ export const projects: Project[] = [
       { label: "Source", href: "https://github.com/Abe-54/Service-Journal-App" },
     ],
     image: "/service_journal.png",
+    imageSize: { width: 1080, height: 2023 },
   },
 ];

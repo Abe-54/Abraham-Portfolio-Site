@@ -2,6 +2,7 @@
 import SectionHeading from "@/components/SectionHeading.astro";
 import type { Project } from "@/data/projects";
 import { ArrowUpRight } from "@lucide/astro";
+import WindowControls from "@/components/WindowControls.astro";
 
 interface Props {
   id: string;
@@ -41,11 +42,7 @@ const slug = (s: string) =>
           {items.map((p, i) => (
             <article class="reveal win" style={`--reveal-delay:${i * 90}ms`}>
               <div class="win-bar">
-                <span class="dots" aria-hidden="true">
-                  <i />
-                  <i />
-                  <i />
-                </span>
+                <WindowControls />
                 <span class="win-title">
                   ~/work/{slug(p.title)}
                 </span>
@@ -106,11 +103,7 @@ const slug = (s: string) =>
               style={`--reveal-delay:${i * 90}ms`}
             >
               <div class="win-bar">
-                <span class="dots" aria-hidden="true">
-                  <i />
-                  <i />
-                  <i />
-                </span>
+                <WindowControls />
                 <span class="win-title">~/projects/{slug(p.title)}</span>
                 <span class="kind">[{kindLabel[p.kind]}]</span>
               </div>
@@ -121,6 +114,8 @@ const slug = (s: string) =>
                   <img
                     src={p.image}
                     alt={`${p.title} — screenshot`}
+                    width={p.imageSize?.width}
+                    height={p.imageSize?.height}
                     loading="lazy"
                     decoding="async"
                   />

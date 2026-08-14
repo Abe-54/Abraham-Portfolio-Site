@@ -2,17 +2,17 @@
 import { navLinks, site } from "@/data/site";
 ---
 
-<div class="statusbar" role="status" aria-label="Status bar">
+<div class="statusbar" role="group" aria-label="Page status">
   <div class="left">
     <span class="mode">NORMAL</span>
-    <span class="seg path"><span class="tok-green">~/</span><span id="sb-path">home</span></span>
+    <span class="seg path" aria-live="polite"><span class="tok-green">~/</span><span id="sb-path">home</span></span>
   </div>
   <div class="right">
-    <span class="seg branch tabular"
+    <span class="seg branch tabular" aria-hidden="true"
       ><span class="tok-amber">main</span> <span id="sb-progress">0%</span></span
     >
     <span class="seg hide-xs">{site.location}</span>
-    <span class="seg clock tabular" id="sb-clock">--:--:--</span>
+    <span class="seg clock tabular" id="sb-clock" aria-hidden="true">--:--:--</span>
   </div>
 </div>
 

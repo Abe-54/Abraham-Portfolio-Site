@@ -1,6 +1,7 @@
 ---
 import SectionHeading from "@/components/SectionHeading.astro";
 import { skillGroups } from "@/data/skills";
+import WindowControls from "@/components/WindowControls.astro";
 
 const dirName: Record<string, string> = {
   LANG: "languages",
@@ -28,7 +29,7 @@ const totalItems = skillGroups.reduce((n, g) => n + g.items.length, 0);
 
     <div class="reveal win mt-10" style="--reveal-delay:80ms">
       <div class="win-bar">
-        <span class="dots" aria-hidden="true"><i></i><i></i><i></i></span>
+        <WindowControls />
         <span class="win-title">~/skills</span>
       </div>
 
