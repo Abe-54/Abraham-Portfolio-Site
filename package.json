@@ -12,7 +12,7 @@
   },
   "dependencies": {
     "@astrojs/react": "^6.0.0",
-    "@fontsource-variable/hubot-sans": "^5.2.8",
+    "@astrojs/sitemap": "^3.7.3",
     "@fontsource-variable/jetbrains-mono": "^5.2.8",
     "@fontsource-variable/mona-sans": "^5.2.8",
     "@fontsource/silkscreen": "^5.2.8",

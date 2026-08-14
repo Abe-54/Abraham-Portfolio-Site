@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+Disallow: /prototype/
+
+Sitemap: https://abraham-r.vercel.app/sitemap-index.xml

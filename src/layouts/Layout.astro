@@ -7,21 +7,55 @@ import Nav from "@/components/Nav.tsx";
 import StatusBar from "@/components/StatusBar.astro";
 import Backdrop from "@/components/Backdrop.astro";
 import GameClickEffects from "@/components/GameClickEffects.tsx";
-import { site } from "@/data/site";
+import { site, socials } from "@/data/site";
 
 interface Props {
   title?: string;
   description?: string;
   gameEffects?: boolean;
+  noindex?: boolean;
 }
 
 const {
   title = `${site.name} — ${site.role}`,
   description = site.description,
+  noindex = false,
 } = Astro.props;
 
 const gameEffects = Astro.props.gameEffects ?? false;
-const canonical = new URL(Astro.url.pathname, Astro.site ?? site.url);
+const origin = new URL(Astro.site ?? site.url);
+const canonical = new URL(Astro.url.pathname, origin);
+const socialImage = new URL("/abraham_professional.jpg", origin);
+const personId = new URL("#person", origin).toString();
+const structuredData = JSON.stringify({
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "ProfilePage",
+      "@id": `${canonical.toString()}#profile`,
+      url: canonical.toString(),
+      name: title,
+      mainEntity: { "@id": personId },
+    },
+    {
+      "@type": "Person",
+      "@id": personId,
+      name: site.name,
+      url: origin.toString(),
+      jobTitle: site.role,
+      image: socialImage.toString(),
+      sameAs: socials.map((social) => social.href),
+    },
+    {
+      "@type": "WebSite",
+      "@id": `${origin.toString()}#website`,
+      url: origin.toString(),
+      name: site.name,
+      description: site.description,
+      publisher: { "@id": personId },
+    },
+  ],
+});
 ---
 
 <!doctype html>
@@ -29,19 +63,28 @@ const canonical = new URL(Astro.url.pathname, Astro.site ?? site.url);
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <link rel="icon" type="image/jpeg" href="/abraham_professional.jpg" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="alternate icon" type="image/jpeg" href="/abraham_professional.jpg" />
     <meta name="generator" content={Astro.generator} />
 
     <title>{title}</title>
     <meta name="description" content={description} />
     <link rel="canonical" href={canonical.toString()} />
+    {noindex && <meta name="robots" content="noindex,follow" />}
 
     <meta property="og:type" content="website" />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
     <meta property="og:url" content={canonical.toString()} />
-    <meta property="og:image" content="/abraham_professional.jpg" />
+    <meta property="og:image" content={socialImage.toString()} />
+    <meta property="og:image:alt" content={`${site.name} — ${site.role}`} />
     <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={socialImage.toString()} />
+    <meta name="twitter:image:alt" content={`${site.name} — ${site.role}`} />
+    <meta name="theme-color" content="#16202d" />
+    <script is:inline type="application/ld+json" set:html={structuredData}></script>
 
     {/* No-flash theme: dark-first, honor stored preference */}
     <script is:inline>
