@@ -1,18 +1,16 @@
 "use client";
 
-import { useSectionInView } from "@/lib/hooks";
-import { motion } from "framer-motion";
+import { profile } from "@/lib/data";
 import React, { useRef, useState } from "react";
 
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import toast from "react-hot-toast";
-import SectionHeading from "./section-heading";
+import AppWindow from "./app-window";
 import SubmitBtn from "./submit-btn";
 
 const Contact = () => {
-  const { ref } = useSectionInView("Contact");
   const formRef = useRef<HTMLFormElement>(null);
   const [pending, setPending] = useState(false);
 
@@ -45,26 +43,26 @@ const Contact = () => {
   }
 
   return (
-    <motion.section
-      ref={ref}
+    <AppWindow
       id="contact"
-      className="mb-20 sm:mb-28 w-[min(100%,38rem)] text-center"
-      initial={{ opacity: 0 }}
-      whileInView={{ opacity: 1 }}
-      transition={{ duration: 1 }}
-      viewport={{ once: true }}
+      section="Contact"
+      title="contact.sh"
+      index="06"
+      heading="Let's talk"
     >
-      <SectionHeading> Contact Me </SectionHeading>
-      <p className="text-gray-700 -mt-6 dark:text-white/80">
-        Please contact me directly at{" "}
-        <a className="underline" href="mailto:a.rubio1224@gmail.com">
-          a.rubio1224@gmail.com
+      <p className="-mt-4 text-lg text-foreground/75">
+        Email me at{" "}
+        <a
+          className="font-medium underline decoration-primary underline-offset-4"
+          href={`mailto:${profile.email}`}
+        >
+          {profile.email}
         </a>{" "}
-        or through this form.
+        or use the form. I usually reply within a day.
       </p>
 
       <form
-        className="mt-10 grid gap-4 text-left"
+        className="mt-8 grid max-w-2xl gap-4 text-left"
         ref={formRef}
         onSubmit={handleSubmit}
       >
@@ -94,7 +92,7 @@ const Contact = () => {
           <SubmitBtn pending={pending} />
         </div>
       </form>
-    </motion.section>
+    </AppWindow>
   );
 };
 

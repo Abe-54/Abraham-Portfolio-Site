@@ -1,85 +1,74 @@
 "use client";
 
-import { useSectionInView } from "@/lib/hooks";
+import { skillGroups } from "@/lib/data";
 import { motion } from "framer-motion";
-import React from "react";
-import SectionHeading from "./section-heading";
+import AppWindow from "./app-window";
 
 const About = () => {
-  const { ref } = useSectionInView("About", 1);
-
   return (
-    <motion.section
-      ref={ref}
-      className="mb-32 max-w-180 leading-8 sm:mb-40 scroll-mt-28"
-      initial={{ opacity: 0, y: 100 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: 0.175 }}
+    <AppWindow
       id="about"
+      section="About"
+      title="about.md"
+      index="02"
+      heading="About"
     >
-      <SectionHeading>About Me</SectionHeading>
+      <div className="grid gap-10 lg:grid-cols-[1.1fr_1fr]">
+        <div className="space-y-4 text-lg leading-relaxed text-foreground/80">
+          <p>
+            I&apos;m a software engineer who leans toward the frontend: the
+            part of the product people actually touch. I studied{" "}
+            <strong className="font-semibold text-foreground">
+              Computer Science &amp; Game Programming
+            </strong>{" "}
+            at Bloomfield College of Montclair State, then spent a summer at{" "}
+            <strong className="font-semibold text-foreground">NASA</strong>{" "}
+            turning climate science into a playable strategy game.
+          </p>
+          <p>
+            Games taught me that small details decide whether something feels
+            good: input latency, clear feedback, and states that never leave you
+            guessing. I bring that into web work with React, TypeScript, and
+            Next.js, and I&apos;m comfortable going down the stack when a
+            feature needs it.
+          </p>
+          <p>
+            Off the clock I&apos;m playing or designing games, watching anime,
+            or building small tools that fix my own annoyances.
+          </p>
+        </div>
 
-      <p className="mb-3">
-        I’m a{" "}
-        <span className="font-medium text-[var(--color-primary)]">
-          full‑stack developer
-        </span>{" "}
-        who builds{" "}
-        <span className="underline decoration-[var(--color-primary)] decoration-2 underline-offset-4">
-          user‑focused software
-        </span>{" "}
-        and thoughtful experiences. I graduated from{" "}
-        <span className="font-medium">
-          Bloomfield College of Montclair State University
-        </span>{" "}
-        with a degree in <span className="font-medium">Computer Science</span>{" "}
-        and <span className="font-medium">Game Programming</span>, grounding my
-        work in both solid engineering and creative design.
-      </p>
-
-      <p className="mb-3">
-        In 2024, I interned at <span className="font-medium">NASA</span> as a{" "}
-        <span className="underline decoration-[var(--color-primary)] decoration-2 underline-offset-4">
-          Climate Game Developer
-        </span>
-        , blending interactivity, design, and code to translate complex climate
-        concepts into engaging, playable experiences.
-      </p>
-
-      <p className="mb-3">
-        These days I’m focused on building fast, accessible{" "}
-        <span className="underline decoration-[var(--color-primary)] decoration-2 underline-offset-4">
-          front‑end applications
-        </span>{" "}
-        with{" "}
-        <span className="font-medium text-[var(--color-primary)]">React</span>,{" "}
-        <span className="font-medium text-[var(--color-primary)]">
-          TypeScript
-        </span>
-        , and{" "}
-        <span className="font-medium text-[var(--color-primary)]">Next.js</span>
-        , while continuing to grow across the{" "}
-        <span className="font-medium">full stack</span>. I care about{" "}
-        <span className="font-medium text-[var(--color-primary)]">
-          clean, scalable code
-        </span>
-        ,{" "}
-        <span className="font-medium text-[var(--color-primary)]">
-          clear UX
-        </span>
-        , and shipping reliably.
-      </p>
-
-      <p>
-        Outside of work, you’ll find me{" "}
-        <span className="font-medium">designing or playing games</span>,{" "}
-        <span className="font-medium">watching anime</span>, and{" "}
-        <span className="font-medium">
-          tinkering with small creative projects
-        </span>{" "}
-        that fuel my curiosity.
-      </p>
-    </motion.section>
+        <div>
+          <p className="mb-4 font-mono text-xs uppercase tracking-widest text-foreground/50">
+            Loadout
+          </p>
+          <div className="grid gap-4 sm:grid-cols-2">
+            {skillGroups.map((group, groupIndex) => (
+              <motion.div
+                key={group.title}
+                initial={{ opacity: 0, y: 12 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: groupIndex * 0.06 }}
+                className="rounded-xl border border-border bg-background/50 p-4"
+              >
+                <h3 className="mb-3 text-sm font-semibold">{group.title}</h3>
+                <ul className="flex flex-wrap gap-1.5">
+                  {group.skills.map((skill) => (
+                    <li
+                      key={skill}
+                      className="rounded-md bg-secondary px-2 py-1 text-xs text-secondary-foreground"
+                    >
+                      {skill}
+                    </li>
+                  ))}
+                </ul>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </AppWindow>
   );
 };
 

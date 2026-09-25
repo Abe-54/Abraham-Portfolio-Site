@@ -1,15 +1,12 @@
-import React from "react";
-
 const Footer = () => {
   return (
-    <footer className="mb-10 px-4 text-center text-foreground/60">
-      <small className="mb-2 block test-xs">
-        &copy; 2030 Abraham Rubio. All rights reserved.
+    <footer className="mb-32 px-4 text-center text-foreground/50">
+      <small className="mb-2 block text-xs">
+        &copy; {new Date().getFullYear()} Abraham Rubio
       </small>
       <p className="text-xs">
-        <span className="font-semibold">About this website:</span> Built with
-        React & Next.js (App Router & Server Actions), Typescript, Tailwind CSS,
-        Framer Motion, React Email & Resend, Netlify Hosting
+        Built with Next.js, TypeScript, Tailwind CSS, and Framer Motion. Hosted
+        on Vercel.
       </p>
     </footer>
   );

@@ -41,6 +41,7 @@ html.dark {
 }
 
 @theme inline {
+  --font-mono: var(--font-jetbrains-mono), ui-monospace, monospace;
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
@@ -178,4 +179,38 @@ html.dark {
   body {
     @apply bg-background text-foreground;
   }
+}
+
+/* Faint dot grid behind the windows */
+.bg-grid {
+  background-image: radial-gradient(
+    circle at center,
+    color-mix(in oklab, var(--foreground) 12%, transparent) 1px,
+    transparent 1px
+  );
+  background-size: 28px 28px;
+  mask-image: linear-gradient(to bottom, black, transparent 90%);
+}
+
+/* Konami code: CRT mode */
+html.retro body {
+  font-family: var(--font-jetbrains-mono), ui-monospace, monospace;
+}
+
+html.retro body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  pointer-events: none;
+  background: repeating-linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 0.12) 0 1px,
+    transparent 1px 3px
+  );
+  box-shadow: inset 0 0 160px rgba(0, 0, 0, 0.45);
+}
+
+html.retro {
+  --color-primary: #33ff99;
 }

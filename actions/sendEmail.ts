@@ -5,8 +5,6 @@ import { getErrorMessage, validateString } from "@/lib/utils";
 import React from "react";
 import { Resend } from "resend";
 
-const resend = new Resend(process.env.RESEND_API_KEY);
-
 export const sendEmail = async (formData: FormData) => {
   const message = formData.get("message");
   const senderEmail = formData.get("senderEmail");
@@ -25,6 +23,8 @@ export const sendEmail = async (formData: FormData) => {
   let data;
 
   try {
+    // Created per request so builds without RESEND_API_KEY (e.g. previews) still succeed.
+    const resend = new Resend(process.env.RESEND_API_KEY);
     data = await resend.emails.send({
       from: "Portfolio Contact Form <onboarding@resend.dev>",
       to: "a.rubio1224@gmail.com",
