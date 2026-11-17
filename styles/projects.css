@@ -110,6 +110,7 @@
 .dcai-packet {
   opacity: 0;
   animation: 1.8s linear infinite;
+  animation-play-state: paused;
 }
 
 .dcai-packet-top {
@@ -124,20 +125,6 @@
   animation-name: packet-bottom;
 }
 
-.orbit-x {
-  animation: orbit-x 3s cubic-bezier(0.37, 0, 0.63, 1) var(--orbit-delay) infinite alternate;
-}
-
-.orbit-y {
-  animation: orbit-y 3s cubic-bezier(0.37, 0, 0.63, 1) calc(var(--orbit-delay) - 1.5s) infinite alternate;
-}
-
-.dcai-packet,
-.orbit-x,
-.orbit-y {
-  animation-play-state: paused;
-}
-
 @media (hover: hover) and (pointer: fine) {
   .project-row:hover .cover-card {
     transform: rotate(-3deg) translate(-4px, -6px);
@@ -147,20 +134,20 @@
     opacity: 1;
   }
 
-  .project-row:hover :is(.dcai-packet, .orbit-x, .orbit-y) {
+  .project-row:hover .dcai-packet {
     animation-play-state: running;
   }
 }
 
 @media (hover: none) {
-  .project-row :is(.dcai-packet, .orbit-x, .orbit-y) {
+  .project-row .dcai-packet {
     animation-play-state: running;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .project-row :is(.dcai-packet, .orbit-x, .orbit-y),
-  .project-row:hover :is(.dcai-packet, .orbit-x, .orbit-y) {
+  .project-row .dcai-packet,
+  .project-row:hover .dcai-packet {
     animation-play-state: paused;
   }
 
@@ -226,24 +213,6 @@
   100% {
     opacity: 0;
     transform: translate(330px, -95px);
-  }
-}
-
-@keyframes orbit-x {
-  from {
-    transform: translateX(-300px);
-  }
-  to {
-    transform: translateX(300px);
-  }
-}
-
-@keyframes orbit-y {
-  from {
-    transform: translateY(-96px);
-  }
-  to {
-    transform: translateY(96px);
   }
 }
 

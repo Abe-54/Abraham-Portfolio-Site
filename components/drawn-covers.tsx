@@ -1,4 +1,4 @@
-import type { CSSProperties } from "react";
+import { useId } from "react";
 import type { DrawnCoverId } from "@/lib/content";
 
 const VIEW_BOX = "40 0 720 420";
@@ -41,38 +41,42 @@ function DcAi() {
   );
 }
 
-const ORBITERS = [
-  { r: 20, delay: "-5.73s" },
-  { r: 26, delay: "-2.47s" },
+const GLOBE = "M404,38 C504,34 576,116 572,214 C568,314 490,388 392,384 C294,380 224,304 228,206 C232,114 308,42 404,38 Z";
+
+const LANDS = [
+  "M222,118 C268,92 336,90 368,120 C394,146 380,182 348,198 C318,214 300,246 266,254 C236,260 216,236 220,204 Z",
+  "M436,250 C478,226 542,236 574,270 C594,302 562,352 520,374 C484,392 438,374 422,340 C408,306 406,266 436,250 Z",
+  "M454,102 C476,90 506,98 510,122 C514,144 490,156 468,152 C446,148 438,116 454,102 Z",
 ];
 
 function ClimateGame() {
+  const globeClip = useId();
   return (
     <svg viewBox={VIEW_BOX} className="drawn-cover" aria-hidden="true">
-      <ellipse
-        cx="384"
-        cy="212"
-        rx="300"
-        ry="96"
+      <clipPath id={globeClip}>
+        <path d={GLOBE} />
+      </clipPath>
+      <path d={GLOBE} fill="#3366FF" />
+      <g clipPath={`url(#${globeClip})`} fill="#7C9CFF">
+        {LANDS.map((land) => (
+          <path key={land} d={land} />
+        ))}
+      </g>
+      <path
+        d="M318,170 C372,192 420,236 470,284"
         fill="none"
-        stroke="#7C9CFF"
+        stroke="#FFFFFF"
         strokeWidth="5"
         strokeLinecap="round"
         strokeDasharray="3 20"
       />
       <path
-        d="M388,84 C466,78 520,140 516,212 C512,290 452,344 376,338 C302,334 250,276 256,204 C260,138 314,90 388,84 Z"
-        fill="#3366FF"
+        d="M296,124 C314,124 312,145 320,162 C327,174 339,176 339,184 C339,191 332,193 296,193 C260,193 253,191 253,184 C253,176 265,174 272,162 C280,145 278,124 296,124 Z"
+        fill="#FFFFFF"
       />
-      <circle cx="386" cy="212" r="46" fill="#FFFFFF" />
-      <circle cx="386" cy="212" r="17" fill="#3366FF" />
-      {ORBITERS.map((orbiter) => (
-        <g key={orbiter.r} className="orbit-x" style={{ "--orbit-delay": orbiter.delay } as CSSProperties}>
-          <g className="orbit-y">
-            <circle cx="384" cy="212" r={orbiter.r} fill="#3366FF" />
-          </g>
-        </g>
-      ))}
+      <circle cx="296" cy="112" r="23" fill="#FFFFFF" />
+      <circle cx="488" cy="300" r="34" fill="#FFFFFF" />
+      <circle cx="488" cy="300" r="13" fill="#3366FF" />
     </svg>
   );
 }
