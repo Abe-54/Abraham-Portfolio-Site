@@ -2,6 +2,7 @@
 @import "../styles/nav.css";
 @import "../styles/projects.css";
 @import "../styles/notes.css";
+@import "../styles/history.css";
 @import "../styles/footer.css";
 
 @theme inline {
