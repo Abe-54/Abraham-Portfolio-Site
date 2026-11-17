@@ -1,0 +1,46 @@
+"use client";
+
+import { useState } from "react";
+import { projects, sideLabel, type Side } from "@/lib/content";
+import ProjectRow from "./project-row";
+
+const filters: { value: Side | "all"; label: string }[] = [
+  { value: "all", label: "All" },
+  { value: "day", label: sideLabel.day.long },
+  { value: "night", label: sideLabel.night.long },
+];
+
+export default function ProjectFilter() {
+  const [shown, setShown] = useState<Side | "all">("all");
+
+  return (
+    <>
+      <div className="shell flex flex-col gap-8 pt-16 pb-10 md:flex-row md:items-end md:justify-between lg:pt-24 lg:pb-14">
+        <h1 className="t-hero text-[64px] leading-[0.95] md:text-[88px] lg:text-[112px] lg:leading-[100px]">Projects</h1>
+        <div role="group" aria-label="Filter projects" className="flex flex-wrap gap-2.5">
+          {filters.map((filter) => (
+            <button
+              key={filter.value}
+              type="button"
+              aria-pressed={shown === filter.value}
+              onClick={() => setShown(filter.value)}
+              className="filter-pill btn press"
+            >
+              {filter.label}
+            </button>
+          ))}
+        </div>
+      </div>
+      <div className="project-page-list">
+        {projects.map((project) => (
+          <ProjectRow
+            key={project.slug}
+            project={project}
+            headingLevel={2}
+            hidden={shown !== "all" && shown !== project.side}
+          />
+        ))}
+      </div>
+    </>
+  );
+}
