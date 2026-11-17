@@ -10,7 +10,7 @@ function ProjectCover({ cover }: { cover: Cover }) {
         alt={cover.alt}
         fill
         placeholder="blur"
-        sizes="(min-width: 768px) 280px, 100vw"
+        sizes="(min-width: 768px) 280px, calc(100vw - 40px)"
         className="cover-wipe object-cover"
       />
     );
