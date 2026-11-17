@@ -1,9 +1,10 @@
 import type { StaticImageData } from "next/image";
 import marketDashImage from "@/public/market_dash.png";
+import njHomesImage from "@/public/nj_homes.webp";
 
 export type Side = "day" | "night";
 
-export type DrawnCoverId = "nj-homes" | "dc-ai" | "climate-game";
+export type DrawnCoverId = "dc-ai" | "climate-game";
 
 export type Cover =
   | { kind: "image"; src: StaticImageData; alt: string }
@@ -81,7 +82,11 @@ export const projects: Project[] = [
     stackLabel: "Stack",
     stack: "Next.js · Prisma · MapLibre · AWS",
     link: { label: "njhomes.dca.nj.gov", href: "https://njhomes.dca.nj.gov" },
-    cover: { kind: "drawn", id: "nj-homes" },
+    cover: {
+      kind: "image",
+      src: njHomesImage,
+      alt: "NJ HOMES home page: the headline “Every municipality’s affordable housing record, in one place.” beside a sample municipality record",
+    },
   },
   {
     slug: "dc-ai",

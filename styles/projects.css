@@ -107,16 +107,6 @@
   }
 }
 
-.pin-bob {
-  animation: pin-bob 1.2s var(--ease-in-out) infinite alternate;
-}
-
-.pin-shadow {
-  transform-box: fill-box;
-  transform-origin: center;
-  animation: pin-shadow 1.2s var(--ease-in-out) infinite alternate;
-}
-
 .dcai-packet {
   opacity: 0;
   animation: 1.8s linear infinite;
@@ -142,8 +132,6 @@
   animation: orbit-y 3s cubic-bezier(0.37, 0, 0.63, 1) calc(var(--orbit-delay) - 1.5s) infinite alternate;
 }
 
-.pin-bob,
-.pin-shadow,
 .dcai-packet,
 .orbit-x,
 .orbit-y {
@@ -159,37 +147,25 @@
     opacity: 1;
   }
 
-  .project-row:hover :is(.pin-bob, .pin-shadow, .dcai-packet, .orbit-x, .orbit-y) {
+  .project-row:hover :is(.dcai-packet, .orbit-x, .orbit-y) {
     animation-play-state: running;
   }
 }
 
 @media (hover: none) {
-  .project-row :is(.pin-bob, .pin-shadow, .dcai-packet, .orbit-x, .orbit-y) {
+  .project-row :is(.dcai-packet, .orbit-x, .orbit-y) {
     animation-play-state: running;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .project-row :is(.pin-bob, .pin-shadow, .dcai-packet, .orbit-x, .orbit-y),
-  .project-row:hover :is(.pin-bob, .pin-shadow, .dcai-packet, .orbit-x, .orbit-y) {
+  .project-row :is(.dcai-packet, .orbit-x, .orbit-y),
+  .project-row:hover :is(.dcai-packet, .orbit-x, .orbit-y) {
     animation-play-state: paused;
   }
 
   .project-row:hover .cover-card {
     transform: none;
-  }
-}
-
-@keyframes pin-bob {
-  to {
-    transform: translateY(-14px);
-  }
-}
-
-@keyframes pin-shadow {
-  to {
-    transform: scaleX(0.75);
   }
 }
 

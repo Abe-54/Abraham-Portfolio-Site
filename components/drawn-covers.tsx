@@ -3,33 +3,6 @@ import type { DrawnCoverId } from "@/lib/content";
 
 const VIEW_BOX = "40 0 720 420";
 
-function NjHomes() {
-  return (
-    <svg viewBox={VIEW_BOX} className="drawn-cover" aria-hidden="true">
-      <rect x="170" y="186" width="190" height="140" rx="22" fill="#FFFFFF" />
-      <path d="M150,202 L265,102 L380,202 Z" fill="#FFFFFF" stroke="#FFFFFF" strokeWidth="28" strokeLinejoin="round" />
-      <path d="M242,326 L242,273 A23,23 0 0 1 288,273 L288,326 Z" fill="#3366FF" />
-      <path
-        d="M392,292 C450,322 494,316 528,282"
-        fill="none"
-        stroke="#FFFFFF"
-        strokeWidth="5"
-        strokeLinecap="round"
-        strokeDasharray="3 20"
-      />
-      <ellipse className="pin-shadow" cx="580" cy="340" rx="30" ry="8" fill="#FFFFFF" opacity="0.4" />
-      <g className="pin-bob">
-        <path
-          d="M580,320 C544,276 506,242 506,186 C506,144 540,110 580,110 C620,110 654,144 654,186 C654,242 616,276 580,320 Z"
-          fill="#FFFFFF"
-        />
-        <circle cx="580" cy="186" r="34" fill="#3366FF" />
-        <circle cx="580" cy="186" r="13" fill="#FFFFFF" />
-      </g>
-    </svg>
-  );
-}
-
 const PACKETS = [
   { delay: "0s", path: "top" },
   { delay: "0.6s", path: "middle" },
@@ -105,7 +78,6 @@ function ClimateGame() {
 }
 
 export const drawnCovers: Record<DrawnCoverId, { background: string; Art: () => React.JSX.Element }> = {
-  "nj-homes": { background: "#3366FF", Art: NjHomes },
   "dc-ai": { background: "#3366FF", Art: DcAi },
   "climate-game": { background: "var(--slot)", Art: ClimateGame },
 };
