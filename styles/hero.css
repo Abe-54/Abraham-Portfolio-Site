@@ -1,0 +1,261 @@
+.hero {
+  container-type: inline-size;
+  background: #ffffff;
+}
+
+.hero-stage {
+  position: relative;
+}
+
+.hero-disc-clip {
+  display: none;
+}
+
+.hero .hero-day {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+  padding: 40px var(--gutter) 128px;
+}
+
+.hero-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.hero-title {
+  font-size: clamp(52px, 14vw, 88px);
+  line-height: 0.95;
+}
+
+.hero-text {
+  max-width: 30rem;
+  font-size: 18px;
+  line-height: 1.55;
+  color: var(--muted);
+}
+
+.hero-btn {
+  align-self: flex-start;
+  min-height: 52px;
+  padding-inline: 26px;
+}
+
+.hero .hero-night {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 132px var(--gutter) 72px;
+  border-radius: 50% 50% 0 0 / 56px 56px 0 0;
+}
+
+.portrait {
+  position: absolute;
+  z-index: 1;
+  top: -100px;
+  left: 50%;
+  width: 200px;
+  height: 200px;
+  margin-left: -100px;
+}
+
+.portrait-goo {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.goo-breathe {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: breathe 4s ease-in-out infinite alternate;
+}
+
+.goo-arm {
+  opacity: 0;
+  transform-box: fill-box;
+  transform-origin: 0% 100%;
+}
+
+.portrait-mask {
+  position: absolute;
+  left: 5.88%;
+  top: 5.29%;
+  width: 82.35%;
+  height: 82.35%;
+  overflow: hidden;
+  border: 5px solid #ffffff;
+  border-radius: 47% 53% 45% 55% / 52% 44% 56% 48%;
+  background: #f1f1f2;
+}
+
+.drip {
+  position: absolute;
+  z-index: 2;
+  top: 100%;
+  left: 50%;
+  width: 40px;
+  height: 52px;
+  margin-left: -20px;
+  overflow: visible;
+  pointer-events: none;
+}
+
+.drip-bulge,
+.drip-drop {
+  fill: #3366ff;
+}
+
+.drip-bulge {
+  transform-box: fill-box;
+  transform-origin: 50% 0;
+  animation: drip-bulge 4s var(--ease-in-out) infinite;
+}
+
+.drip-drop {
+  opacity: 0;
+  animation: drip-drop 4s linear infinite;
+}
+
+@keyframes breathe {
+  to {
+    transform: scale(1.03);
+  }
+}
+
+@keyframes drip-bulge {
+  0% {
+    transform: scaleY(0.12);
+  }
+  14%,
+  26% {
+    transform: scaleY(1);
+  }
+  38%,
+  100% {
+    transform: scaleY(0.12);
+  }
+}
+
+@keyframes drip-drop {
+  0%,
+  22% {
+    opacity: 0;
+    transform: translateY(0);
+  }
+  24% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  40% {
+    opacity: 0;
+    transform: translateY(160px);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(160px);
+  }
+}
+
+@media (min-width: 1024px) {
+  .hero {
+    background: linear-gradient(90deg, #ffffff 50%, #0b0b0c 50%);
+  }
+
+  .hero-stage {
+    --u: min(1px, calc(100cqw / 1440));
+    display: flex;
+    width: calc(1440 * var(--u));
+    height: calc(660 * var(--u));
+    margin-inline: auto;
+    background: #ffffff;
+    isolation: isolate;
+  }
+
+  .hero-disc-clip {
+    display: block;
+    position: absolute;
+    z-index: -1;
+    inset: 0;
+    overflow: hidden;
+  }
+
+  .hero-disc {
+    position: absolute;
+    left: calc(740 * var(--u));
+    top: calc(-170 * var(--u));
+    width: calc(1000 * var(--u));
+    height: calc(1000 * var(--u));
+    border-radius: 50%;
+    background: #0b0b0c;
+  }
+
+  .hero .hero-day {
+    position: relative;
+    flex-shrink: 0;
+    justify-content: space-between;
+    width: calc(700 * var(--u));
+    gap: 0;
+    padding: calc(72 * var(--u)) 0 calc(64 * var(--u)) calc(64 * var(--u));
+    background: transparent;
+  }
+
+  .hero-copy {
+    gap: calc(28 * var(--u));
+  }
+
+  .hero-title {
+    font-size: calc(112 * var(--u));
+    line-height: calc(100 * var(--u));
+  }
+
+  .hero-text {
+    font-size: max(16px, calc(19 * var(--u)));
+    line-height: 1.58;
+  }
+
+  .hero-day .hero-text {
+    width: calc(420 * var(--u));
+  }
+
+  .hero .hero-night {
+    position: static;
+    flex: 1;
+    justify-content: center;
+    gap: calc(24 * var(--u));
+    padding: 0 calc(64 * var(--u)) 0 calc(300 * var(--u));
+    border-radius: 0;
+    background: transparent;
+  }
+
+  .hero-title-night {
+    font-size: calc(88 * var(--u));
+    line-height: calc(80 * var(--u));
+  }
+
+  .portrait {
+    left: calc(620 * var(--u));
+    top: calc(300 * var(--u));
+    width: calc(340 * var(--u));
+    height: calc(340 * var(--u));
+    margin-left: 0;
+  }
+
+  .portrait-mask {
+    border-width: calc(6 * var(--u));
+  }
+
+  .drip {
+    left: calc(900 * var(--u));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .goo-breathe {
+    animation: none;
+  }
+}
