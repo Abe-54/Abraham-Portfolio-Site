@@ -1,0 +1,253 @@
+import type { StaticImageData } from "next/image";
+import marketDashImage from "@/public/market_dash.png";
+
+export type Side = "day" | "night";
+
+export type DrawnCoverId = "nj-homes" | "dc-ai" | "climate-game";
+
+export type Cover =
+  | { kind: "image"; src: StaticImageData; alt: string }
+  | { kind: "drawn"; id: DrawnCoverId };
+
+export type Project = {
+  slug: string;
+  name: string;
+  side: Side;
+  year: number;
+  summary: string;
+  role: string;
+  built: string[];
+  stackLabel: "Stack" | "Team";
+  stack: string;
+  link?: { label: string; href?: string };
+  cover: Cover;
+};
+
+export type Stop = {
+  level: number;
+  label: string;
+  title: string;
+  org: string;
+  details: string[];
+};
+
+export type Note = {
+  slug: string;
+  date: string;
+  title: string;
+  summary: string;
+  side: Side;
+  minutes: number;
+  project?: string;
+  sample: true;
+};
+
+export type NoteBlock =
+  | { kind: "p"; text: string }
+  | { kind: "h2"; text: string }
+  | { kind: "code"; code: string };
+
+export const sideLabel: Record<Side, { short: string; long: string }> = {
+  day: { short: "Day", long: "By day" },
+  night: { short: "Night", long: "By night" },
+};
+
+export const contact = {
+  email: "a.rubio1224@gmail.com",
+  resume: "/resume.pdf",
+  links: [
+    { label: "LinkedIn", href: "https://www.linkedin.com/in/abraham-rubio/" },
+    { label: "GitHub", href: "https://github.com/abe-54" },
+    { label: "itch.io", href: "https://abe-54.itch.io" },
+    { label: "Résumé", href: "/resume.pdf" },
+  ],
+};
+
+export const marketDashUrl = "https://abe-54.itch.io/market-dash";
+
+export const projects: Project[] = [
+  {
+    slug: "nj-homes",
+    name: "NJ HOMES",
+    side: "day",
+    year: 2026,
+    summary: "Affordable-housing planning tools for New Jersey towns.",
+    role: "Full-stack engineer",
+    built: [
+      "Sign-in and admin tools",
+      "RFP board with review before publishing",
+      "Smoke checks and rate limiting",
+    ],
+    stackLabel: "Stack",
+    stack: "Next.js · Prisma · MapLibre · AWS",
+    link: { label: "njhomes.dca.nj.gov", href: "https://njhomes.dca.nj.gov" },
+    cover: { kind: "drawn", id: "nj-homes" },
+  },
+  {
+    slug: "dc-ai",
+    name: "DC AI",
+    side: "day",
+    year: 2026,
+    summary: "An AI workspace for state staff, with specialist agents behind one chat.",
+    role: "Full-stack engineer",
+    built: [
+      "Auto-routing between specialist agents",
+      "Chat that survives stalls and disconnects",
+      "Form-filling agent and its eval harness",
+    ],
+    stackLabel: "Stack",
+    stack: "Next.js · AI SDK · Bedrock",
+    link: { label: "Internal tool · no public link" },
+    cover: { kind: "drawn", id: "dc-ai" },
+  },
+  {
+    slug: "market-dash",
+    name: "Market Dash",
+    side: "night",
+    year: 2025,
+    summary: "A third-person platformer set in a grocery store, built by a team of five.",
+    role: "Lead programmer",
+    built: ["Player movement and game UI", "Level design", "Unity editor tools"],
+    stackLabel: "Stack",
+    stack: "Unity · C# · Photoshop",
+    link: { label: "Play it on itch.io", href: marketDashUrl },
+    cover: {
+      kind: "image",
+      src: marketDashImage,
+      alt: "Market Dash title screen: a grocery store aisle with Play and Settings buttons",
+    },
+  },
+  {
+    slug: "climate-game",
+    name: "Climate game",
+    side: "night",
+    year: 2024,
+    summary: "A multiplayer climate strategy game for classrooms, from my NASA internship.",
+    role: "Climate Game Intern, NASA",
+    built: ["Built with two other interns", "Picked from 600+ applicants"],
+    stackLabel: "Team",
+    stack: "Three interns",
+    link: { label: "Summer 2024" },
+    cover: { kind: "drawn", id: "climate-game" },
+  },
+];
+
+export const history: Stop[] = [
+  {
+    level: 4,
+    label: "Now playing",
+    title: "Software Engineer",
+    org: "NJ Department of Community Affairs",
+    details: [
+      "NJ HOMES: tools that help towns plan affordable housing.",
+      "DC AI: an AI workspace for state staff.",
+    ],
+  },
+  {
+    level: 3,
+    label: "2025",
+    title: "B.S. CS & Game Programming",
+    org: "Bloomfield College of Montclair State · shipped Market Dash",
+    details: [
+      "Led a team of five for nine months to ship Market Dash.",
+      "Ran the games club as president from 2022 to 2025.",
+    ],
+  },
+  {
+    level: 2,
+    label: "2024",
+    title: "Climate Game Intern",
+    org: "NASA · picked from 600+ applicants",
+    details: [
+      "Built a multiplayer climate strategy game for classrooms.",
+      "One of three interns picked from 600+ applicants.",
+    ],
+  },
+  {
+    level: 1,
+    label: "2022",
+    title: "Games Club President",
+    org: "Bloomfield College, through 2025",
+    details: ["President for three years, 2022 to 2025."],
+  },
+];
+
+export const notes: Note[] = [
+  {
+    slug: "chat-stream-dropped-connection",
+    date: "2026-11-01",
+    title: "Keeping a chat stream alive through a dropped connection",
+    summary: "What breaks when the network drops mid-answer, and how the chat picks back up.",
+    side: "day",
+    minutes: 6,
+    project: "DC AI",
+    sample: true,
+  },
+  {
+    slug: "platformer-ui-feel",
+    date: "2026-10-01",
+    title: "What a platformer taught me about making UI feel good",
+    summary: "Game feel tricks that carry over to buttons, loading states and transitions.",
+    side: "night",
+    minutes: 8,
+    sample: true,
+  },
+  {
+    slug: "scoring-form-filling-agent",
+    date: "2026-09-01",
+    title: "How I score an AI agent that fills out forms",
+    summary: "Building a test harness that says whether a change made the agent better or worse.",
+    side: "day",
+    minutes: 5,
+    project: "DC AI",
+    sample: true,
+  },
+  {
+    slug: "unity-editor-tools",
+    date: "2026-08-01",
+    title: "Unity editor tools that cut level-design time",
+    summary: "The small custom tools I wrote for Market Dash, and which ones the team kept using.",
+    side: "night",
+    minutes: 4,
+    project: "Market Dash",
+    sample: true,
+  },
+];
+
+export const sampleNoteBody: NoteBlock[] = [
+  {
+    kind: "p",
+    text: "Sample body text. The opening paragraph states the problem in two or three sentences, so someone skimming knows whether to keep reading.",
+  },
+  { kind: "h2", text: "A section heading" },
+  {
+    kind: "p",
+    text: "Sample body text. Each section covers one idea, then shows the code or the picture that proves it.",
+  },
+  { kind: "code", code: "// sample code block\nconst stream = resume(lastEventId)" },
+];
+
+export const focus = [
+  { title: "Public services", body: "Housing and staff tools for the state, built to be dependable." },
+  { title: "Full-stack products", body: "Database to interface, with Next.js, Prisma and AWS." },
+  { title: "Games", body: "Gameplay, UI and editor tools in Unity." },
+];
+
+export const proudOf = [
+  { title: "Running the games club", body: "President for three years, 2022 to 2025." },
+  { title: "A summer at NASA", body: "One of three interns picked from 600+ applicants." },
+  { title: "Shipping Market Dash", body: "Led five people for nine months to a finished game." },
+];
+
+export const toolkit = [
+  ["TypeScript", "JavaScript", "Java", "Python", "C#", "CSS"],
+  ["Unity", "Android Studio"],
+];
+
+export function formatMonth(isoDate: string) {
+  return new Date(isoDate).toLocaleDateString("en-US", {
+    month: "short",
+    year: "numeric",
+    timeZone: "UTC",
+  });
+}

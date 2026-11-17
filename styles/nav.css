@@ -1,0 +1,133 @@
+.nav-pill {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  border-radius: 999px;
+  background: #3366ff;
+  opacity: 0;
+  transform-origin: left center;
+  transition: opacity 150ms ease;
+}
+
+.nav-link {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  height: 40px;
+  padding-inline: 14px;
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 20px;
+  transition: color 150ms ease;
+}
+
+.nav-link[aria-current="page"] {
+  color: #ffffff;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .nav-link:not([aria-current="page"]):hover {
+    color: var(--link);
+  }
+}
+
+.mobile-menu {
+  position: absolute;
+  inset-inline: 0;
+  top: 100%;
+  background: var(--ground);
+  border-bottom: 1px solid var(--hairline);
+  opacity: 0;
+  transform: translateY(-8px);
+  pointer-events: none;
+  transition:
+    opacity 200ms var(--ease-out),
+    transform 200ms var(--ease-out);
+}
+
+.mobile-menu[data-open] {
+  opacity: 1;
+  transform: none;
+  pointer-events: auto;
+}
+
+.mobile-menu-link {
+  display: flex;
+  align-items: center;
+  min-height: 56px;
+  font-family: var(--font-display);
+  font-size: 26px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.mobile-menu-link[aria-current="page"] {
+  color: var(--link);
+}
+
+.goo-switch {
+  position: relative;
+  flex-shrink: 0;
+  width: 84px;
+  height: 44px;
+}
+
+.goo-switch svg {
+  position: absolute;
+  inset: 2px 0;
+  width: 84px;
+  height: 40px;
+  overflow: visible;
+}
+
+.gs-track {
+  fill: #ffffff;
+  stroke: #0b0b0c;
+}
+
+.gs-blob,
+.gs-goo path {
+  fill: #3366ff;
+}
+
+.gs-goo {
+  opacity: 0;
+}
+
+.gs-blob-night,
+html[data-theme="night"] .gs-blob-day,
+.goo-switch[data-moving] .gs-blob {
+  opacity: 0;
+}
+
+html[data-theme="night"] .gs-blob-night {
+  opacity: 1;
+}
+
+.gs-sun {
+  fill: #ffffff;
+}
+
+.gs-moon {
+  fill: #0b0b0c;
+}
+
+html[data-theme="night"] .gs-track {
+  fill: #1c1c20;
+  stroke: #3a3a3f;
+}
+
+html[data-theme="night"] .gs-sun {
+  fill: #a3a3a8;
+}
+
+html[data-theme="night"] .gs-moon {
+  fill: #ffffff;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mobile-menu {
+    transform: none;
+  }
+}
