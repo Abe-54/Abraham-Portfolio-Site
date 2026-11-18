@@ -38,7 +38,7 @@ export default function EmailCopy({ email, label }: { email: string; label?: str
   }
 
   return (
-    <div data-phase={phase} className={label ? "relative" : "relative self-start"}>
+    <div data-phase={phase} className={label ? "relative" : "email-copy-row"}>
       <button type="button" onClick={copy} className={label ? "btn btn-solid press" : "email-copy press"}>
         {label ? (
           <>
@@ -60,14 +60,14 @@ export default function EmailCopy({ email, label }: { email: string; label?: str
       >
         <g className="email-pop-blob">
           <path
+            className="email-pop-shape"
             d="M152,34 C208,30 250,72 246,124 C242,176 200,208 146,204 C96,200 60,162 64,112 C68,68 104,38 152,34 Z"
-            fill="#3366FF"
           />
-          <circle cx="154" cy="120" r="50" fill="#FFFFFF" />
+          <circle className="email-pop-disc" cx="154" cy="120" r="50" />
           <path
+            className="email-pop-tick"
             d="M130,121 L147,138 L180,102"
             fill="none"
-            stroke="#3366FF"
             strokeWidth="11"
             strokeLinecap="round"
             strokeLinejoin="round"
@@ -80,7 +80,6 @@ export default function EmailCopy({ email, label }: { email: string; label?: str
             cx={drop.cx}
             cy={drop.cy}
             r={drop.r}
-            fill="#3366FF"
             style={
               {
                 "--from-x": `${(154 - drop.cx) * 0.7}px`,

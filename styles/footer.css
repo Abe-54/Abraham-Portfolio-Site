@@ -12,30 +12,75 @@
     color 150ms ease;
 }
 
+/* The address and its pop share a row. The pop is in the flow, so when large text leaves no room
+   beside the address it moves under it instead of pushing past the edge of the page. */
+.email-copy-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  column-gap: 4px;
+  align-self: flex-start;
+}
+
 .email-pop {
-  position: absolute;
-  left: 100%;
-  top: 50%;
-  width: 84px;
-  height: 62px;
-  margin-top: -31px;
-  margin-left: 4px;
   overflow: visible;
   pointer-events: none;
   opacity: 0;
 }
 
-/* On the recruiter strip button the tick pops over the button itself while its label steps aside. */
-.email-pop-over {
-  left: 50%;
-  margin-left: -42px;
+.email-copy-row .email-pop {
+  flex: none;
+  width: 84px;
+  height: 62px;
+  /* Takes no more height than the 44px address button it sits beside. */
+  margin-block: -9px;
 }
 
-.email-copy-label {
+/* On the recruiter strip button the tick pops inside the button itself while its label steps aside. */
+.email-pop-over {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 60px;
+  height: 44px;
+  margin: -22px 0 0 -30px;
+}
+
+.email-pop-shape,
+.email-pop-drop {
+  fill: #3366ff;
+}
+
+.email-pop-disc {
+  fill: #ffffff;
+}
+
+.email-pop-tick {
+  stroke: #3366ff;
+}
+
+/* The button is black by day and blue by night, so its pop is drawn in white to stand out on both. */
+.email-pop-over .email-pop-shape,
+.email-pop-over .email-pop-drop {
+  fill: #ffffff;
+}
+
+.email-pop-over .email-pop-disc {
+  fill: #3366ff;
+}
+
+.email-pop-over .email-pop-tick {
+  stroke: #ffffff;
+}
+
+/* The label steps aside at once as the tick pops in, and returns only once the tick has faded out,
+   so the two never share a frame. */
+[data-phase="idle"] > button .email-copy-label {
   transition: opacity 150ms var(--ease-out);
 }
 
-[data-phase="in"] > button .email-copy-label {
+[data-phase="in"] > button .email-copy-label,
+[data-phase="out"] > button .email-copy-label {
   opacity: 0;
 }
 
