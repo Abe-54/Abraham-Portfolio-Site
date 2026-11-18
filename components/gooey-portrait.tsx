@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useCallback, useEffect, useRef } from "react";
+import { useEffect, useRef } from "react";
 import portrait from "@/public/abraham_professional.jpg";
 
 const REACH = 240;
@@ -9,64 +9,19 @@ const MAX_PULL = 28;
 const STIFFNESS = 200;
 const DAMPING = 21;
 
-const WAVED_KEY = "portrait-waved";
-
 function prefersReducedMotion() {
   return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 }
 
-const WAVE: Keyframe[] = [
-  { opacity: 0, transform: "scale(0.4) rotate(0deg)" },
-  { opacity: 1, transform: "scale(1) rotate(0deg)", offset: 0.15 },
-  { transform: "scale(1) rotate(-16deg)", offset: 0.35 },
-  { transform: "scale(1) rotate(10deg)", offset: 0.55 },
-  { transform: "scale(1) rotate(-6deg)", offset: 0.72 },
-  { opacity: 1, transform: "scale(1) rotate(0deg)", offset: 0.86 },
-  { opacity: 0, transform: "scale(0.4) rotate(0deg)" },
-];
-
 export default function GooeyPortrait() {
   const rootRef = useRef<HTMLDivElement>(null);
-  const armRef = useRef<SVGPathElement>(null);
   const gooRef = useRef<SVGSVGElement>(null);
-  const waving = useRef<Animation | null>(null);
-
-  const wave = useCallback(() => {
-    const arm = armRef.current;
-    if (!arm || waving.current?.playState === "running" || prefersReducedMotion()) return;
-    waving.current = arm.animate(WAVE, { duration: 1100, easing: "cubic-bezier(0.77, 0, 0.175, 1)" });
-  }, []);
-
   useEffect(() => {
     const root = rootRef.current;
     const goo = gooRef.current;
     if (!root || !goo || prefersReducedMotion()) return;
 
-    if (!window.matchMedia("(hover: hover) and (pointer: fine)").matches) {
-      // Touch devices get one wave per visit, the first time the portrait is in view.
-      try {
-        if (sessionStorage.getItem(WAVED_KEY)) return;
-      } catch {}
-      let timer = 0;
-      const observer = new IntersectionObserver(
-        ([entry]) => {
-          if (!entry.isIntersecting) return;
-          observer.disconnect();
-          timer = window.setTimeout(() => {
-            try {
-              sessionStorage.setItem(WAVED_KEY, "1");
-            } catch {}
-            wave();
-          }, 400);
-        },
-        { threshold: 0.6 },
-      );
-      observer.observe(root);
-      return () => {
-        observer.disconnect();
-        window.clearTimeout(timer);
-      };
-    }
+    if (!window.matchMedia("(hover: hover) and (pointer: fine)").matches) return;
 
     let x = 0;
     let y = 0;
@@ -107,10 +62,10 @@ export default function GooeyPortrait() {
       window.removeEventListener("pointermove", follow);
       cancelAnimationFrame(frame);
     };
-  }, [wave]);
+  }, []);
 
   return (
-    <div ref={rootRef} className="portrait" onPointerEnter={(event) => event.pointerType === "mouse" && wave()}>
+    <div ref={rootRef} className="portrait">
       <svg ref={gooRef} className="portrait-goo" viewBox="0 0 380 380" aria-hidden="true">
         <g className="goo-breathe">
           <path
@@ -119,12 +74,6 @@ export default function GooeyPortrait() {
           />
           <circle cx="352" cy="318" r="13" fill="#3366FF" />
           <circle cx="372" cy="350" r="6" fill="#3366FF" />
-          <path
-            ref={armRef}
-            className="goo-arm"
-            d="M318,142 C356,112 386,78 404,44 C416,22 450,29 450,56 C450,74 438,93 427,112 C404,150 374,191 341,221 Z"
-            fill="#3366FF"
-          />
         </g>
       </svg>
       <div className="portrait-mask">
