@@ -5,9 +5,9 @@
   height: 100%;
   border-radius: 999px;
   background: #3366ff;
+  /* Shown only by the stretch animation on a route change; at rest the active link fills itself. */
   opacity: 0;
   transform-origin: left center;
-  transition: opacity 150ms ease;
 }
 
 .nav-link {
@@ -22,15 +22,10 @@
   transition: color 150ms ease;
 }
 
-/* The active link carries its own fill until the pill is measured and placed over it. */
 .nav-link[aria-current="page"] {
   border-radius: 999px;
   background: #3366ff;
   color: #ffffff;
-}
-
-[data-pill] .nav-link[aria-current="page"] {
-  background: transparent;
 }
 
 @media (hover: hover) and (pointer: fine) {

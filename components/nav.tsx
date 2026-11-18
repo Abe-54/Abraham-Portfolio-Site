@@ -13,59 +13,48 @@ const links = [
   { label: "Contact", href: "/#contact", page: false },
 ];
 
-type Span = { left: number; width: number };
-
-// Route changes started from the keyboard move the pill at once; pointer navigation stretches it.
+// Route changes started from the keyboard move the active fill at once; pointer navigation stretches it.
 let lastInput: "pointer" | "keyboard" = "pointer";
 
+/**
+ * The active link always carries its own fill, so it reads on every frame, with or without JS. On a
+ * pointer route change between two page links a ghost pill stretches from the old link to the new one
+ * and disappears into the new link's fill.
+ */
 function useStretchPill(activeIndex: number) {
   const listRef = useRef<HTMLUListElement>(null);
   const pillRef = useRef<HTMLSpanElement>(null);
-  const previous = useRef<Span | null>(null);
+  const previousIndex = useRef(activeIndex);
 
   useLayoutEffect(() => {
+    const fromIndex = previousIndex.current;
+    previousIndex.current = activeIndex;
     const pill = pillRef.current;
     const list = listRef.current;
-    if (!pill || !list) return;
-
-    const place = (animate: boolean) => {
-      const target = list.children[activeIndex] as HTMLElement | undefined;
-      // The desktop list is display:none below the lg breakpoint, so it measures 0 there.
-      if (activeIndex < 0 || !target || target.offsetWidth === 0) {
-        pill.style.opacity = "0";
-        delete list.dataset.pill;
-        previous.current = null;
-        return;
-      }
-      const next = { left: target.offsetLeft, width: target.offsetWidth };
-      pill.style.left = `${next.left}px`;
-      pill.style.width = `${next.width}px`;
-      pill.style.opacity = "1";
-      list.dataset.pill = "";
-      const from = previous.current;
-      previous.current = next;
-      if (!animate || !from || from.left === next.left || lastInput === "keyboard") return;
-      if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-      const spanLeft = Math.min(from.left, next.left);
-      const spanRight = Math.max(from.left + from.width, next.left + next.width);
-      pill.animate(
-        [
-          { transform: `translateX(${from.left - next.left}px) scaleX(${from.width / next.width})` },
-          {
-            transform: `translateX(${spanLeft - next.left}px) scaleX(${(spanRight - spanLeft) / next.width})`,
-            offset: 0.45,
-          },
-          { transform: "none" },
-        ],
-        { duration: 300, easing: "cubic-bezier(0.77, 0, 0.175, 1)" },
-      );
-    };
-
-    place(true);
-    // Re-place without animation when the breakpoint or font loading changes the link sizes.
-    const resizeObserver = new ResizeObserver(() => place(false));
-    resizeObserver.observe(list);
-    return () => resizeObserver.disconnect();
+    if (!pill || !list || fromIndex === activeIndex || fromIndex < 0 || activeIndex < 0) return;
+    if (lastInput === "keyboard" || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const from = list.children[fromIndex] as HTMLElement | undefined;
+    const to = list.children[activeIndex] as HTMLElement | undefined;
+    // The desktop list is display:none below the lg breakpoint, so it measures 0 there.
+    if (!from || !to || to.offsetWidth === 0) return;
+    const next = { left: to.offsetLeft, width: to.offsetWidth };
+    const spanLeft = Math.min(from.offsetLeft, next.left);
+    const spanRight = Math.max(from.offsetLeft + from.offsetWidth, next.left + next.width);
+    pill.style.left = `${next.left}px`;
+    pill.style.width = `${next.width}px`;
+    pill.getAnimations().forEach((animation) => animation.cancel());
+    pill.animate(
+      [
+        { opacity: 1, transform: `translateX(${from.offsetLeft - next.left}px) scaleX(${from.offsetWidth / next.width})` },
+        {
+          opacity: 1,
+          transform: `translateX(${spanLeft - next.left}px) scaleX(${(spanRight - spanLeft) / next.width})`,
+          offset: 0.45,
+        },
+        { opacity: 1, transform: "none" },
+      ],
+      { duration: 300, easing: "cubic-bezier(0.77, 0, 0.175, 1)" },
+    );
   }, [activeIndex]);
 
   return { listRef, pillRef };
