@@ -10,81 +10,117 @@ const GOO_DUMBBELL =
 const LEFT_LOBE = "inset(0 50px 0 0)";
 const RIGHT_LOBE = "inset(0 0 0 50px)";
 
+const THEME_COLOR: Record<Theme, string> = { day: "#ffffff", night: "#0b0b0c" };
+
 function prefersReducedMotion() {
   return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 }
 
-function applyTheme(next: Theme, origin: { x: number; y: number }, reduce: boolean) {
-  const root = document.documentElement;
-  const commit = () => {
-    root.dataset.theme = next;
-    try {
-      localStorage.setItem("theme", next);
-    } catch {}
-  };
-  if (reduce || typeof document.startViewTransition !== "function") {
-    commit();
-    return;
-  }
-  const growing = next === "night";
-  root.dataset.themeShift = growing ? "grow" : "shrink";
-  const transition = document.startViewTransition(commit);
-  transition.ready.then(() => {
-    const radius = Math.hypot(
-      Math.max(origin.x, window.innerWidth - origin.x),
-      Math.max(origin.y, window.innerHeight - origin.y),
-    );
-    const disc = [
-      `circle(0px at ${origin.x}px ${origin.y}px)`,
-      `circle(${radius}px at ${origin.x}px ${origin.y}px)`,
-    ];
-    root.animate(
-      { clipPath: growing ? disc : disc.reverse() },
-      {
-        duration: 450,
-        easing: "cubic-bezier(0.23, 1, 0.32, 1)",
-        fill: "forwards",
-        pseudoElement: growing ? "::view-transition-new(root)" : "::view-transition-old(root)",
-      },
-    );
-  });
-  transition.finished.finally(() => delete root.dataset.themeShift);
+function paintBrowserChrome(theme: Theme) {
+  document.querySelectorAll('meta[name="theme-color"]').forEach((meta) => meta.setAttribute("content", THEME_COLOR[theme]));
+}
+
+function commitTheme(theme: Theme) {
+  document.documentElement.dataset.theme = theme;
+  paintBrowserChrome(theme);
+  try {
+    localStorage.setItem("theme", theme);
+  } catch {}
 }
 
 export default function ThemeSwitch() {
   const [night, setNight] = useState(false);
   const buttonRef = useRef<HTMLButtonElement>(null);
   const gooRef = useRef<SVGSVGElement>(null);
+  // The theme the visitor asked for last. Clicks read this, never the DOM, which lags behind a transition.
+  const themeRef = useRef<Theme>("day");
+  const transitionRef = useRef<ViewTransition | null>(null);
+  const gooAnimationRef = useRef<Animation | null>(null);
 
   useEffect(() => {
-    setNight(document.documentElement.dataset.theme === "night");
+    const theme: Theme = document.documentElement.dataset.theme === "night" ? "night" : "day";
+    themeRef.current = theme;
+    setNight(theme === "night");
+    paintBrowserChrome(theme);
   }, []);
 
-  function toggle() {
-    const next: Theme = document.documentElement.dataset.theme === "night" ? "day" : "night";
+  function moveKnob(next: Theme, animate: boolean) {
     const button = buttonRef.current;
     const goo = gooRef.current;
+    gooAnimationRef.current?.cancel();
+    gooAnimationRef.current = null;
     if (!button || !goo) return;
-    const reduce = prefersReducedMotion();
-    const box = button.getBoundingClientRect();
-    setNight(next === "night");
-
-    if (!reduce) {
-      button.dataset.moving = "";
-      const lobes = next === "night" ? [LEFT_LOBE, RIGHT_LOBE] : [RIGHT_LOBE, LEFT_LOBE];
-      goo
-        .animate(
-          [
-            { clipPath: lobes[0], opacity: 1 },
-            { clipPath: "inset(0 0 0 0)", opacity: 1, offset: 0.5 },
-            { clipPath: lobes[1], opacity: 1 },
-          ],
-          { duration: 300, easing: "cubic-bezier(0.77, 0, 0.175, 1)" },
-        )
-        .finished.finally(() => delete button.dataset.moving);
+    if (!animate) {
+      delete button.dataset.moving;
+      return;
     }
+    button.dataset.moving = "";
+    const lobes = next === "night" ? [LEFT_LOBE, RIGHT_LOBE] : [RIGHT_LOBE, LEFT_LOBE];
+    const animation = goo.animate(
+      [
+        { clipPath: lobes[0], opacity: 1 },
+        { clipPath: "inset(0 0 0 0)", opacity: 1, offset: 0.5 },
+        { clipPath: lobes[1], opacity: 1 },
+      ],
+      { duration: 300, easing: "cubic-bezier(0.77, 0, 0.175, 1)" },
+    );
+    gooAnimationRef.current = animation;
+    const settle = () => {
+      if (gooAnimationRef.current !== animation) return;
+      gooAnimationRef.current = null;
+      delete button.dataset.moving;
+    };
+    animation.finished.then(settle, settle);
+  }
 
-    applyTheme(next, { x: box.left + box.width / 2, y: box.top + box.height / 2 }, reduce);
+  function swapPage(next: Theme, animate: boolean) {
+    const root = document.documentElement;
+    // One transition at a time: finish the running one before the next starts.
+    transitionRef.current?.skipTransition();
+    transitionRef.current = null;
+    if (!animate || typeof document.startViewTransition !== "function") {
+      delete root.dataset.themeShift;
+      commitTheme(next);
+      return;
+    }
+    const growing = next === "night";
+    const origin = buttonRef.current?.getBoundingClientRect();
+    const x = origin ? origin.left + origin.width / 2 : window.innerWidth;
+    const y = origin ? origin.top + origin.height / 2 : 0;
+    root.dataset.themeShift = growing ? "grow" : "shrink";
+    const transition = document.startViewTransition(() => commitTheme(themeRef.current));
+    transitionRef.current = transition;
+    transition.ready
+      .then(() => {
+        const radius = Math.hypot(Math.max(x, window.innerWidth - x), Math.max(y, window.innerHeight - y));
+        const disc = [`circle(0px at ${x}px ${y}px)`, `circle(${radius}px at ${x}px ${y}px)`];
+        root.animate(
+          { clipPath: growing ? disc : disc.reverse() },
+          {
+            duration: 450,
+            easing: "cubic-bezier(0.23, 1, 0.32, 1)",
+            fill: "forwards",
+            pseudoElement: growing ? "::view-transition-new(root)" : "::view-transition-old(root)",
+          },
+        );
+      })
+      .catch(() => {});
+    const settle = () => {
+      if (transitionRef.current !== transition) return;
+      transitionRef.current = null;
+      delete root.dataset.themeShift;
+    };
+    transition.finished.then(settle, settle);
+  }
+
+  function toggle(event: React.MouseEvent<HTMLButtonElement>) {
+    const next: Theme = themeRef.current === "night" ? "day" : "night";
+    themeRef.current = next;
+    setNight(next === "night");
+    // Keyboard presses (detail 0) and reduced motion swap at once.
+    const animate = event.detail > 0 && !prefersReducedMotion();
+    moveKnob(next, animate);
+    swapPage(next, animate);
   }
 
   return (

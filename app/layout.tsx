@@ -22,7 +22,7 @@ export const viewport: Viewport = {
   ],
 };
 
-const themeScript = `try{var t=localStorage.getItem("theme");if(t!=="day"&&t!=="night")t=matchMedia("(prefers-color-scheme: dark)").matches?"night":"day";document.documentElement.dataset.theme=t}catch(e){}`;
+const themeScript = `try{var t=localStorage.getItem("theme");if(t!=="day"&&t!=="night")t=matchMedia("(prefers-color-scheme: dark)").matches?"night":"day";document.documentElement.dataset.theme=t;document.querySelectorAll('meta[name="theme-color"]').forEach(function(m){m.setAttribute("content",t==="night"?"#0b0b0c":"#ffffff")})}catch(e){}`;
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
