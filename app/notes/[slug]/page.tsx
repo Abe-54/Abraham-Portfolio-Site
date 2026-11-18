@@ -82,7 +82,7 @@ export default async function NotePage({ params }: { params: Params }) {
         </div>
       </article>
       <Link href={`/notes/${next.slug}`} data-tone="night" className="next-note shell flex items-center justify-between gap-6 py-12 lg:py-14">
-        <span className="flex flex-col gap-2.5">
+        <span className="flex min-w-0 flex-col gap-2.5">
           <span className="t-label t-tag">Next · {sideLabel[next.side].long.toLowerCase()}</span>
           <span className="next-note-title font-display text-[28px] leading-[1.1] font-extrabold tracking-[-0.03em] lg:text-[44px]">
             {next.title}

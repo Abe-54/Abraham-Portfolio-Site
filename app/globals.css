@@ -164,6 +164,7 @@ html[data-theme-shift="shrink"]::view-transition-old(root) {
     font-family: var(--font-display);
     font-weight: 800;
     letter-spacing: -0.04em;
+    overflow-wrap: break-word;
   }
 
   .t-section {
@@ -172,6 +173,18 @@ html[data-theme-shift="shrink"]::view-transition-old(root) {
     font-size: clamp(40px, 4.444vw, 64px);
     line-height: 1;
     letter-spacing: -0.035em;
+    overflow-wrap: break-word;
+  }
+
+  /* Enlarged text on a phone (20em is 320px at the default size, so this never applies at 100%): a
+     display word can be wider than the column. Hyphenate it rather than cut off a letter or two. */
+  @media (width < 20em) {
+    .t-hero,
+    .t-section,
+    .next-note-title {
+      hyphens: auto;
+      hyphenate-limit-chars: 6 3 3;
+    }
   }
 
   .t-statement {

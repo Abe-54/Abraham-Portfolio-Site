@@ -24,7 +24,10 @@ export default function ProjectFilter() {
   return (
     <>
       <div className="shell flex flex-col gap-8 pt-16 pb-10 md:flex-row md:items-end md:justify-between lg:pt-24 lg:pb-14">
-        <h1 className="t-hero text-[64px] leading-[0.95] md:text-[88px] lg:text-[112px] lg:leading-[100px]">Projects</h1>
+        <h1 className="t-hero text-[64px] leading-[0.95] md:text-[88px] lg:text-[112px] lg:leading-[100px]">
+          {/* The soft hyphen only shows when enlarged text makes the word wider than a phone. */}
+          Proj&shy;ects
+        </h1>
         <div role="group" aria-label="Filter projects" className="flex flex-wrap gap-2.5">
           {filters.map((filter) => (
             <button

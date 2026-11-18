@@ -82,6 +82,18 @@
   }
 }
 
+.next-note-title {
+  overflow-wrap: break-word;
+}
+
+/* Enlarged text on a phone (20em is 320px at the default size): the title takes the full width and the
+   arrow moves below it, so long words in the title are not squeezed beside the arrow. */
+@media (width < 20em) {
+  .next-note {
+    flex-wrap: wrap;
+  }
+}
+
 .next-note-arrow {
   transition: transform 200ms var(--ease-out);
 }
