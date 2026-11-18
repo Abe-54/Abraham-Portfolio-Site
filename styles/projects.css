@@ -68,13 +68,18 @@
 
 /* The image wipes between two inset() shapes so the clip interpolates instead of popping. */
 @media (prefers-reduced-motion: no-preference) {
-  [data-entrance="pending"]:not(:focus-within) .cover-wipe {
+  [data-entrance="pending"] .cover-wipe {
     clip-path: inset(0 0 100% 0);
   }
 
   [data-entrance="shown"] .cover-wipe {
     clip-path: inset(0 0 0 0);
     transition: clip-path 300ms var(--ease-out) 120ms;
+  }
+
+  [data-entrance]:focus-within .cover-wipe {
+    clip-path: inset(0 0 0 0);
+    transition: none;
   }
 }
 

@@ -259,7 +259,7 @@ html[data-theme-shift="shrink"]::view-transition-old(root) {
 }
 
 /* Entrances: set only by RevealObserver, so server HTML and failed bundles stay readable. */
-[data-entrance="pending"]:not(:focus-within) {
+[data-entrance="pending"] {
   opacity: 0;
   transform: translateY(8px);
 }
@@ -270,8 +270,15 @@ html[data-theme-shift="shrink"]::view-transition-old(root) {
     transform 300ms var(--ease-out) var(--delay, 0ms);
 }
 
+/* Keyboard focus never lands on something hidden or still fading in. */
+[data-entrance]:focus-within {
+  opacity: 1;
+  transform: none;
+  transition: none;
+}
+
 @media (prefers-reduced-motion: reduce) {
-  [data-entrance="pending"]:not(:focus-within) {
+  [data-entrance="pending"] {
     transform: none;
   }
 
