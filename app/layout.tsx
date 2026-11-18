@@ -4,6 +4,7 @@ import { Bricolage_Grotesque, Geist_Mono, Inter_Tight } from "next/font/google";
 import Footer from "@/components/footer";
 import Nav from "@/components/nav";
 import RevealObserver from "@/components/reveal-observer";
+import RouteScroll from "@/components/route-scroll";
 import "./globals.css";
 
 const display = Bricolage_Grotesque({ subsets: ["latin"], axes: ["opsz"], variable: "--font-bricolage" });
@@ -40,6 +41,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         </a>
         <Nav />
         {children}
+        <RouteScroll />
         <Footer />
         <RevealObserver />
         <Analytics />
