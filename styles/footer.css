@@ -22,47 +22,52 @@
   margin-left: 4px;
   overflow: visible;
   pointer-events: none;
-  animation: pop-fade 1600ms linear forwards;
+  opacity: 0;
+}
+
+/* On the recruiter strip button the tick pops over the button itself. */
+.email-pop-over {
+  left: 50%;
+  margin-left: -42px;
+}
+
+.email-pop[data-phase="in"] {
+  opacity: 1;
+  transition: opacity 150ms var(--ease-out);
+}
+
+.email-pop[data-phase="out"] {
+  transition: opacity 240ms var(--ease-out);
 }
 
 .email-pop-blob {
   transform-box: fill-box;
   transform-origin: center;
-  animation: pop-in 320ms var(--ease-out);
+  transform: scale(0.85);
 }
 
 .email-pop-drop {
-  animation: pop-drop 520ms var(--ease-out) both;
+  opacity: 0;
+  transform: translate(var(--from-x), var(--from-y)) scale(0.6);
 }
 
-@keyframes pop-fade {
-  85% {
-    opacity: 1;
-  }
-  100% {
-    opacity: 0;
-  }
+/* Both visible phases hold the end state, so a repeat copy or the fade never restarts the pop. */
+[data-phase="in"] .email-pop-blob,
+[data-phase="out"] .email-pop-blob,
+[data-phase="in"] .email-pop-drop,
+[data-phase="out"] .email-pop-drop {
+  opacity: 1;
+  transform: none;
 }
 
-@keyframes pop-in {
-  from {
-    transform: scale(0.85);
-    opacity: 0;
-  }
-  60% {
-    transform: scale(1.06);
-    opacity: 1;
-  }
+[data-phase="in"] .email-pop-blob {
+  transition: transform 300ms var(--ease-out);
 }
 
-@keyframes pop-drop {
-  from {
-    transform: translate(var(--from-x), var(--from-y)) scale(0.6);
-    opacity: 0;
-  }
-  30% {
-    opacity: 1;
-  }
+[data-phase="in"] .email-pop-drop {
+  transition:
+    transform 300ms var(--ease-out),
+    opacity 150ms var(--ease-out);
 }
 
 @media (hover: hover) and (pointer: fine) {
@@ -79,6 +84,6 @@
 @media (prefers-reduced-motion: reduce) {
   .email-pop-blob,
   .email-pop-drop {
-    animation: none;
+    transform: none;
   }
 }

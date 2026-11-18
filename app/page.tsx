@@ -1,4 +1,5 @@
 import Link from "next/link";
+import EmailCopy from "@/components/email-copy";
 import Hero from "@/components/hero";
 import History from "@/components/history";
 import NoteRow from "@/components/note-row";
@@ -62,9 +63,7 @@ export default function Home() {
           ))}
         </dl>
         <div className="flex flex-wrap gap-2.5">
-          <a href={`mailto:${contact.email}`} className="btn btn-solid press">
-            Email me
-          </a>
+          <EmailCopy email={contact.email} label="Email me" />
           <a href={contact.resume} target="_blank" rel="noopener" className="btn btn-outline press">
             Résumé ↓
           </a>
