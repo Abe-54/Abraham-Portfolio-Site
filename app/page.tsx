@@ -56,7 +56,7 @@ export default function Home() {
       <section aria-label="At a glance" className="shell flex flex-col gap-6 border-b-[1.5px] border-rule py-8 lg:flex-row lg:items-center lg:gap-14">
         <dl className="flex flex-col gap-5 md:flex-row md:gap-10 lg:flex-1 lg:gap-14">
           {glance.map((item) => (
-            <div key={item.label} className="flex flex-col gap-1.5 last:flex-1">
+            <div key={item.label} className="flex flex-col gap-1.5 last:flex-1 last:whitespace-nowrap">
               <dt className="t-label text-[12px]">{item.label}</dt>
               <dd className="text-[17px] leading-[22px] font-semibold lg:text-[18px]">{item.value}</dd>
             </div>
@@ -70,8 +70,8 @@ export default function Home() {
         </div>
       </section>
 
-      <section id="about" className="shell flex scroll-mt-4 flex-col gap-12 pt-20 pb-8 lg:flex-row lg:items-start lg:gap-24 lg:py-28">
-        <div className="flex flex-col gap-7 lg:w-[720px] lg:shrink-0">
+      <section id="about" className="shell flex scroll-mt-4 flex-col gap-12 pt-20 pb-8 lg:py-28 xl:flex-row xl:items-start xl:gap-24">
+        <div className="flex max-w-[720px] flex-col gap-7 xl:w-[720px] xl:shrink-0">
           <h2 className="t-label">Hi, I&apos;m Abraham</h2>
           <p className="t-statement">
             By day I build public services for New Jersey: tools that help towns plan affordable housing, and an
@@ -83,7 +83,7 @@ export default function Home() {
             reliably.
           </p>
         </div>
-        <ol className="flex flex-col lg:flex-1 lg:pt-11">
+        <ol className="flex flex-col xl:flex-1 xl:pt-11">
           {focus.map((item, index) => (
             <li
               key={item.title}
