@@ -1,5 +1,4 @@
 import { marketDashUrl } from "@/lib/content";
-import Drip from "./drip";
 import GooeyPortrait from "./gooey-portrait";
 
 export default function Hero() {
@@ -34,7 +33,6 @@ export default function Hero() {
           <a href={marketDashUrl} target="_blank" rel="noopener" className="btn btn-blue hero-btn press">
             Play Market Dash ▸
           </a>
-          <Drip />
         </div>
       </div>
     </section>

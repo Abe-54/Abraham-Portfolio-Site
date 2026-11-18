@@ -93,71 +93,9 @@
   background: #f1f1f2;
 }
 
-.drip {
-  position: absolute;
-  z-index: 2;
-  top: 100%;
-  left: 50%;
-  width: 40px;
-  height: 52px;
-  margin-left: -20px;
-  overflow: visible;
-  pointer-events: none;
-}
-
-.drip-bulge,
-.drip-drop {
-  fill: #3366ff;
-}
-
-.drip-bulge {
-  transform-box: fill-box;
-  transform-origin: 50% 0;
-  animation: drip-bulge 4s var(--ease-in-out) infinite;
-}
-
-.drip-drop {
-  opacity: 0;
-  animation: drip-drop 4s linear infinite;
-}
-
 @keyframes breathe {
   to {
     transform: scale(1.03);
-  }
-}
-
-@keyframes drip-bulge {
-  0% {
-    transform: scaleY(0.12);
-  }
-  14%,
-  26% {
-    transform: scaleY(1);
-  }
-  38%,
-  100% {
-    transform: scaleY(0.12);
-  }
-}
-
-@keyframes drip-drop {
-  0%,
-  22% {
-    opacity: 0;
-    transform: translateY(0);
-  }
-  24% {
-    opacity: 1;
-    transform: translateY(0);
-  }
-  40% {
-    opacity: 0;
-    transform: translateY(160px);
-  }
-  100% {
-    opacity: 0;
-    transform: translateY(160px);
   }
 }
 
@@ -247,10 +185,6 @@
 
   .portrait-mask {
     border-width: calc(6 * var(--u));
-  }
-
-  .drip {
-    left: calc(900 * var(--u));
   }
 }
 
