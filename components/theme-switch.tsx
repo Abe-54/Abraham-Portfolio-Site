@@ -141,7 +141,7 @@ export default function ThemeSwitch() {
         { clipPath: BOTH_LOBES, opacity: 1, offset: 0.5 },
         { clipPath: lobes[1], opacity: 1 },
       ],
-      { duration: 300, easing: "cubic-bezier(0.77, 0, 0.175, 1)" },
+      { duration: 420, easing: "cubic-bezier(0.77, 0, 0.175, 1)" },
     );
     gooAnimationRef.current = animation;
     const settle = () => {
@@ -177,7 +177,7 @@ export default function ThemeSwitch() {
         discRef.current = root.animate(
           { clipPath: growing ? disc : disc.reverse() },
           {
-            duration: 450,
+            duration: 500,
             easing: "cubic-bezier(0.23, 1, 0.32, 1)",
             fill: "forwards",
             pseudoElement: growing ? "::view-transition-new(root)" : "::view-transition-old(root)",
