@@ -228,19 +228,20 @@ html[data-theme-shift="shrink"]::view-transition-old(root) {
   }
 }
 
-.js [data-reveal]:not([data-shown]) {
+/* Entrances: set only by RevealObserver, so server HTML and failed bundles stay readable. */
+[data-entrance="pending"]:not(:focus-within) {
   opacity: 0;
   transform: translateY(8px);
 }
 
-[data-reveal] {
+[data-entrance="shown"] {
   transition:
     opacity 300ms var(--ease-out) var(--delay, 0ms),
     transform 300ms var(--ease-out) var(--delay, 0ms);
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .js [data-reveal]:not([data-shown]) {
+  [data-entrance="pending"]:not(:focus-within) {
     transform: none;
   }
 

@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { projects, sideLabel, type Side } from "@/lib/content";
 import ProjectRow from "./project-row";
+import { revealAll } from "./reveal-observer";
 
 const filters: { value: Side | "all"; label: string }[] = [
   { value: "all", label: "All" },
@@ -12,6 +13,13 @@ const filters: { value: Side | "all"; label: string }[] = [
 
 export default function ProjectFilter() {
   const [shown, setShown] = useState<Side | "all">("all");
+  const listRef = useRef<HTMLDivElement>(null);
+
+  function choose(value: Side | "all") {
+    setShown(value);
+    // Filtering moves rows into view without a scroll, so none of them may wait on an entrance.
+    if (listRef.current) revealAll(listRef.current);
+  }
 
   return (
     <>
@@ -23,7 +31,7 @@ export default function ProjectFilter() {
               key={filter.value}
               type="button"
               aria-pressed={shown === filter.value}
-              onClick={() => setShown(filter.value)}
+              onClick={() => choose(filter.value)}
               className="filter-pill btn press"
             >
               {filter.label}
@@ -31,7 +39,7 @@ export default function ProjectFilter() {
           ))}
         </div>
       </div>
-      <div className="project-page-list">
+      <div ref={listRef} className="project-page-list">
         {projects.map((project) => (
           <ProjectRow
             key={project.slug}
