@@ -91,7 +91,27 @@ export default function ThemeSwitch() {
       const control = document
         .elementFromPoint(event.clientX, event.clientY)
         ?.closest<HTMLElement>("a[href], button, summary, label, input, select, textarea");
-      control?.click();
+      // A copy of the click, not .click(), so Ctrl, Cmd or Shift still open a link in a new tab or window.
+      const { detail, screenX, screenY, clientX, clientY, ctrlKey, shiftKey, altKey, metaKey, button, buttons } = event;
+      control?.dispatchEvent(
+        new MouseEvent("click", {
+          bubbles: true,
+          cancelable: true,
+          composed: true,
+          view: window,
+          detail,
+          screenX,
+          screenY,
+          clientX,
+          clientY,
+          ctrlKey,
+          shiftKey,
+          altKey,
+          metaKey,
+          button,
+          buttons,
+        }),
+      );
     };
     document.addEventListener("pointerdown", onRootPointerDown, true);
     document.addEventListener("click", onRootClick);
