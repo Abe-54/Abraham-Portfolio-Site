@@ -19,7 +19,6 @@
   font-size: 16px;
   font-weight: 500;
   line-height: 20px;
-  transition: color 150ms ease;
 }
 
 .nav-link[aria-current="page"] {
@@ -28,9 +27,12 @@
   color: #ffffff;
 }
 
+/* The colour fades only into hover. A link gaining or losing aria-current swaps colour in the same frame
+   as its fill, so a label never fades through the blue or sits white on the header. */
 @media (hover: hover) and (pointer: fine) {
   .nav-link:not([aria-current="page"]):hover {
     color: var(--link);
+    transition: color 150ms ease;
   }
 }
 
