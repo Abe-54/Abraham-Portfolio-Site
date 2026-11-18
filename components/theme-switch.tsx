@@ -20,42 +20,80 @@ function paintBrowserChrome(theme: Theme) {
   document.querySelectorAll('meta[name="theme-color"]').forEach((meta) => meta.setAttribute("content", THEME_COLOR[theme]));
 }
 
-function commitTheme(theme: Theme) {
-  document.documentElement.dataset.theme = theme;
-  paintBrowserChrome(theme);
+function currentTheme(): Theme {
+  return document.documentElement.dataset.theme === "night" ? "night" : "day";
+}
+
+function storeTheme(theme: Theme) {
   try {
     localStorage.setItem("theme", theme);
   } catch {}
+}
+
+function commitTheme(theme: Theme) {
+  document.documentElement.dataset.theme = theme;
+  paintBrowserChrome(theme);
 }
 
 export default function ThemeSwitch() {
   const [night, setNight] = useState(false);
   const buttonRef = useRef<HTMLButtonElement>(null);
   const gooRef = useRef<SVGSVGElement>(null);
-  // The theme the visitor asked for last. Clicks read this, never the DOM, which lags behind a transition.
+  // The theme the visitor asked for last. The page catches up to it one transition at a time.
   const themeRef = useRef<Theme>("day");
+  const animateRef = useRef(true);
   const transitionRef = useRef<ViewTransition | null>(null);
+  const targetRef = useRef<Theme | null>(null);
   const discRef = useRef<Animation | null>(null);
   const gooAnimationRef = useRef<Animation | null>(null);
   const toggleRef = useRef<(animate: boolean) => void>(() => {});
 
   useEffect(() => {
-    const theme: Theme = document.documentElement.dataset.theme === "night" ? "night" : "day";
+    const theme = currentTheme();
     themeRef.current = theme;
     setNight(theme === "night");
     paintBrowserChrome(theme);
 
-    // While a view transition runs, its pseudo-elements take every click on the root element. A click
-    // over the switch still counts, so quick repeat toggles are not lost.
-    const onRootClick = (event: MouseEvent) => {
+    // While a view transition runs, the browser hit-tests its picture of the page, so every tap lands
+    // on <html>. A tap on the switch still toggles. A tap anywhere else ends the disc at once and is
+    // passed on to the link or button under it, so it is never swallowed.
+    let forward = false;
+    const overSwitch = (event: MouseEvent) => {
       const box = buttonRef.current?.getBoundingClientRect();
-      if (!transitionRef.current || event.target !== document.documentElement || !box) return;
-      const inside =
-        event.clientX >= box.left && event.clientX <= box.right && event.clientY >= box.top && event.clientY <= box.bottom;
-      if (inside) toggleRef.current(event.detail > 0 && !prefersReducedMotion());
+      return (
+        !!box &&
+        event.clientX >= box.left &&
+        event.clientX <= box.right &&
+        event.clientY >= box.top &&
+        event.clientY <= box.bottom
+      );
     };
+    const onRootPointerDown = (event: PointerEvent) => {
+      const running = transitionRef.current;
+      if (!running || event.target !== document.documentElement || overSwitch(event)) return;
+      forward = true;
+      animateRef.current = false;
+      running.skipTransition();
+    };
+    const onRootClick = (event: MouseEvent) => {
+      if (event.target !== document.documentElement) return;
+      if (transitionRef.current && overSwitch(event)) {
+        toggleRef.current(event.detail > 0 && !prefersReducedMotion());
+        return;
+      }
+      if (!forward) return;
+      forward = false;
+      const control = document
+        .elementFromPoint(event.clientX, event.clientY)
+        ?.closest<HTMLElement>("a[href], button, summary, label, input, select, textarea");
+      control?.click();
+    };
+    document.addEventListener("pointerdown", onRootPointerDown, true);
     document.addEventListener("click", onRootClick);
-    return () => document.removeEventListener("click", onRootClick);
+    return () => {
+      document.removeEventListener("pointerdown", onRootPointerDown, true);
+      document.removeEventListener("click", onRootClick);
+    };
   }, []);
 
   function moveKnob(next: Theme, animate: boolean) {
@@ -87,16 +125,12 @@ export default function ThemeSwitch() {
     animation.finished.then(settle, settle);
   }
 
-  function swapPage(next: Theme, animate: boolean) {
+  /** Bring the page to the wanted theme. A running disc is never cut short or skipped to its end. */
+  function catchUp() {
     const root = document.documentElement;
-    // One transition at a time: finish the running one before the next starts. The disc animation
-    // targets the root's pseudo-elements by name, so it must go too or it would clip the next snapshot.
-    transitionRef.current?.skipTransition();
-    transitionRef.current = null;
-    discRef.current?.cancel();
-    discRef.current = null;
-    if (!animate || typeof document.startViewTransition !== "function") {
-      delete root.dataset.themeShift;
+    const next = themeRef.current;
+    if (transitionRef.current || currentTheme() === next) return;
+    if (!animateRef.current || typeof document.startViewTransition !== "function") {
       commitTheme(next);
       return;
     }
@@ -105,8 +139,9 @@ export default function ThemeSwitch() {
     const x = origin ? origin.left + origin.width / 2 : window.innerWidth;
     const y = origin ? origin.top + origin.height / 2 : 0;
     root.dataset.themeShift = growing ? "grow" : "shrink";
-    const transition = document.startViewTransition(() => commitTheme(themeRef.current));
+    const transition = document.startViewTransition(() => commitTheme(next));
     transitionRef.current = transition;
+    targetRef.current = next;
     transition.ready
       .then(() => {
         if (transitionRef.current !== transition) return;
@@ -121,14 +156,18 @@ export default function ThemeSwitch() {
             pseudoElement: growing ? "::view-transition-new(root)" : "::view-transition-old(root)",
           },
         );
+        // The visitor already changed their mind: finish this disc quickly, then run the next one.
+        if (themeRef.current !== next) discRef.current.updatePlaybackRate(3);
       })
       .catch(() => {});
     const settle = () => {
       if (transitionRef.current !== transition) return;
       transitionRef.current = null;
+      targetRef.current = null;
       discRef.current?.cancel();
       discRef.current = null;
       delete root.dataset.themeShift;
+      catchUp();
     };
     transition.finished.then(settle, settle);
   }
@@ -136,9 +175,19 @@ export default function ThemeSwitch() {
   function toggle(animate: boolean) {
     const next: Theme = themeRef.current === "night" ? "day" : "night";
     themeRef.current = next;
+    animateRef.current = animate;
     setNight(next === "night");
+    storeTheme(next);
     moveKnob(next, animate);
-    swapPage(next, animate);
+    const running = transitionRef.current;
+    if (!running) {
+      catchUp();
+    } else if (!animate) {
+      // Keyboard and reduced motion switch at once, even over a running disc.
+      running.skipTransition();
+    } else if (targetRef.current !== next) {
+      discRef.current?.updatePlaybackRate(3);
+    }
   }
   toggleRef.current = toggle;
 
