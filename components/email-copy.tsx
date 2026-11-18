@@ -38,11 +38,11 @@ export default function EmailCopy({ email, label }: { email: string; label?: str
   }
 
   return (
-    <div className={label ? "relative" : "relative self-start"}>
+    <div data-phase={phase} className={label ? "relative" : "relative self-start"}>
       <button type="button" onClick={copy} className={label ? "btn btn-solid press" : "email-copy press"}>
         {label ? (
           <>
-            {label}
+            <span className="email-copy-label">{label}</span>
             <span className="sr-only"> (copy address)</span>
           </>
         ) : (

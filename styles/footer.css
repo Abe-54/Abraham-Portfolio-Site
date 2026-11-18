@@ -25,10 +25,18 @@
   opacity: 0;
 }
 
-/* On the recruiter strip button the tick pops over the button itself. */
+/* On the recruiter strip button the tick pops over the button itself while its label steps aside. */
 .email-pop-over {
   left: 50%;
   margin-left: -42px;
+}
+
+.email-copy-label {
+  transition: opacity 150ms var(--ease-out);
+}
+
+[data-phase="in"] > button .email-copy-label {
+  opacity: 0;
 }
 
 .email-pop[data-phase="in"] {
