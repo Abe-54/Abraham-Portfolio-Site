@@ -35,13 +35,27 @@ export default function ThemeSwitch() {
   // The theme the visitor asked for last. Clicks read this, never the DOM, which lags behind a transition.
   const themeRef = useRef<Theme>("day");
   const transitionRef = useRef<ViewTransition | null>(null);
+  const discRef = useRef<Animation | null>(null);
   const gooAnimationRef = useRef<Animation | null>(null);
+  const toggleRef = useRef<(animate: boolean) => void>(() => {});
 
   useEffect(() => {
     const theme: Theme = document.documentElement.dataset.theme === "night" ? "night" : "day";
     themeRef.current = theme;
     setNight(theme === "night");
     paintBrowserChrome(theme);
+
+    // While a view transition runs, its pseudo-elements take every click on the root element. A click
+    // over the switch still counts, so quick repeat toggles are not lost.
+    const onRootClick = (event: MouseEvent) => {
+      const box = buttonRef.current?.getBoundingClientRect();
+      if (!transitionRef.current || event.target !== document.documentElement || !box) return;
+      const inside =
+        event.clientX >= box.left && event.clientX <= box.right && event.clientY >= box.top && event.clientY <= box.bottom;
+      if (inside) toggleRef.current(event.detail > 0 && !prefersReducedMotion());
+    };
+    document.addEventListener("click", onRootClick);
+    return () => document.removeEventListener("click", onRootClick);
   }, []);
 
   function moveKnob(next: Theme, animate: boolean) {
@@ -75,9 +89,12 @@ export default function ThemeSwitch() {
 
   function swapPage(next: Theme, animate: boolean) {
     const root = document.documentElement;
-    // One transition at a time: finish the running one before the next starts.
+    // One transition at a time: finish the running one before the next starts. The disc animation
+    // targets the root's pseudo-elements by name, so it must go too or it would clip the next snapshot.
     transitionRef.current?.skipTransition();
     transitionRef.current = null;
+    discRef.current?.cancel();
+    discRef.current = null;
     if (!animate || typeof document.startViewTransition !== "function") {
       delete root.dataset.themeShift;
       commitTheme(next);
@@ -92,9 +109,10 @@ export default function ThemeSwitch() {
     transitionRef.current = transition;
     transition.ready
       .then(() => {
+        if (transitionRef.current !== transition) return;
         const radius = Math.hypot(Math.max(x, window.innerWidth - x), Math.max(y, window.innerHeight - y));
         const disc = [`circle(0px at ${x}px ${y}px)`, `circle(${radius}px at ${x}px ${y}px)`];
-        root.animate(
+        discRef.current = root.animate(
           { clipPath: growing ? disc : disc.reverse() },
           {
             duration: 450,
@@ -108,26 +126,28 @@ export default function ThemeSwitch() {
     const settle = () => {
       if (transitionRef.current !== transition) return;
       transitionRef.current = null;
+      discRef.current?.cancel();
+      discRef.current = null;
       delete root.dataset.themeShift;
     };
     transition.finished.then(settle, settle);
   }
 
-  function toggle(event: React.MouseEvent<HTMLButtonElement>) {
+  function toggle(animate: boolean) {
     const next: Theme = themeRef.current === "night" ? "day" : "night";
     themeRef.current = next;
     setNight(next === "night");
-    // Keyboard presses (detail 0) and reduced motion swap at once.
-    const animate = event.detail > 0 && !prefersReducedMotion();
     moveKnob(next, animate);
     swapPage(next, animate);
   }
+  toggleRef.current = toggle;
 
   return (
     <button
       ref={buttonRef}
       type="button"
-      onClick={toggle}
+      // Keyboard presses (detail 0) and reduced motion swap at once.
+      onClick={(event) => toggle(event.detail > 0 && !prefersReducedMotion())}
       aria-pressed={night}
       aria-label="Night mode"
       className="goo-switch press"
