@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { useLayoutEffect, useRef, useState } from "react";
 import { history } from "@/lib/content";
 
 type Point = { x: number; y: number };
@@ -12,20 +12,28 @@ type Geometry = {
   stops: Point[];
   path: string;
   samples: Point[];
+  winding: boolean;
 };
 
 type Progress = { engaged: boolean; current: number };
 
 type StopState = "open" | "closed" | "passed" | "ahead";
 
-const READING_LINE = 0.55;
-const SAMPLES_PER_SEGMENT = 24;
+type ViewTimelineConstructor = new (options: { subject: Element; axis?: "block" | "inline" }) => AnimationTimeline;
+
+const SAMPLES_PER_SEGMENT = 32;
 
 function stopState(index: number, progress: Progress, reduced: boolean): StopState {
   if (reduced) return "open";
   if (!progress.engaged) return index === 0 ? "open" : "closed";
   if (index < progress.current) return "passed";
   return index === progress.current ? "open" : "ahead";
+}
+
+/** Scroll-driven animations let the compositor move the marker along the curve in the same frame as the scroll. */
+function viewTimeline(): ViewTimelineConstructor | null {
+  const constructor = (window as unknown as { ViewTimeline?: ViewTimelineConstructor }).ViewTimeline;
+  return typeof constructor === "function" ? constructor : null;
 }
 
 function bezier(a: Point, c1: Point, c2: Point, b: Point, t: number): Point {
@@ -36,12 +44,13 @@ function bezier(a: Point, c1: Point, c2: Point, b: Point, t: number): Point {
   };
 }
 
-function measure(column: HTMLElement, list: HTMLElement, heads: HTMLElement[]): Geometry {
+function measure(column: HTMLElement, list: HTMLElement, heads: HTMLElement[], winding: boolean): Geometry {
   const width = column.clientWidth;
   const listTop = list.getBoundingClientRect().top;
   const stops = heads.map((head, index) => {
     const box = head.getBoundingClientRect();
-    return { x: width * (index % 2 === 0 ? 0.3 : 0.7), y: box.top - listTop + box.height / 2 };
+    const x = winding ? width * (index % 2 === 0 ? 0.3 : 0.7) : width * 0.5;
+    return { x, y: box.top - listTop + box.height / 2 };
   });
 
   let path = `M${stops[0].x},${stops[0].y}`;
@@ -59,7 +68,7 @@ function measure(column: HTMLElement, list: HTMLElement, heads: HTMLElement[]): 
     }
   }
 
-  return { width, height: list.offsetHeight, scale: width / 200, stops, path, samples };
+  return { width, height: list.offsetHeight, scale: width / 200, stops, path, samples, winding };
 }
 
 function xAt(samples: Point[], y: number) {
@@ -76,55 +85,61 @@ function xAt(samples: Point[], y: number) {
   return a.x + (b.x - a.x) * Math.min(Math.max(t, 0), 1);
 }
 
+function sameGeometry(a: Geometry | null, b: Geometry) {
+  return !!a && a.path === b.path && a.width === b.width && a.height === b.height;
+}
+
 export default function History() {
   const columnRef = useRef<HTMLDivElement>(null);
   const listRef = useRef<HTMLOListElement>(null);
   const headRefs = useRef<HTMLDivElement[]>([]);
-  const solidRef = useRef<SVGSVGElement>(null);
+  const probeRef = useRef<HTMLDivElement>(null);
   const markerRef = useRef<SVGSVGElement>(null);
   const geometryRef = useRef<Geometry | null>(null);
-  const placeRef = useRef(() => {});
+  const updateRef = useRef(() => {});
   const [geometry, setGeometry] = useState<Geometry | null>(null);
   const [progress, setProgress] = useState<Progress>({ engaged: false, current: 0 });
   const [reduced, setReduced] = useState(false);
+  const [live, setLive] = useState(false);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     const column = columnRef.current;
     const list = listRef.current;
     if (!column || !list) return;
     const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    // Without scroll-driven animations the marker cannot follow a curve in step with the scroll, so the path runs straight.
+    const winding = reduceMotion || viewTimeline() !== null;
     setReduced(reduceMotion);
+    setLive(true);
     let frame = 0;
+    let alive = true;
 
-    const place = () => {
+    // Only the stop states read the scroll here. The marker and the solid path are positioned by CSS.
+    const update = () => {
       frame = 0;
       const g = geometryRef.current;
-      const marker = markerRef.current;
-      const solid = solidRef.current;
-      if (!g || !marker || !solid) return;
-      const first = g.stops[0].y;
-      const last = g.stops[g.stops.length - 1].y;
-      const raw = reduceMotion ? first : window.innerHeight * READING_LINE - list.getBoundingClientRect().top;
-      const y = Math.min(Math.max(raw, first), last);
-      marker.style.transform = `translate(${xAt(g.samples, y)}px, ${y}px) scale(${g.scale})`;
-      solid.style.clipPath = `inset(0 0 ${g.height - y}px 0)`;
-      const engaged = raw > first;
-      const current = g.stops.reduce((reached, stop, index) => (stop.y <= raw ? index : reached), 0);
+      const probe = probeRef.current;
+      if (!g || !probe || reduceMotion) return;
+      const travelled = -probe.getBoundingClientRect().top;
+      const line = g.stops[0].y + travelled;
+      const engaged = travelled > 0;
+      const current = g.stops.reduce((reached, stop, index) => (stop.y <= line ? index : reached), 0);
       setProgress((previous) =>
         previous.engaged === engaged && previous.current === current ? previous : { engaged, current },
       );
     };
-
-    placeRef.current = place;
+    updateRef.current = update;
 
     const remeasure = () => {
-      geometryRef.current = measure(column, list, headRefs.current);
-      setGeometry(geometryRef.current);
-      place();
+      if (!alive) return;
+      const next = measure(column, list, headRefs.current, winding);
+      if (sameGeometry(geometryRef.current, next)) return;
+      geometryRef.current = next;
+      setGeometry(next);
     };
 
-    const onScroll = () => {
-      if (!frame) frame = requestAnimationFrame(place);
+    const schedule = () => {
+      if (!frame) frame = requestAnimationFrame(update);
     };
 
     remeasure();
@@ -132,21 +147,56 @@ export default function History() {
     const resizeObserver = new ResizeObserver(remeasure);
     resizeObserver.observe(list);
     resizeObserver.observe(column);
-    if (!reduceMotion) window.addEventListener("scroll", onScroll, { passive: true });
+    if (!reduceMotion) {
+      window.addEventListener("scroll", schedule, { passive: true });
+      window.addEventListener("resize", schedule, { passive: true });
+    }
 
     return () => {
+      alive = false;
       cancelAnimationFrame(frame);
       resizeObserver.disconnect();
-      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("scroll", schedule);
+      window.removeEventListener("resize", schedule);
     };
   }, []);
 
-  useLayoutEffect(() => placeRef.current(), [geometry]);
+  useLayoutEffect(() => {
+    updateRef.current();
+    const marker = markerRef.current;
+    const probe = probeRef.current;
+    const Timeline = viewTimeline();
+    if (!geometry || !geometry.winding || reduced || !marker || !probe || !Timeline) return;
+    const first = geometry.stops[0].y;
+    const travel = geometry.stops[geometry.stops.length - 1].y - first;
+    const keyframes = geometry.samples.map((point) => ({
+      transform: `translateX(${point.x}px) scale(${geometry.scale})`,
+      offset: travel > 0 ? Math.min(Math.max((point.y - first) / travel, 0), 1) : 0,
+    }));
+    // The probe sits 55dvh above the marker track, so "exit-crossing" spans exactly the sticky marker's travel.
+    const animation = marker.animate(keyframes, {
+      fill: "both",
+      timeline: new Timeline({ subject: probe, axis: "block" }),
+      rangeStart: "exit-crossing 0%",
+      rangeEnd: "exit-crossing 100%",
+    } as KeyframeAnimationOptions);
+    return () => animation.cancel();
+  }, [geometry, reduced]);
 
   const s = geometry?.scale ?? 1;
+  const first = geometry?.stops[0].y ?? 0;
+  const travel = geometry ? geometry.stops[geometry.stops.length - 1].y - first : 0;
+  const coverHeight = geometry ? geometry.height - first : 0;
+  const markerX = geometry ? xAt(geometry.samples, first) : 0;
 
   return (
-    <section id="history" data-tone="night" aria-labelledby="history-title" className="history shell">
+    <section
+      id="history"
+      data-tone="night"
+      data-live={live || undefined}
+      aria-labelledby="history-title"
+      className="history shell"
+    >
       <div className="flex flex-col gap-3">
         <p className="t-label t-tag">History</p>
         <h2 id="history-title" className="t-section">
@@ -163,23 +213,24 @@ export default function History() {
                   d={geometry.path}
                   fill="none"
                   stroke="#3366FF"
-                  strokeWidth={Math.max(2.5, 4 * s)}
+                  strokeWidth={Math.max(3, 6 * s)}
                   strokeLinecap="round"
-                  strokeDasharray={`${Math.max(1, 2 * s)} ${Math.max(8, 14 * s)}`}
                 />
               </svg>
-              <svg
-                ref={solidRef}
-                className="history-layer"
-                width={geometry.width}
-                height={geometry.height}
-              >
+              {/* A sticky cover hides the solid path below the marker; it moves with the marker on the compositor. */}
+              <div className="history-cover-clip" style={{ top: first }}>
+                <div style={{ height: travel + coverHeight }}>
+                  <div className="history-cover" style={{ height: coverHeight }} />
+                </div>
+              </div>
+              <svg className="history-layer" width={geometry.width} height={geometry.height}>
                 <path
                   d={geometry.path}
                   fill="none"
                   stroke="#3366FF"
-                  strokeWidth={Math.max(3, 6 * s)}
+                  strokeWidth={Math.max(2.5, 4 * s)}
                   strokeLinecap="round"
+                  strokeDasharray={`${Math.max(1, 2 * s)} ${Math.max(8, 14 * s)}`}
                 />
               </svg>
               <svg className="history-layer" width={geometry.width} height={geometry.height}>
@@ -204,22 +255,33 @@ export default function History() {
                   </g>
                 ))}
               </svg>
-              <svg ref={markerRef} className="history-marker" viewBox="-70 -70 140 140">
-                <path
-                  d="M2,-48 C32,-50 52,-28 50,0 C48,30 26,50 -2,48 C-30,46 -50,26 -48,-2 C-46,-28 -26,-46 2,-48 Z"
-                  fill="#3366FF"
-                />
-                <circle r="24" fill="#FFFFFF" />
-                <circle r="9" fill="#3366FF" />
-                <circle
-                  className="history-droplet"
-                  data-hidden={progress.engaged || undefined}
-                  cx="64"
-                  cy="37"
-                  r="6"
-                  fill="#3366FF"
-                />
-              </svg>
+              {/* The marker track spans first to last stop. Its sticky anchor holds the marker on the reading line. */}
+              <div className="history-track" style={{ top: first, height: travel }}>
+                <div ref={probeRef} className="history-probe" />
+                <div className="history-anchor">
+                  <svg
+                    ref={markerRef}
+                    className="history-marker"
+                    viewBox="-70 -70 140 140"
+                    style={{ transform: `translateX(${markerX}px) scale(${s})` }}
+                  >
+                    <path
+                      d="M2,-48 C32,-50 52,-28 50,0 C48,30 26,50 -2,48 C-30,46 -50,26 -48,-2 C-46,-28 -26,-46 2,-48 Z"
+                      fill="#3366FF"
+                    />
+                    <circle r="24" fill="#FFFFFF" />
+                    <circle r="9" fill="#3366FF" />
+                    <circle
+                      className="history-droplet"
+                      data-hidden={progress.engaged || undefined}
+                      cx="64"
+                      cy="37"
+                      r="6"
+                      fill="#3366FF"
+                    />
+                  </svg>
+                </div>
+              </div>
             </>
           ) : null}
         </div>

@@ -23,6 +23,52 @@
   overflow: visible;
 }
 
+/*
+ * The marker and the cover over the solid path are sticky on the 55dvh reading line, bounded by the
+ * first and last stop, so the compositor moves them in the same frame as the scroll.
+ */
+.history-track {
+  position: absolute;
+  left: 0;
+  right: 0;
+}
+
+.history-anchor,
+.history-cover {
+  position: sticky;
+  top: 55vh;
+  top: 55dvh;
+  will-change: transform;
+}
+
+.history-anchor {
+  height: 0;
+}
+
+/* Scroll-timeline subject: its exit-crossing range is exactly the anchor's sticky travel. */
+.history-probe {
+  position: absolute;
+  top: -55vh;
+  top: -55dvh;
+  left: 0;
+  width: 1px;
+  height: 100%;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.history-cover-clip {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  overflow: clip;
+}
+
+.history-cover {
+  background: var(--ground);
+}
+
 .history-marker {
   position: absolute;
   top: 0;
@@ -65,7 +111,7 @@
   display: grid;
   grid-template-areas: "level" "main";
   gap: 10px;
-  padding-block: 28px 32px;
+  padding-block: 20px 24px;
 }
 
 .history-row + .history-row {
@@ -76,12 +122,11 @@
   grid-area: main;
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 12px;
 }
 
 .history-level {
   grid-area: level;
-  transition: color 150ms ease;
 }
 
 .history-title {
@@ -105,16 +150,15 @@
   gap: 8px;
   font-size: 17px;
   line-height: 26px;
-  opacity: 0;
-  transform: translateY(8px);
   transition:
     opacity 300ms var(--ease-out),
     transform 300ms var(--ease-out);
 }
 
-[data-state="open"] .history-details {
-  opacity: 1;
-  transform: none;
+/* Details hide only once the scroll logic runs, so without JavaScript every stop reads in full. */
+.history[data-live] .history-row:not([data-state="open"]) .history-details {
+  opacity: 0;
+  transform: translateY(8px);
 }
 
 [data-state="open"] .history-level {
@@ -143,7 +187,7 @@
     grid-template-columns: minmax(0, 1fr) auto;
     grid-template-areas: "main level";
     column-gap: 32px;
-    padding-block: 42px 48px;
+    padding-block: 28px 32px;
   }
 
   .history-org {
@@ -162,7 +206,13 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .history-details {
+  .history-anchor,
+  .history-cover {
+    position: relative;
+    top: 0;
+  }
+
+  .history[data-live] .history-row:not([data-state="open"]) .history-details {
     transform: none;
   }
 }
