@@ -2,7 +2,7 @@ import Image from "next/image";
 import { sideLabel, type Cover, type Project } from "@/lib/content";
 import { drawnCovers } from "./drawn-covers";
 
-function ProjectCover({ cover }: { cover: Cover }) {
+function ProjectCover({ cover, priority }: { cover: Cover; priority?: boolean }) {
   if (cover.kind === "image") {
     const contain = cover.fit === "contain";
     return (
@@ -19,6 +19,7 @@ function ProjectCover({ cover }: { cover: Cover }) {
           alt={cover.alt}
           fill
           placeholder="blur"
+          priority={priority}
           sizes="(min-width: 768px) 280px, calc(100vw - 40px)"
           style={{ objectFit: contain ? "contain" : "cover" }}
         />
@@ -37,10 +38,13 @@ export default function ProjectRow({
   project,
   headingLevel = 3,
   hidden,
+  priority,
 }: {
   project: Project;
   headingLevel?: 2 | 3;
   hidden?: boolean;
+  /** Load the cover eagerly when the row starts above the fold. */
+  priority?: boolean;
 }) {
   const Heading = headingLevel === 2 ? "h2" : "h3";
   const facts = [
@@ -81,7 +85,7 @@ export default function ProjectRow({
       </dl>
       <div className="cover-frame">
         <div className="cover-card">
-          <ProjectCover cover={project.cover} />
+          <ProjectCover cover={project.cover} priority={priority} />
         </div>
       </div>
     </article>

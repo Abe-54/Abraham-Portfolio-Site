@@ -40,10 +40,11 @@ export default function ProjectFilter() {
         </div>
       </div>
       <div ref={listRef} className="project-page-list">
-        {projects.map((project) => (
+        {projects.map((project, index) => (
           <ProjectRow
             key={project.slug}
             project={project}
+            priority={index === 0}
             headingLevel={2}
             hidden={shown !== "all" && shown !== project.side}
           />
