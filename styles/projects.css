@@ -53,6 +53,14 @@
   transition: transform 200ms var(--ease-out);
 }
 
+.cover-backdrop {
+  position: absolute;
+  inset: -16px;
+  background-position: center;
+  background-size: cover;
+  filter: blur(12px);
+}
+
 .drawn-cover {
   width: 100%;
   height: 100%;

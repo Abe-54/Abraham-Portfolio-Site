@@ -7,7 +7,8 @@ export type Side = "day" | "night";
 export type DrawnCoverId = "dc-ai" | "climate-game";
 
 export type Cover =
-  | { kind: "image"; src: StaticImageData; alt: string }
+  /** "contain" shows the whole image over a blurred copy of itself instead of cropping it. */
+  | { kind: "image"; src: StaticImageData; alt: string; fit?: "cover" | "contain" }
   | { kind: "drawn"; id: DrawnCoverId };
 
 export type Project = {
@@ -77,10 +78,9 @@ export const projects: Project[] = [
     built: [
       "Sign-in and admin tools",
       "RFP board with review before publishing",
-      "Smoke checks and rate limiting",
     ],
     stackLabel: "Stack",
-    stack: "Next.js · Prisma · MapLibre · AWS",
+    stack: "Next.js · Prisma · MapLibre",
     link: { label: "njhomes.dca.nj.gov", href: "https://njhomes.dca.nj.gov" },
     cover: {
       kind: "image",
@@ -101,7 +101,7 @@ export const projects: Project[] = [
       "Form-filling agent and its eval harness",
     ],
     stackLabel: "Stack",
-    stack: "Next.js · AI SDK · Bedrock",
+    stack: "Next.js · AI SDK",
     link: { label: "Internal tool · no public link" },
     cover: { kind: "drawn", id: "dc-ai" },
   },
@@ -120,6 +120,7 @@ export const projects: Project[] = [
       kind: "image",
       src: marketDashImage,
       alt: "Market Dash title screen: a grocery store aisle with Play and Settings buttons",
+      fit: "contain",
     },
   },
   {

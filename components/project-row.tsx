@@ -4,15 +4,25 @@ import { drawnCovers } from "./drawn-covers";
 
 function ProjectCover({ cover }: { cover: Cover }) {
   if (cover.kind === "image") {
+    const contain = cover.fit === "contain";
     return (
-      <Image
-        src={cover.src}
-        alt={cover.alt}
-        fill
-        placeholder="blur"
-        sizes="(min-width: 768px) 280px, calc(100vw - 40px)"
-        className="cover-wipe object-cover"
-      />
+      <div className="cover-wipe absolute inset-0">
+        {contain && cover.src.blurDataURL ? (
+          <div
+            aria-hidden="true"
+            className="cover-backdrop"
+            style={{ backgroundImage: `url(${cover.src.blurDataURL})` }}
+          />
+        ) : null}
+        <Image
+          src={cover.src}
+          alt={cover.alt}
+          fill
+          placeholder="blur"
+          sizes="(min-width: 768px) 280px, calc(100vw - 40px)"
+          style={{ objectFit: contain ? "contain" : "cover" }}
+        />
+      </div>
     );
   }
   const { background, Art } = drawnCovers[cover.id];
