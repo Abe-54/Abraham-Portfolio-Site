@@ -126,6 +126,11 @@ main[tabindex="-1"]:focus {
   white-space: nowrap;
 }
 
+/* Colours change with the theme in one step instead of running their hover fades. */
+html[data-theme-swap] :is(.nav-link, .t-link, .footer-link, .email-copy, .note-title) {
+  transition: none !important;
+}
+
 ::view-transition-old(root),
 ::view-transition-new(root) {
   animation: none;

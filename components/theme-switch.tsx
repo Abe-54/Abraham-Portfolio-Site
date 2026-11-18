@@ -31,7 +31,12 @@ function storeTheme(theme: Theme) {
 }
 
 function commitTheme(theme: Theme) {
-  document.documentElement.dataset.theme = theme;
+  const root = document.documentElement;
+  // Hover colour transitions must not fade the swap; colours change with the theme in one step.
+  root.dataset.themeSwap = "";
+  root.dataset.theme = theme;
+  void document.body.offsetWidth;
+  delete root.dataset.themeSwap;
   paintBrowserChrome(theme);
 }
 
