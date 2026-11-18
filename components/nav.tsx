@@ -153,12 +153,24 @@ export default function Nav() {
             aria-expanded={menuOpen}
             aria-controls="mobile-menu"
             onClick={() => setMenuOpen((open) => !open)}
-            className="btn btn-outline press min-h-11 px-4 py-2 lg:hidden"
+            className="menu-toggle btn btn-outline press min-h-11 px-4 py-2 lg:hidden"
           >
             {menuOpen ? "Close" : "Menu"}
           </button>
         </div>
       </nav>
+
+      {/* Without JS the menu cannot open, so phones get the same links in the header flow. */}
+      <noscript
+        dangerouslySetInnerHTML={{
+          __html:
+            "<style>.menu-toggle,.goo-switch{display:none}</style>" +
+            `<ul class="nojs-menu shell">${links
+              .concat({ label: "Résumé ↓", href: contact.resume, page: false })
+              .map((link) => `<li><a href="${link.href}">${link.label}</a></li>`)
+              .join("")}</ul>`,
+        }}
+      />
 
       <div
         ref={menuRef}
