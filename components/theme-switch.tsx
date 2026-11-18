@@ -7,8 +7,10 @@ type Theme = "day" | "night";
 const GOO_DUMBBELL =
   "M20,6 C28,6 32,12 38,14 C41,15 43,15 46,14 C52,12 56,6 64,6 C72,6 78,12 78,20 C78,28 72,34 64,34 C56,34 52,28 46,26 C43,25 41,25 38,26 C32,28 28,34 20,34 C12,34 6,28 6,20 C6,12 12,6 20,6 Z";
 
-const LEFT_LOBE = "inset(0 50px 0 0)";
-const RIGHT_LOBE = "inset(0 0 0 50px)";
+// Clip boxes hug the blobs and have round ends, so the goo never shows a straight cut edge.
+const LEFT_LOBE = "inset(6px 50px 6px 6px round 14px)";
+const RIGHT_LOBE = "inset(6px 6px 6px 50px round 14px)";
+const BOTH_LOBES = "inset(6px 6px 6px 6px round 14px)";
 
 const THEME_COLOR: Record<Theme, string> = { day: "#ffffff", night: "#0b0b0c" };
 
@@ -136,7 +138,7 @@ export default function ThemeSwitch() {
     const animation = goo.animate(
       [
         { clipPath: lobes[0], opacity: 1 },
-        { clipPath: "inset(0 0 0 0)", opacity: 1, offset: 0.5 },
+        { clipPath: BOTH_LOBES, opacity: 1, offset: 0.5 },
         { clipPath: lobes[1], opacity: 1 },
       ],
       { duration: 300, easing: "cubic-bezier(0.77, 0, 0.175, 1)" },
