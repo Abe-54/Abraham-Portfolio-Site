@@ -96,6 +96,36 @@ body {
   border-radius: 4px;
 }
 
+/* main takes focus from the skip link; the ring belongs on the link, not around the page. */
+main[tabindex="-1"]:focus {
+  outline: none;
+}
+
+.skip-link {
+  position: absolute;
+  z-index: 50;
+  top: 14px;
+  left: var(--gutter);
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding-inline: 18px;
+  border-radius: 999px;
+  background: #3366ff;
+  color: #ffffff;
+  font-weight: 600;
+}
+
+.skip-link:not(:focus) {
+  width: 1px;
+  height: 1px;
+  min-height: 0;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
 ::view-transition-old(root),
 ::view-transition-new(root) {
   animation: none;

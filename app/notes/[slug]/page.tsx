@@ -48,10 +48,10 @@ export default async function NotePage({ params }: { params: Params }) {
   ];
 
   return (
-    <main>
+    <main id="main" tabIndex={-1}>
       <article className="shell flex flex-col gap-10 pt-12 pb-20 lg:flex-row lg:gap-20 lg:pt-24 lg:pb-[120px]">
         <aside className="flex flex-col gap-3.5 lg:w-[240px] lg:shrink-0 lg:pt-3.5">
-          <Link href="/notes" className="inline-flex min-h-11 items-center self-start text-[17px] font-semibold underline decoration-1 underline-offset-auto lg:min-h-6">
+          <Link href="/notes" className="inline-flex min-h-11 items-center self-start text-[17px] font-semibold underline decoration-1 underline-offset-auto lg:-my-2.5">
             ← All notes
           </Link>
           <p className="t-label leading-[22px]">

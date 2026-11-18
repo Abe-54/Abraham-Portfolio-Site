@@ -49,7 +49,7 @@ function WorkSection({
 
 export default function Home() {
   return (
-    <main>
+    <main id="main" tabIndex={-1}>
       <Hero />
 
       <section aria-label="At a glance" className="shell flex flex-col gap-6 border-b-[1.5px] border-rule py-8 lg:flex-row lg:items-center lg:gap-14">

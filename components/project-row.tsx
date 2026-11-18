@@ -48,7 +48,7 @@ export default function ProjectRow({
         <Heading className="t-section">{project.name}</Heading>
         <p className="t-lede">{project.summary}</p>
         {project.link?.href ? (
-          <a href={project.link.href} target="_blank" rel="noopener" className="t-link self-start text-[17px] leading-6">
+          <a href={project.link.href} target="_blank" rel="noopener" className="t-link -my-2.5 inline-flex min-h-11 items-center self-start text-[17px] leading-6">
             {project.link.label} ↗
           </a>
         ) : project.link ? (

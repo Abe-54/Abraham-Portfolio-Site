@@ -8,7 +8,7 @@ export const metadata: Metadata = {
 
 export default function ProjectsPage() {
   return (
-    <main>
+    <main id="main" tabIndex={-1}>
       <ProjectFilter />
     </main>
   );

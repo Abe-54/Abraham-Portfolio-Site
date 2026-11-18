@@ -8,6 +8,8 @@ export const metadata: Metadata = {
 export default function NotFound() {
   return (
     <main
+      id="main"
+      tabIndex={-1}
       data-tone="night"
       className="shell flex min-h-[70svh] flex-col items-center justify-center gap-4 py-24 text-center"
     >
