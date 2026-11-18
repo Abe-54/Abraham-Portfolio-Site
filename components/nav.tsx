@@ -111,15 +111,22 @@ export default function Nav() {
   return (
     <header className="relative z-30 border-b border-hairline bg-ground">
       <div aria-hidden="true" data-open={menuOpen || undefined} className="menu-scrim lg:hidden" />
-      <nav aria-label="Main" className="shell relative flex min-h-[72px] items-center justify-between bg-ground lg:min-h-24">
-        <Link
-          href="/"
-          className="inline-flex min-h-11 items-center font-display text-[20px] leading-7 font-extrabold tracking-[-0.02em] lg:text-[22px]"
-        >
-          Abraham Rubio
-        </Link>
+      {/* The brand takes the free width and wraps before it can touch the controls. When even its
+          longest word does not fit (large text), the controls move to their own line instead. */}
+      <nav
+        aria-label="Main"
+        className="shell relative flex min-h-[72px] flex-wrap items-center gap-x-3 gap-y-1 bg-ground py-2 lg:min-h-24"
+      >
+        <div className="flex-[1_1_0%]">
+          <Link
+            href="/"
+            className="inline-flex min-h-11 items-center font-display text-[18px] leading-7 font-extrabold tracking-[-0.02em] min-[375px]:text-[20px] lg:text-[22px]"
+          >
+            Abraham Rubio
+          </Link>
+        </div>
 
-        <div className="flex items-center gap-3 lg:gap-6">
+        <div className="ml-auto flex items-center gap-3 lg:gap-6">
           <div className="relative hidden lg:block">
             <span ref={pillRef} aria-hidden="true" className="nav-pill" />
             <ul ref={listRef} className="flex items-center gap-2">
