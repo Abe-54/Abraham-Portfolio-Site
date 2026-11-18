@@ -15,6 +15,9 @@ const links = [
 
 type Span = { left: number; width: number };
 
+// Route changes started from the keyboard move the pill at once; pointer navigation stretches it.
+let lastInput: "pointer" | "keyboard" = "pointer";
+
 function useStretchPill(activeIndex: number) {
   const listRef = useRef<HTMLUListElement>(null);
   const pillRef = useRef<HTMLSpanElement>(null);
@@ -22,34 +25,47 @@ function useStretchPill(activeIndex: number) {
 
   useLayoutEffect(() => {
     const pill = pillRef.current;
-    const target = listRef.current?.children[activeIndex] as HTMLElement | undefined;
-    if (!pill) return;
-    if (activeIndex < 0 || !target) {
-      pill.style.opacity = "0";
-      previous.current = null;
-      return;
-    }
-    const next = { left: target.offsetLeft, width: target.offsetWidth };
-    pill.style.left = `${next.left}px`;
-    pill.style.width = `${next.width}px`;
-    pill.style.opacity = "1";
-    const from = previous.current;
-    previous.current = next;
-    if (!from || from.left === next.left) return;
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-    const spanLeft = Math.min(from.left, next.left);
-    const spanRight = Math.max(from.left + from.width, next.left + next.width);
-    pill.animate(
-      [
-        { transform: `translateX(${from.left - next.left}px) scaleX(${from.width / next.width})` },
-        {
-          transform: `translateX(${spanLeft - next.left}px) scaleX(${(spanRight - spanLeft) / next.width})`,
-          offset: 0.45,
-        },
-        { transform: "none" },
-      ],
-      { duration: 300, easing: "cubic-bezier(0.77, 0, 0.175, 1)" },
-    );
+    const list = listRef.current;
+    if (!pill || !list) return;
+
+    const place = (animate: boolean) => {
+      const target = list.children[activeIndex] as HTMLElement | undefined;
+      // The desktop list is display:none below the lg breakpoint, so it measures 0 there.
+      if (activeIndex < 0 || !target || target.offsetWidth === 0) {
+        pill.style.opacity = "0";
+        delete list.dataset.pill;
+        previous.current = null;
+        return;
+      }
+      const next = { left: target.offsetLeft, width: target.offsetWidth };
+      pill.style.left = `${next.left}px`;
+      pill.style.width = `${next.width}px`;
+      pill.style.opacity = "1";
+      list.dataset.pill = "";
+      const from = previous.current;
+      previous.current = next;
+      if (!animate || !from || from.left === next.left || lastInput === "keyboard") return;
+      if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+      const spanLeft = Math.min(from.left, next.left);
+      const spanRight = Math.max(from.left + from.width, next.left + next.width);
+      pill.animate(
+        [
+          { transform: `translateX(${from.left - next.left}px) scaleX(${from.width / next.width})` },
+          {
+            transform: `translateX(${spanLeft - next.left}px) scaleX(${(spanRight - spanLeft) / next.width})`,
+            offset: 0.45,
+          },
+          { transform: "none" },
+        ],
+        { duration: 300, easing: "cubic-bezier(0.77, 0, 0.175, 1)" },
+      );
+    };
+
+    place(true);
+    // Re-place without animation when the breakpoint or font loading changes the link sizes.
+    const resizeObserver = new ResizeObserver(() => place(false));
+    resizeObserver.observe(list);
+    return () => resizeObserver.disconnect();
   }, [activeIndex]);
 
   return { listRef, pillRef };
@@ -58,24 +74,58 @@ function useStretchPill(activeIndex: number) {
 export default function Nav() {
   const pathname = usePathname();
   const [menuOpen, setMenuOpen] = useState(false);
+  const menuButtonRef = useRef<HTMLButtonElement>(null);
+  const menuRef = useRef<HTMLDivElement>(null);
   const activeIndex = links.findIndex((link) => link.page && pathname.startsWith(link.href));
   const { listRef, pillRef } = useStretchPill(activeIndex);
 
   useEffect(() => setMenuOpen(false), [pathname]);
 
   useEffect(() => {
+    const onPointer = () => (lastInput = "pointer");
+    const onKey = () => (lastInput = "keyboard");
+    window.addEventListener("pointerdown", onPointer, { capture: true, passive: true });
+    window.addEventListener("keydown", onKey, { capture: true, passive: true });
+    return () => {
+      window.removeEventListener("pointerdown", onPointer, { capture: true });
+      window.removeEventListener("keydown", onKey, { capture: true });
+    };
+  }, []);
+
+  useEffect(() => {
     if (!menuOpen) return;
-    const onKey = (event: KeyboardEvent) => event.key === "Escape" && setMenuOpen(false);
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key !== "Escape") return;
+      // Focus leaves the menu before it turns inert, so it lands on the button that opened it.
+      menuButtonRef.current?.focus();
+      setMenuOpen(false);
+    };
+    const onPointerDown = (event: PointerEvent) => {
+      const target = event.target as Node;
+      if (menuRef.current?.contains(target) || menuButtonRef.current?.contains(target)) return;
+      setMenuOpen(false);
+    };
     window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
+    document.addEventListener("pointerdown", onPointerDown);
+    return () => {
+      window.removeEventListener("keydown", onKey);
+      document.removeEventListener("pointerdown", onPointerDown);
+    };
   }, [menuOpen]);
+
+  function closeOnFocusLeave(event: React.FocusEvent<HTMLDivElement>) {
+    const next = event.relatedTarget as Node | null;
+    if (!next || event.currentTarget.contains(next) || menuButtonRef.current?.contains(next)) return;
+    setMenuOpen(false);
+  }
 
   return (
     <header className="relative z-30 border-b border-hairline bg-ground">
-      <nav aria-label="Main" className="shell flex h-[72px] items-center justify-between lg:h-24">
+      <div aria-hidden="true" data-open={menuOpen || undefined} className="menu-scrim lg:hidden" />
+      <nav aria-label="Main" className="shell relative flex h-[72px] items-center justify-between bg-ground lg:h-24">
         <Link
           href="/"
-          className="font-display text-[20px] leading-7 font-extrabold tracking-[-0.02em] lg:text-[22px]"
+          className="inline-flex min-h-11 items-center font-display text-[20px] leading-7 font-extrabold tracking-[-0.02em] lg:text-[22px]"
         >
           Abraham Rubio
         </Link>
@@ -102,6 +152,7 @@ export default function Nav() {
           </a>
           <ThemeSwitch />
           <button
+            ref={menuButtonRef}
             type="button"
             aria-expanded={menuOpen}
             aria-controls="mobile-menu"
@@ -113,7 +164,14 @@ export default function Nav() {
         </div>
       </nav>
 
-      <div id="mobile-menu" data-open={menuOpen || undefined} inert={!menuOpen} className="mobile-menu lg:hidden">
+      <div
+        ref={menuRef}
+        id="mobile-menu"
+        data-open={menuOpen || undefined}
+        inert={!menuOpen}
+        onBlur={closeOnFocusLeave}
+        className="mobile-menu lg:hidden"
+      >
         <ul className="shell flex flex-col pt-2 pb-6">
           {links.map((link, index) => (
             <li key={link.href} className="border-b border-hairline">
