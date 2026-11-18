@@ -20,6 +20,7 @@ function ProjectCover({ cover, priority }: { cover: Cover; priority?: boolean })
           fill
           placeholder="blur"
           priority={priority}
+          fetchPriority={priority ? "high" : undefined}
           sizes="(min-width: 768px) 280px, calc(100vw - 40px)"
           style={{ objectFit: contain ? "contain" : "cover" }}
         />
