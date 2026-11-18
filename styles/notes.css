@@ -86,7 +86,7 @@
   transition: transform 200ms var(--ease-out);
 }
 
-@media (hover: hover) and (pointer: fine) {
+@media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
   .next-note:hover .next-note-arrow {
     transform: translateX(6px);
   }

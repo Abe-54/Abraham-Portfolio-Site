@@ -9,6 +9,12 @@ const MAX_PULL = 28;
 const STIFFNESS = 200;
 const DAMPING = 21;
 
+const WAVED_KEY = "portrait-waved";
+
+function prefersReducedMotion() {
+  return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+}
+
 const WAVE: Keyframe[] = [
   { opacity: 0, transform: "scale(0.4) rotate(0deg)" },
   { opacity: 1, transform: "scale(1) rotate(0deg)", offset: 0.15 },
@@ -27,26 +33,39 @@ export default function GooeyPortrait() {
 
   const wave = useCallback(() => {
     const arm = armRef.current;
-    if (!arm || waving.current?.playState === "running") return;
+    if (!arm || waving.current?.playState === "running" || prefersReducedMotion()) return;
     waving.current = arm.animate(WAVE, { duration: 1100, easing: "cubic-bezier(0.77, 0, 0.175, 1)" });
   }, []);
 
   useEffect(() => {
     const root = rootRef.current;
     const goo = gooRef.current;
-    if (!root || !goo || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    if (!root || !goo || prefersReducedMotion()) return;
 
     if (!window.matchMedia("(hover: hover) and (pointer: fine)").matches) {
+      // Touch devices get one wave per visit, the first time the portrait is in view.
+      try {
+        if (sessionStorage.getItem(WAVED_KEY)) return;
+      } catch {}
+      let timer = 0;
       const observer = new IntersectionObserver(
         ([entry]) => {
           if (!entry.isIntersecting) return;
           observer.disconnect();
-          window.setTimeout(wave, 400);
+          timer = window.setTimeout(() => {
+            try {
+              sessionStorage.setItem(WAVED_KEY, "1");
+            } catch {}
+            wave();
+          }, 400);
         },
         { threshold: 0.6 },
       );
       observer.observe(root);
-      return () => observer.disconnect();
+      return () => {
+        observer.disconnect();
+        window.clearTimeout(timer);
+      };
     }
 
     let x = 0;
