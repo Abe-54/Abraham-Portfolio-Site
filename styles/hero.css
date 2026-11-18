@@ -1,6 +1,12 @@
+/*
+ * The two-column hero is a container query in em, sized from this font-size: 64em is 1024px at
+ * default text size. Enlarged text (200% text-only zoom) raises the threshold, so the hero falls
+ * back to the stacked layout and reflows instead of overflowing its fixed proportions.
+ */
 .hero {
   container-type: inline-size;
   background: #ffffff;
+  font-size: 1rem;
 }
 
 .hero-stage {
@@ -27,6 +33,7 @@
 .hero-title {
   font-size: clamp(52px, 14vw, 88px);
   line-height: 0.95;
+  overflow-wrap: break-word;
 }
 
 .hero-text {
@@ -99,18 +106,16 @@
   }
 }
 
-@media (min-width: 1024px) {
-  .hero {
-    background: linear-gradient(90deg, #ffffff 50%, #0b0b0c 50%);
-  }
-
+@container (min-width: 64em) {
   .hero-stage {
     --u: min(1px, calc(100cqw / 1440));
     display: flex;
     width: calc(1440 * var(--u));
-    height: calc(660 * var(--u));
+    min-height: calc(660 * var(--u));
     margin-inline: auto;
     background: #ffffff;
+    /* Past 1440px the night side continues to the right edge; a shadow adds no scrollable overflow. */
+    box-shadow: calc(1440 * var(--u)) 0 #0b0b0c;
     isolation: isolate;
   }
 

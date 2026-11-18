@@ -122,7 +122,7 @@ export default function Nav() {
   return (
     <header className="relative z-30 border-b border-hairline bg-ground">
       <div aria-hidden="true" data-open={menuOpen || undefined} className="menu-scrim lg:hidden" />
-      <nav aria-label="Main" className="shell relative flex h-[72px] items-center justify-between bg-ground lg:h-24">
+      <nav aria-label="Main" className="shell relative flex min-h-[72px] items-center justify-between bg-ground lg:min-h-24">
         <Link
           href="/"
           className="inline-flex min-h-11 items-center font-display text-[20px] leading-7 font-extrabold tracking-[-0.02em] lg:text-[22px]"
