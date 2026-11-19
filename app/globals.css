@@ -36,6 +36,11 @@
   --button: #0b0b0c;
 }
 
+/* Pages with and without a scrollbar share the same centre line. */
+html {
+  scrollbar-gutter: stable;
+}
+
 html[data-theme="night"],
 [data-tone="night"],
 [data-side="night"] {
@@ -127,7 +132,7 @@ main[tabindex="-1"]:focus {
   position: absolute;
   z-index: 50;
   top: 14px;
-  left: var(--gutter);
+  left: var(--shell-pad);
   display: inline-flex;
   align-items: center;
   min-height: 44px;
@@ -306,6 +311,30 @@ html[data-theme-swap] :is(.nav-link, .t-link, .footer-link, .email-copy, .note-t
     transform 300ms var(--ease-out) var(--delay, 0ms);
 }
 
+/* A project row paints its own full-width band, so the band is always there and only what is
+   inside it fades in. */
+.project-row[data-entrance="pending"] {
+  opacity: 1;
+  transform: none;
+}
+
+.project-row[data-entrance="pending"] > * {
+  opacity: 0;
+  transform: translateY(8px);
+}
+
+.project-row[data-entrance="shown"] > * {
+  transition:
+    opacity 300ms var(--ease-out) var(--delay, 0ms),
+    transform 300ms var(--ease-out) var(--delay, 0ms);
+}
+
+.project-row[data-entrance]:focus-within > * {
+  opacity: 1;
+  transform: none;
+  transition: none;
+}
+
 /* Keyboard focus never lands on something hidden or still fading in. */
 [data-entrance]:focus-within {
   opacity: 1;
@@ -314,7 +343,8 @@ html[data-theme-swap] :is(.nav-link, .t-link, .footer-link, .email-copy, .note-t
 }
 
 @media (prefers-reduced-motion: reduce) {
-  [data-entrance="pending"] {
+  [data-entrance="pending"],
+  .project-row[data-entrance="pending"] > * {
     transform: none;
   }
 

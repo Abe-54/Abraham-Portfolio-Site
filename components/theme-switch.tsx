@@ -10,6 +10,7 @@ const SWAP_MS = 560;
 // The knob lands on the far icon this far into the swap. The page sweep starts on that beat.
 const IMPACT = 0.72;
 const SEGMENT_EASE = "cubic-bezier(0.45, 0, 0.55, 1)";
+const SCROLL_KEYS = new Set(["ArrowUp", "ArrowDown", "PageUp", "PageDown", "Home", "End", " "]);
 
 function at(x: number, scaleX = 1, scaleY = 1) {
   return `translateX(${x.toFixed(2)}px) scale(${scaleX}, ${scaleY})`;
@@ -20,11 +21,12 @@ function at(x: number, scaleX = 1, scaleY = 1) {
  * squashes on landing and settles. Two smaller blobs leave late and catch up, and the goo filter
  * on the group melts them into a tail that snaps back into the knob.
  */
-function swapFrames(from: number, to: number): Keyframe[][] {
+function swapFrames(from: number, to: number, fromRest: boolean): Keyframe[][] {
   const d = to - from;
   const knob: Keyframe[] = [
     { transform: at(from), offset: 0 },
-    { transform: at(from - 0.06 * d, 0.88, 1.1), offset: 0.14 },
+    // The lean-back only plays from rest. A knob turned round mid-travel just goes.
+    { transform: fromRest ? at(from - 0.06 * d, 0.88, 1.1) : at(from + 0.1 * d, 1.1, 0.94), offset: 0.14 },
     { transform: at(from + 0.55 * d, 1.4, 0.74), offset: 0.5 },
     { transform: at(to + 0.07 * d, 0.84, 1.14), offset: 0.72 },
     { transform: at(to - 0.02 * d, 1.06, 0.95), offset: 0.86 },
@@ -164,14 +166,14 @@ export default function ThemeSwitch() {
    * The knob has landed: change the page. The new theme opens as a circle out of the knob. The
    * switch is part of the page, so the circle reveals its new face along with everything else.
    */
-  function sweep(next: Theme) {
+  function sweep(next: Theme, animate: boolean) {
     const root = document.documentElement;
     const button = buttonRef.current;
     const commit = () => {
       commitTheme(next);
       if (button) button.dataset.lit = next;
     };
-    if (currentTheme() === next || typeof document.startViewTransition !== "function") {
+    if (!animate || currentTheme() === next || typeof document.startViewTransition !== "function") {
       commit();
       return;
     }
@@ -184,6 +186,13 @@ export default function ThemeSwitch() {
     window.dispatchEvent(new CustomEvent("theme-sweep", { detail: true }));
     const transition = document.startViewTransition(commit);
     transitionRef.current = transition;
+    // Scrolling ends the sweep at once, so the page is never shown at two scroll positions.
+    const endOnScroll = (event: Event) => {
+      if (event instanceof KeyboardEvent && !SCROLL_KEYS.has(event.key)) return;
+      transition.skipTransition();
+    };
+    const scrollEvents = ["wheel", "touchmove", "keydown"] as const;
+    scrollEvents.forEach((type) => window.addEventListener(type, endOnScroll, { passive: true }));
     transition.ready
       .then(() => {
         if (transitionRef.current !== transition) return;
@@ -192,8 +201,8 @@ export default function ThemeSwitch() {
           { clipPath: [`circle(${knob}px at ${x}px ${y}px)`, `circle(${radius}px at ${x}px ${y}px)`] },
           {
             // A wider screen gets a longer sweep, so it reads as a sweep and not a flash.
-            duration: Math.min(700, Math.max(420, 260 + radius * 0.09)),
-            easing: "cubic-bezier(0.33, 1, 0.68, 1)",
+            duration: Math.min(620, Math.max(420, 260 + radius * 0.09)),
+            easing: "cubic-bezier(0.37, 0.6, 0.45, 1)",
             fill: "both",
             pseudoElement: "::view-transition-new(root)",
           },
@@ -201,6 +210,7 @@ export default function ThemeSwitch() {
       })
       .catch(() => {});
     const settle = () => {
+      scrollEvents.forEach((type) => window.removeEventListener(type, endOnScroll));
       if (transitionRef.current !== transition) return;
       transitionRef.current = null;
       window.dispatchEvent(new CustomEvent("theme-sweep", { detail: false }));
@@ -232,10 +242,11 @@ export default function ThemeSwitch() {
     gooAnimationsRef.current = [];
     button.dataset.knob = next;
     if (!animate || Math.abs(to - from) < 1) {
-      sweep(next);
+      sweep(next, animate);
       return;
     }
-    const animations = swapFrames(from, to).map((frames, index) =>
+    const fromRest = Math.abs(Math.abs(to - from) - TRAVEL) < 1;
+    const animations = swapFrames(from, to, fromRest).map((frames, index) =>
       blobs[index].animate(frames, { duration: SWAP_MS, easing: "linear" }),
     );
     gooAnimationsRef.current = animations;
@@ -245,13 +256,13 @@ export default function ThemeSwitch() {
     let left = false;
     const watch = () => {
       const time = Number(knob.currentTime ?? 0);
-      if (!left && time >= SWAP_MS * 0.3) {
+      if (!left && time >= SWAP_MS * 0.5) {
         left = true;
         button.dataset.lit = "";
       }
       if (time >= SWAP_MS * IMPACT || knob.playState === "finished") {
         landingRef.current = 0;
-        sweep(next);
+        sweep(next, true);
         return;
       }
       landingRef.current = requestAnimationFrame(watch);

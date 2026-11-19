@@ -65,7 +65,8 @@
   left: 50%;
   width: 200px;
   height: 200px;
-  margin-left: -100px;
+  /* The photo sits at 47% of this box, so this puts the photo, not the box, on the centre line. */
+  margin-left: -94px;
 }
 
 /* The metaball canvas is one and a half times the portrait's size and centred on the photo, so the goo has room
@@ -78,6 +79,15 @@
   height: 150%;
   transform: translate(-50%, -50%);
   pointer-events: none;
+  /* The canvas is square. Fading it out in a circle means goo that follows the pointer melts
+     away near the edge and is never cut by a straight line. */
+  -webkit-mask-image: radial-gradient(circle closest-side, #000 88%, transparent 100%);
+  mask-image: radial-gradient(circle closest-side, #000 88%, transparent 100%);
+}
+
+/* The blue button keeps a dark ring, so blue goo passing behind it never swallows its shape. */
+.hero-night .btn-blue {
+  box-shadow: 0 0 0 5px #0b0b0c;
 }
 
 /* Words and buttons always sit above the goo. */

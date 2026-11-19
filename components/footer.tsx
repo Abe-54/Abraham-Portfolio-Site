@@ -12,7 +12,7 @@ export default function Footer() {
       </div>
       <div
         data-tone="night"
-        className="flex flex-col justify-end gap-3 pr-[var(--shell-pad-half)] pl-[var(--gutter)] py-12 lg:py-[72px] lg:pl-44"
+        className="flex flex-col justify-end gap-3 pr-[var(--shell-pad-half)] pl-[var(--gutter)] py-12 lg:items-end lg:py-[72px]"
       >
         <ul className="flex flex-wrap items-center font-medium">
           {contact.links.map((link, index) => (

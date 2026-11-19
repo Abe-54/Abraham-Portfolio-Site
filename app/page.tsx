@@ -53,7 +53,7 @@ export default function Home() {
     <main id="main" tabIndex={-1}>
       <Hero />
 
-      <section aria-label="At a glance" className="shell flex flex-col gap-6 border-b-[1.5px] border-rule py-8 lg:flex-row lg:items-center lg:gap-14">
+      <section aria-label="At a glance" className="shell relative z-[2] bg-ground flex flex-col gap-6 border-b-[1.5px] border-rule py-8 lg:flex-row lg:items-center lg:gap-14">
         <dl className="flex flex-col gap-5 md:flex-row md:gap-10 lg:flex-1 lg:gap-14">
           {glance.map((item) => (
             <div key={item.label} className="flex flex-col gap-1.5 last:flex-1 last:whitespace-nowrap">

@@ -18,9 +18,22 @@ export default function GooeyPortrait() {
     // The goo holds still while the day/night sweep crosses the page.
     const onSweep = (event: Event) => setHeld((event as CustomEvent<boolean>).detail);
     window.addEventListener("theme-sweep", onSweep);
+    // The goo tracks pointer moves only. After a scroll the pointer is over a different part of
+    // the page without having moved, so tell the goo where it is now.
+    let last: { x: number; y: number } | null = null;
+    const onMove = (event: PointerEvent) => {
+      if (event.isTrusted) last = { x: event.clientX, y: event.clientY };
+    };
+    const onScroll = () => {
+      if (last) window.dispatchEvent(new PointerEvent("pointermove", { clientX: last.x, clientY: last.y }));
+    };
+    window.addEventListener("pointermove", onMove, { passive: true });
+    window.addEventListener("scroll", onScroll, { passive: true });
     return () => {
       query.removeEventListener("change", sync);
       window.removeEventListener("theme-sweep", onSweep);
+      window.removeEventListener("pointermove", onMove);
+      window.removeEventListener("scroll", onScroll);
     };
   }, []);
 
@@ -33,14 +46,15 @@ export default function GooeyPortrait() {
             cursorBallColor="#3366FF"
             enableTransparency
             paused={held}
-            ballCount={30}
-            clumpFactor={1.02}
+            intro={false}
+            ballCount={40}
+            clumpFactor={0.95}
             cursorBallSize={1.8}
             animationSize={30}
             speed={0.3}
             hoverSmoothness={0.08}
-            gooeyness={0.62}
-            stickiness={0.65}
+            gooeyness={0.7}
+            stickiness={0.45}
             stretch={0.6}
             wobble={0.55}
           />
