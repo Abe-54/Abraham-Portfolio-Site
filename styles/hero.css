@@ -76,10 +76,42 @@
   overflow: visible;
 }
 
-.goo-breathe {
-  transform-box: fill-box;
-  transform-origin: center;
-  animation: breathe 4s ease-in-out infinite alternate;
+/* Goo pieces sit around the photo's centre and move with transforms only. */
+.portrait-goo-part {
+  transform-box: view-box;
+  transform-origin: 0 0;
+}
+
+.goo-turn {
+  animation: goo-turn 44s linear infinite;
+}
+
+.goo-turn-2 {
+  animation-duration: 61s;
+  animation-direction: reverse;
+}
+
+.goo-turn-3 {
+  animation-duration: 83s;
+}
+
+.portrait[data-paused] .goo-turn {
+  animation-play-state: paused;
+}
+
+.goo-lobe {
+  transform: translate(0, -118px);
+}
+
+.goo-droplet {
+  transform: scale(0);
+}
+
+/* Only pointer devices stretch the goo, so only they pay for the filter that melts the pieces together. */
+@media (hover: hover) and (pointer: fine) {
+  .portrait-goo-melt {
+    filter: url(#portrait-goo-filter);
+  }
 }
 
 .portrait-mask {
@@ -94,9 +126,9 @@
   background: #f1f1f2;
 }
 
-@keyframes breathe {
+@keyframes goo-turn {
   to {
-    transform: scale(1.03);
+    transform: rotate(360deg);
   }
 }
 
@@ -188,7 +220,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .goo-breathe {
+  .goo-turn {
     animation: none;
   }
 }
