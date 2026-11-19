@@ -104,7 +104,9 @@
 
 @media (min-width: 1280px) {
   .project-row {
-    grid-template-columns: 120px minmax(0, 440fr) minmax(0, 352fr) 280px;
+    /* Up to a 1440px page one fr is one pixel and the cover is 280px. Past that the row grows to the
+       content cap and the cover grows with the text columns. */
+    grid-template-columns: 120px minmax(0, 440fr) minmax(0, 352fr) minmax(280px, 280fr);
     grid-template-rows: auto;
     grid-template-areas: "meta main facts cover";
     align-items: start;
