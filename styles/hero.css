@@ -68,49 +68,34 @@
   margin-left: -100px;
 }
 
+/* The metaball canvas is one and a half times the portrait's size and centred on the photo, so the goo has room
+   to orbit past the rim and to reach for the pointer. It never takes clicks. */
 .portrait-goo {
   position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  overflow: visible;
+  left: 47.06%;
+  top: 46.47%;
+  width: 150%;
+  height: 150%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
 }
 
-/* Goo pieces sit around the photo's centre and move with transforms only. */
-.portrait-goo-part {
-  transform-box: view-box;
-  transform-origin: 0 0;
+/* Words and buttons always sit above the goo. */
+.hero-copy,
+.hero-btn,
+.hero-night > p,
+.hero-night > h2 {
+  position: relative;
+  z-index: 2;
 }
 
-.goo-turn {
-  animation: goo-turn 44s linear infinite;
-}
-
-.goo-turn-2 {
-  animation-duration: 61s;
-  animation-direction: reverse;
-}
-
-.goo-turn-3 {
-  animation-duration: 83s;
-}
-
-.portrait[data-paused] .goo-turn {
-  animation-play-state: paused;
-}
-
-.goo-lobe {
-  transform: translate(0, -118px);
-}
-
-.goo-droplet {
-  transform: scale(0);
-}
-
-/* Only pointer devices stretch the goo, so only they pay for the filter that melts the pieces together. */
-@media (hover: hover) and (pointer: fine) {
-  .portrait-goo-melt {
-    filter: url(#portrait-goo-filter);
+/* Reduced motion: a still blue rim instead of moving goo. */
+@media (prefers-reduced-motion: reduce) {
+  .portrait-goo {
+    width: 90%;
+    height: 90%;
+    border-radius: 47% 53% 45% 55% / 52% 44% 56% 48%;
+    background: #3366ff;
   }
 }
 
@@ -124,12 +109,6 @@
   border: 5px solid #ffffff;
   border-radius: 47% 53% 45% 55% / 52% 44% 56% 48%;
   background: #f1f1f2;
-}
-
-@keyframes goo-turn {
-  to {
-    transform: rotate(360deg);
-  }
 }
 
 @container (min-width: 64em) {
@@ -216,11 +195,5 @@
 
   .portrait-mask {
     border-width: calc(6 * var(--u));
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .goo-turn {
-    animation: none;
   }
 }
