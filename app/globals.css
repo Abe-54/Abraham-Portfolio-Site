@@ -87,7 +87,11 @@ html[data-theme="night"] {
   }
 }
 
+/* The body is a column at least the window's height, so the footer of a short page meets the bottom. */
 body {
+  display: flex;
+  flex-direction: column;
+  min-height: 100svh;
   background: var(--ground);
   color: var(--ink);
   font-family: var(--font-body);
@@ -96,6 +100,10 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   overflow-x: clip;
+}
+
+body > main {
+  flex: 1 0 auto;
 }
 
 [data-tone],
