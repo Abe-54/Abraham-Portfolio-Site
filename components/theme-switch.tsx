@@ -81,16 +81,15 @@ export default function ThemeSwitch() {
   const [night, setNight] = useState(false);
   const buttonRef = useRef<HTMLButtonElement>(null);
   const gooRef = useRef<SVGSVGElement>(null);
-  // The theme the visitor asked for last. The page catches up to it one transition at a time.
+  // The theme the visitor asked for last.
   const themeRef = useRef<Theme>("day");
-  const animateRef = useRef(true);
   const transitionRef = useRef<ViewTransition | null>(null);
-  const targetRef = useRef<Theme | null>(null);
   const discRef = useRef<Animation | null>(null);
   const gooAnimationsRef = useRef<Animation[]>([]);
-  const litTimerRef = useRef(0);
-  // When the knob lands (performance.now() time). The sweep waits for it.
-  const impactAtRef = useRef(0);
+  // The frame loop that waits for the knob to land.
+  const landingRef = useRef(0);
+  // A click on the switch during the sweep. It plays once the sweep ends.
+  const queuedRef = useRef(false);
   const toggleRef = useRef<(animate: boolean) => void>(() => {});
 
   useEffect(() => {
@@ -117,13 +116,12 @@ export default function ThemeSwitch() {
       const running = transitionRef.current;
       if (!running || event.target !== document.documentElement || overSwitch(event)) return;
       forward = true;
-      animateRef.current = false;
       running.skipTransition();
     };
     const onRootClick = (event: MouseEvent) => {
       if (event.target !== document.documentElement) return;
       if (transitionRef.current && overSwitch(event)) {
-        toggleRef.current(event.detail > 0 && !prefersReducedMotion());
+        toggleRef.current(!prefersReducedMotion());
         return;
       }
       if (!forward) return;
@@ -158,109 +156,125 @@ export default function ThemeSwitch() {
     return () => {
       document.removeEventListener("pointerdown", onRootPointerDown, true);
       document.removeEventListener("click", onRootClick);
+      cancelAnimationFrame(landingRef.current);
     };
   }, []);
 
+  /**
+   * The knob has landed: change the page. The new theme opens as a circle out of the knob. The
+   * switch is part of the page, so the circle reveals its new face along with everything else.
+   */
+  function sweep(next: Theme) {
+    const root = document.documentElement;
+    const button = buttonRef.current;
+    const commit = () => {
+      commitTheme(next);
+      if (button) button.dataset.lit = next;
+    };
+    if (currentTheme() === next || typeof document.startViewTransition !== "function") {
+      commit();
+      return;
+    }
+    const box = button?.getBoundingClientRect();
+    const x = box ? box.left + (box.width * (next === "night" ? 64 : 20)) / 84 : window.innerWidth;
+    const y = box ? box.top + box.height / 2 : 0;
+    const knob = box ? (box.width * 14) / 84 : 0;
+    // Anything that redraws every frame (the portrait goo) holds still for the sweep, so the
+    // browser is not re-capturing the page on each frame of it.
+    window.dispatchEvent(new CustomEvent("theme-sweep", { detail: true }));
+    const transition = document.startViewTransition(commit);
+    transitionRef.current = transition;
+    transition.ready
+      .then(() => {
+        if (transitionRef.current !== transition) return;
+        const radius = Math.hypot(Math.max(x, window.innerWidth - x), Math.max(y, window.innerHeight - y));
+        discRef.current = root.animate(
+          { clipPath: [`circle(${knob}px at ${x}px ${y}px)`, `circle(${radius}px at ${x}px ${y}px)`] },
+          {
+            // A wider screen gets a longer sweep, so it reads as a sweep and not a flash.
+            duration: Math.min(700, Math.max(420, 260 + radius * 0.09)),
+            easing: "cubic-bezier(0.33, 1, 0.68, 1)",
+            fill: "both",
+            pseudoElement: "::view-transition-new(root)",
+          },
+        );
+      })
+      .catch(() => {});
+    const settle = () => {
+      if (transitionRef.current !== transition) return;
+      transitionRef.current = null;
+      window.dispatchEvent(new CustomEvent("theme-sweep", { detail: false }));
+      discRef.current?.cancel();
+      discRef.current = null;
+      if (queuedRef.current) {
+        queuedRef.current = false;
+        toggle(!prefersReducedMotion());
+      }
+    };
+    transition.finished.then(settle, settle);
+  }
+
+  /** Move the knob. With motion, the page changes when the knob lands; without, at once. */
   function moveKnob(next: Theme, animate: boolean) {
     const button = buttonRef.current;
     const goo = gooRef.current;
-    if (!button || !goo) return;
+    cancelAnimationFrame(landingRef.current);
+    landingRef.current = 0;
+    if (!button || !goo) {
+      commitTheme(next);
+      return;
+    }
     const blobs = Array.from(goo.querySelectorAll<SVGCircleElement>(".gs-move"));
     // Start from wherever the knob is now, so a change of mind mid-swap never jumps.
     const from = blobs[0] ? new DOMMatrix(getComputedStyle(blobs[0]).transform).m41 : 0;
     const to = next === "night" ? TRAVEL : 0;
     gooAnimationsRef.current.forEach((animation) => animation.cancel());
     gooAnimationsRef.current = [];
-    window.clearTimeout(litTimerRef.current);
     button.dataset.knob = next;
     if (!animate || Math.abs(to - from) < 1) {
-      button.dataset.lit = next;
-      button.dataset.face = next;
-      impactAtRef.current = performance.now();
+      sweep(next);
       return;
     }
-    // The icon being left dims at once. On landing, the icon reached lights up and the switch
-    // takes the new theme's colours, on the same beat as the page sweep starting.
-    button.dataset.lit = "";
-    button.dataset.face ??= next === "night" ? "day" : "night";
-    impactAtRef.current = performance.now() + SWAP_MS * IMPACT;
-    litTimerRef.current = window.setTimeout(() => {
-      button.dataset.lit = next;
-      button.dataset.face = next;
-    }, SWAP_MS * IMPACT);
-    gooAnimationsRef.current = swapFrames(from, to).map((frames, index) =>
+    const animations = swapFrames(from, to).map((frames, index) =>
       blobs[index].animate(frames, { duration: SWAP_MS, easing: "linear" }),
     );
-  }
-
-  /** Bring the page to the wanted theme. A running disc is never cut short or skipped to its end. */
-  function catchUp() {
-    const root = document.documentElement;
-    const next = themeRef.current;
-    if (transitionRef.current || currentTheme() === next) return;
-    if (!animateRef.current) {
-      commitTheme(next);
-      return;
-    }
-    const wait = () => Math.max(0, impactAtRef.current - performance.now());
-    if (typeof document.startViewTransition !== "function") {
-      // No sweep in this browser: the page still changes as the knob lands.
-      window.setTimeout(() => commitTheme(themeRef.current), wait());
-      return;
-    }
-    // The new theme grows out of the knob from where it lands.
-    const box = buttonRef.current?.getBoundingClientRect();
-    const x = box ? box.left + (box.width * (next === "night" ? 64 : 20)) / 84 : window.innerWidth;
-    const y = box ? box.top + box.height / 2 : 0;
-    const transition = document.startViewTransition(() => commitTheme(next));
-    transitionRef.current = transition;
-    targetRef.current = next;
-    transition.ready
-      .then(() => {
-        if (transitionRef.current !== transition) return;
-        const radius = Math.hypot(Math.max(x, window.innerWidth - x), Math.max(y, window.innerHeight - y));
-        discRef.current = root.animate(
-          { clipPath: [`circle(0px at ${x}px ${y}px)`, `circle(${radius}px at ${x}px ${y}px)`] },
-          {
-            // Held shut until the knob lands, then it opens.
-            delay: wait(),
-            duration: 520,
-            easing: "cubic-bezier(0.23, 1, 0.32, 1)",
-            fill: "both",
-            pseudoElement: "::view-transition-new(root)",
-          },
-        );
-        // The visitor already changed their mind: finish this sweep quickly, then run the next one.
-        if (themeRef.current !== next) discRef.current.updatePlaybackRate(3);
-      })
-      .catch(() => {});
-    const settle = () => {
-      if (transitionRef.current !== transition) return;
-      transitionRef.current = null;
-      targetRef.current = null;
-      discRef.current?.cancel();
-      discRef.current = null;
-      catchUp();
+    gooAnimationsRef.current = animations;
+    // One clock for everything: the knob animation itself. The icon it leaves dims once the knob
+    // is off it, and the page changes on the frame the knob lands.
+    const knob = animations[0];
+    let left = false;
+    const watch = () => {
+      const time = Number(knob.currentTime ?? 0);
+      if (!left && time >= SWAP_MS * 0.3) {
+        left = true;
+        button.dataset.lit = "";
+      }
+      if (time >= SWAP_MS * IMPACT || knob.playState === "finished") {
+        landingRef.current = 0;
+        sweep(next);
+        return;
+      }
+      landingRef.current = requestAnimationFrame(watch);
     };
-    transition.finished.then(settle, settle);
+    landingRef.current = requestAnimationFrame(watch);
   }
 
   function toggle(animate: boolean) {
+    const running = transitionRef.current;
+    if (running) {
+      if (animate) {
+        // Mid-sweep: remember the click and play it when the sweep ends. Two clicks cancel out.
+        queuedRef.current = !queuedRef.current;
+        return;
+      }
+      queuedRef.current = false;
+      running.skipTransition();
+    }
     const next: Theme = themeRef.current === "night" ? "day" : "night";
     themeRef.current = next;
-    animateRef.current = animate;
     setNight(next === "night");
     storeTheme(next);
     moveKnob(next, animate);
-    const running = transitionRef.current;
-    if (!running) {
-      catchUp();
-    } else if (!animate) {
-      // Keyboard and reduced motion switch at once, even over a running disc.
-      running.skipTransition();
-    } else if (targetRef.current !== next) {
-      discRef.current?.updatePlaybackRate(3);
-    }
   }
   toggleRef.current = toggle;
 
@@ -268,8 +282,8 @@ export default function ThemeSwitch() {
     <button
       ref={buttonRef}
       type="button"
-      // Keyboard presses (detail 0) and reduced motion swap at once.
-      onClick={(event) => toggle(event.detail > 0 && !prefersReducedMotion())}
+      // Only reduced motion swaps at once. Keyboard presses get the same motion as clicks.
+      onClick={() => toggle(!prefersReducedMotion())}
       aria-pressed={night}
       aria-label="Night mode"
       className="goo-switch press"

@@ -137,24 +137,6 @@ html[data-theme-swap] :is(.nav-link, .t-link, .footer-link, .email-copy, .note-t
   mix-blend-mode: normal;
 }
 
-/* The switch is lifted out of the page snapshot and stays live, so its goo swap plays above the disc. */
-.goo-switch {
-  view-transition-name: theme-switch;
-}
-
-::view-transition-group(theme-switch) {
-  animation: none;
-  z-index: 2;
-}
-
-::view-transition-old(theme-switch) {
-  display: none;
-}
-
-::view-transition-new(theme-switch) {
-  animation: none;
-}
-
 @layer components {
   .shell {
     padding-inline: var(--gutter);
