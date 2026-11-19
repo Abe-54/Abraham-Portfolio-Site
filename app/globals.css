@@ -137,10 +137,6 @@ html[data-theme-swap] :is(.nav-link, .t-link, .footer-link, .email-copy, .note-t
   mix-blend-mode: normal;
 }
 
-html[data-theme-shift="shrink"]::view-transition-old(root) {
-  z-index: 1;
-}
-
 /* The switch is lifted out of the page snapshot and stays live, so its goo swap plays above the disc. */
 .goo-switch {
   view-transition-name: theme-switch;

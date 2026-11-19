@@ -7,6 +7,8 @@ type Theme = "day" | "night";
 // The knob travels 44px between the sun and the moon.
 const TRAVEL = 44;
 const SWAP_MS = 560;
+// The knob lands on the far icon this far into the swap. The page sweep starts on that beat.
+const IMPACT = 0.72;
 const SEGMENT_EASE = "cubic-bezier(0.45, 0, 0.55, 1)";
 
 function at(x: number, scaleX = 1, scaleY = 1) {
@@ -87,6 +89,8 @@ export default function ThemeSwitch() {
   const discRef = useRef<Animation | null>(null);
   const gooAnimationsRef = useRef<Animation[]>([]);
   const litTimerRef = useRef(0);
+  // When the knob lands (performance.now() time). The sweep waits for it.
+  const impactAtRef = useRef(0);
   const toggleRef = useRef<(animate: boolean) => void>(() => {});
 
   useEffect(() => {
@@ -171,13 +175,19 @@ export default function ThemeSwitch() {
     button.dataset.knob = next;
     if (!animate || Math.abs(to - from) < 1) {
       button.dataset.lit = next;
+      button.dataset.face = next;
+      impactAtRef.current = performance.now();
       return;
     }
-    // The icon being left dims at once; the one being reached lights up as the knob lands on it.
+    // The icon being left dims at once. On landing, the icon reached lights up and the switch
+    // takes the new theme's colours, on the same beat as the page sweep starting.
     button.dataset.lit = "";
+    button.dataset.face ??= next === "night" ? "day" : "night";
+    impactAtRef.current = performance.now() + SWAP_MS * IMPACT;
     litTimerRef.current = window.setTimeout(() => {
       button.dataset.lit = next;
-    }, SWAP_MS * 0.55);
+      button.dataset.face = next;
+    }, SWAP_MS * IMPACT);
     gooAnimationsRef.current = swapFrames(from, to).map((frames, index) =>
       blobs[index].animate(frames, { duration: SWAP_MS, easing: "linear" }),
     );
@@ -188,15 +198,20 @@ export default function ThemeSwitch() {
     const root = document.documentElement;
     const next = themeRef.current;
     if (transitionRef.current || currentTheme() === next) return;
-    if (!animateRef.current || typeof document.startViewTransition !== "function") {
+    if (!animateRef.current) {
       commitTheme(next);
       return;
     }
-    const growing = next === "night";
-    const origin = buttonRef.current?.getBoundingClientRect();
-    const x = origin ? origin.left + origin.width / 2 : window.innerWidth;
-    const y = origin ? origin.top + origin.height / 2 : 0;
-    root.dataset.themeShift = growing ? "grow" : "shrink";
+    const wait = () => Math.max(0, impactAtRef.current - performance.now());
+    if (typeof document.startViewTransition !== "function") {
+      // No sweep in this browser: the page still changes as the knob lands.
+      window.setTimeout(() => commitTheme(themeRef.current), wait());
+      return;
+    }
+    // The new theme grows out of the knob from where it lands.
+    const box = buttonRef.current?.getBoundingClientRect();
+    const x = box ? box.left + (box.width * (next === "night" ? 64 : 20)) / 84 : window.innerWidth;
+    const y = box ? box.top + box.height / 2 : 0;
     const transition = document.startViewTransition(() => commitTheme(next));
     transitionRef.current = transition;
     targetRef.current = next;
@@ -204,17 +219,18 @@ export default function ThemeSwitch() {
       .then(() => {
         if (transitionRef.current !== transition) return;
         const radius = Math.hypot(Math.max(x, window.innerWidth - x), Math.max(y, window.innerHeight - y));
-        const disc = [`circle(0px at ${x}px ${y}px)`, `circle(${radius}px at ${x}px ${y}px)`];
         discRef.current = root.animate(
-          { clipPath: growing ? disc : disc.reverse() },
+          { clipPath: [`circle(0px at ${x}px ${y}px)`, `circle(${radius}px at ${x}px ${y}px)`] },
           {
-            duration: 500,
+            // Held shut until the knob lands, then it opens.
+            delay: wait(),
+            duration: 520,
             easing: "cubic-bezier(0.23, 1, 0.32, 1)",
-            fill: "forwards",
-            pseudoElement: growing ? "::view-transition-new(root)" : "::view-transition-old(root)",
+            fill: "both",
+            pseudoElement: "::view-transition-new(root)",
           },
         );
-        // The visitor already changed their mind: finish this disc quickly, then run the next one.
+        // The visitor already changed their mind: finish this sweep quickly, then run the next one.
         if (themeRef.current !== next) discRef.current.updatePlaybackRate(3);
       })
       .catch(() => {});
@@ -224,7 +240,6 @@ export default function ThemeSwitch() {
       targetRef.current = null;
       discRef.current?.cancel();
       discRef.current = null;
-      delete root.dataset.themeShift;
       catchUp();
     };
     transition.finished.then(settle, settle);

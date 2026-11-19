@@ -131,7 +131,9 @@
   stroke: #0b0b0c;
 }
 
-html[data-theme="night"] .gs-track {
+/* The switch wears the theme. Once used, it changes face as the knob lands, in step with the sweep. */
+html[data-theme="night"] .goo-switch:not([data-face]) .gs-track,
+.goo-switch[data-face="night"] .gs-track {
   fill: #1c1c20;
   stroke: #3a3a3f;
 }
@@ -157,7 +159,8 @@ html[data-theme="night"] .goo-switch:not([data-knob]) .gs-move,
   color: #0b0b0c;
 }
 
-html[data-theme="night"] .gs-icon {
+html[data-theme="night"] .goo-switch:not([data-face]) .gs-icon,
+.goo-switch[data-face="night"] .gs-icon {
   color: #a3a3a8;
 }
 
