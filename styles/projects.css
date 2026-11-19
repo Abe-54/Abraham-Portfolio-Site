@@ -234,7 +234,7 @@
 }
 
 .project-page-list > .project-row {
-  --row-pad: var(--gutter);
+  --row-pad: var(--shell-pad);
   border-top: 1px solid var(--hairline);
 }
 

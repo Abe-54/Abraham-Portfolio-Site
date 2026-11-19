@@ -54,6 +54,9 @@ html[data-theme="night"],
   --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
   --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
   --gutter: 20px;
+  /* The side padding of every full-width band. Below 1280 it is the gutter. */
+  --shell-pad: var(--gutter);
+  --shell-pad-half: var(--gutter);
   color-scheme: light;
 }
 
@@ -67,9 +70,20 @@ html[data-theme="night"] {
   }
 }
 
+/*
+ * One content cap for the whole site, taken from the hero stage. The stage is 1440 units wide with a
+ * 64-unit inset, and a unit grows with the width up to 1.25px, so the stage stops at 1800px and its
+ * content at 1312 units: 41/45 of the width, at most 1640px. Every band keeps painting its ground edge
+ * to edge; only its padding grows, so its content shares the hero copy's left edge and the stage's
+ * right inset. The percentages resolve against the band that uses the value, so it must be full width.
+ * Up to a 1440px band this works out to less than the 64px gutter, so nothing moves there.
+ */
 @media (min-width: 1280px) {
   :root {
     --gutter: 64px;
+    --shell-pad: max(var(--gutter), calc((100% - min(100% * 41 / 45, 1640px)) / 2));
+    /* The same edge for a box that is exactly half of a full-width band (the footer halves). */
+    --shell-pad-half: max(var(--gutter), calc(100% - min(100% * 41 / 45, 820px)));
   }
 }
 
@@ -139,7 +153,7 @@ html[data-theme-swap] :is(.nav-link, .t-link, .footer-link, .email-copy, .note-t
 
 @layer components {
   .shell {
-    padding-inline: var(--gutter);
+    padding-inline: var(--shell-pad);
   }
 
   .t-label {

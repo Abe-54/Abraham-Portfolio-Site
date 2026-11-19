@@ -112,16 +112,37 @@
 }
 
 @container (min-width: 64em) {
+  /* The stage scales with the width up to 1.25px a unit, so it stops growing at 1800px and stays
+     centred. Its copy insets (64 units) are the content edges of every band below (--shell-pad). */
   .hero-stage {
-    --u: min(1px, calc(100cqw / 1440));
+    --u: min(1.25px, calc(100cqw / 1440));
     display: flex;
     width: calc(1440 * var(--u));
     min-height: calc(660 * var(--u));
     margin-inline: auto;
     background: #ffffff;
-    /* Past 1440px the night side continues to the right edge; a shadow adds no scrollable overflow. */
-    box-shadow: calc(1440 * var(--u)) 0 #0b0b0c;
     isolation: isolate;
+  }
+
+  /* Past the stage, day continues to the left window edge and night to the right one. Each fill is
+     exactly as wide as the gap beside the stage, so neither adds scrollable overflow. */
+  .hero-stage::before,
+  .hero-stage::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: calc((100cqw - 100%) / 2);
+  }
+
+  .hero-stage::before {
+    right: 100%;
+    background: #ffffff;
+  }
+
+  .hero-stage::after {
+    left: 100%;
+    background: #0b0b0c;
   }
 
   .hero-disc-clip {

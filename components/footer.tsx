@@ -4,7 +4,7 @@ import EmailCopy from "./email-copy";
 export default function Footer() {
   return (
     <footer id="contact" className="grid scroll-mt-4 lg:grid-cols-2">
-      <div data-tone="day" className="flex flex-col gap-5 border-t-[1.5px] border-rule px-[var(--gutter)] py-14 lg:py-[72px] lg:pr-14">
+      <div data-tone="day" className="flex flex-col gap-5 border-t-[1.5px] border-rule pr-[var(--gutter)] pl-[var(--shell-pad-half)] py-14 lg:py-[72px] lg:pr-14">
         <h2 className="font-display text-[40px] leading-[1.04] font-extrabold tracking-[-0.035em] lg:text-[56px]">
           Say hi, any shift.
         </h2>
@@ -12,7 +12,7 @@ export default function Footer() {
       </div>
       <div
         data-tone="night"
-        className="flex flex-col justify-end gap-3 px-[var(--gutter)] py-12 lg:py-[72px] lg:pl-44"
+        className="flex flex-col justify-end gap-3 pr-[var(--shell-pad-half)] pl-[var(--gutter)] py-12 lg:py-[72px] lg:pl-44"
       >
         <ul className="flex flex-wrap items-center font-medium">
           {contact.links.map((link, index) => (
