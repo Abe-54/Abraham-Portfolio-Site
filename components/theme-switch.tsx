@@ -4,13 +4,46 @@ import { useEffect, useRef, useState } from "react";
 
 type Theme = "day" | "night";
 
-const GOO_DUMBBELL =
-  "M20,6 C28,6 32,12 38,14 C41,15 43,15 46,14 C52,12 56,6 64,6 C72,6 78,12 78,20 C78,28 72,34 64,34 C56,34 52,28 46,26 C43,25 41,25 38,26 C32,28 28,34 20,34 C12,34 6,28 6,20 C6,12 12,6 20,6 Z";
+// The knob travels 44px between the sun and the moon.
+const TRAVEL = 44;
+const SWAP_MS = 560;
+const SEGMENT_EASE = "cubic-bezier(0.45, 0, 0.55, 1)";
 
-// Clip boxes hug the blobs and have round ends, so the goo never shows a straight cut edge.
-const LEFT_LOBE = "inset(6px 50px 6px 6px round 14px)";
-const RIGHT_LOBE = "inset(6px 6px 6px 50px round 14px)";
-const BOTH_LOBES = "inset(6px 6px 6px 6px round 14px)";
+function at(x: number, scaleX = 1, scaleY = 1) {
+  return `translateX(${x.toFixed(2)}px) scale(${scaleX}, ${scaleY})`;
+}
+
+/**
+ * Squash and stretch for the swap. The knob leans back, stretches as it travels, overshoots,
+ * squashes on landing and settles. Two smaller blobs leave late and catch up, and the goo filter
+ * on the group melts them into a tail that snaps back into the knob.
+ */
+function swapFrames(from: number, to: number): Keyframe[][] {
+  const d = to - from;
+  const knob: Keyframe[] = [
+    { transform: at(from), offset: 0 },
+    { transform: at(from - 0.06 * d, 0.88, 1.1), offset: 0.14 },
+    { transform: at(from + 0.55 * d, 1.4, 0.74), offset: 0.5 },
+    { transform: at(to + 0.07 * d, 0.84, 1.14), offset: 0.72 },
+    { transform: at(to - 0.02 * d, 1.06, 0.95), offset: 0.86 },
+    { transform: at(to), offset: 1 },
+  ];
+  const tail: Keyframe[] = [
+    { transform: at(from), offset: 0 },
+    { transform: at(from), offset: 0.22 },
+    { transform: at(from + 0.3 * d, 1.25, 0.8), offset: 0.55 },
+    { transform: at(to, 0.8, 0.8), offset: 0.84 },
+    { transform: at(to, 0.6, 0.6), offset: 1 },
+  ];
+  const drop: Keyframe[] = [
+    { transform: at(from), offset: 0 },
+    { transform: at(from), offset: 0.36 },
+    { transform: at(from + 0.45 * d, 1.2, 0.85), offset: 0.7 },
+    { transform: at(to, 0.7, 0.7), offset: 0.94 },
+    { transform: at(to, 0.6, 0.6), offset: 1 },
+  ];
+  return [knob, tail, drop].map((frames) => frames.map((frame) => ({ ...frame, easing: SEGMENT_EASE })));
+}
 
 const THEME_COLOR: Record<Theme, string> = { day: "#ffffff", night: "#0b0b0c" };
 
@@ -52,7 +85,8 @@ export default function ThemeSwitch() {
   const transitionRef = useRef<ViewTransition | null>(null);
   const targetRef = useRef<Theme | null>(null);
   const discRef = useRef<Animation | null>(null);
-  const gooAnimationRef = useRef<Animation | null>(null);
+  const gooAnimationsRef = useRef<Animation[]>([]);
+  const litTimerRef = useRef(0);
   const toggleRef = useRef<(animate: boolean) => void>(() => {});
 
   useEffect(() => {
@@ -126,30 +160,27 @@ export default function ThemeSwitch() {
   function moveKnob(next: Theme, animate: boolean) {
     const button = buttonRef.current;
     const goo = gooRef.current;
-    gooAnimationRef.current?.cancel();
-    gooAnimationRef.current = null;
     if (!button || !goo) return;
-    if (!animate) {
-      delete button.dataset.moving;
+    const blobs = Array.from(goo.querySelectorAll<SVGCircleElement>(".gs-move"));
+    // Start from wherever the knob is now, so a change of mind mid-swap never jumps.
+    const from = blobs[0] ? new DOMMatrix(getComputedStyle(blobs[0]).transform).m41 : 0;
+    const to = next === "night" ? TRAVEL : 0;
+    gooAnimationsRef.current.forEach((animation) => animation.cancel());
+    gooAnimationsRef.current = [];
+    window.clearTimeout(litTimerRef.current);
+    button.dataset.knob = next;
+    if (!animate || Math.abs(to - from) < 1) {
+      button.dataset.lit = next;
       return;
     }
-    button.dataset.moving = "";
-    const lobes = next === "night" ? [LEFT_LOBE, RIGHT_LOBE] : [RIGHT_LOBE, LEFT_LOBE];
-    const animation = goo.animate(
-      [
-        { clipPath: lobes[0], opacity: 1 },
-        { clipPath: BOTH_LOBES, opacity: 1, offset: 0.5 },
-        { clipPath: lobes[1], opacity: 1 },
-      ],
-      { duration: 420, easing: "cubic-bezier(0.77, 0, 0.175, 1)" },
+    // The icon being left dims at once; the one being reached lights up as the knob lands on it.
+    button.dataset.lit = "";
+    litTimerRef.current = window.setTimeout(() => {
+      button.dataset.lit = next;
+    }, SWAP_MS * 0.55);
+    gooAnimationsRef.current = swapFrames(from, to).map((frames, index) =>
+      blobs[index].animate(frames, { duration: SWAP_MS, easing: "linear" }),
     );
-    gooAnimationRef.current = animation;
-    const settle = () => {
-      if (gooAnimationRef.current !== animation) return;
-      gooAnimationRef.current = null;
-      delete button.dataset.moving;
-    };
-    animation.finished.then(settle, settle);
   }
 
   /** Bring the page to the wanted theme. A running disc is never cut short or skipped to its end. */
@@ -230,15 +261,29 @@ export default function ThemeSwitch() {
     >
       <svg viewBox="0 0 84 40" aria-hidden="true">
         <rect className="gs-track" x="1" y="1" width="82" height="38" rx="19" strokeWidth="1.5" />
-        <circle className="gs-blob gs-blob-day" cx="20" cy="20" r="14" />
-        <circle className="gs-blob gs-blob-night" cx="64" cy="20" r="14" />
       </svg>
       <svg ref={gooRef} className="gs-goo" viewBox="0 0 84 40" aria-hidden="true">
-        <path d={GOO_DUMBBELL} />
+        <defs>
+          <filter id="gs-goo-filter" filterUnits="userSpaceOnUse" x="-12" y="-12" width="108" height="64">
+            <feGaussianBlur in="SourceGraphic" stdDeviation="3" />
+            <feColorMatrix values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 22 -10" />
+          </filter>
+        </defs>
+        <g filter="url(#gs-goo-filter)">
+          <circle className="gs-move" cx="20" cy="20" r="14" />
+          <circle className="gs-move" cx="20" cy="20" r="10" />
+          <circle className="gs-move" cx="20" cy="20" r="6" />
+        </g>
       </svg>
       <svg viewBox="0 0 84 40" aria-hidden="true">
-        <circle className="gs-sun" cx="20" cy="20" r="8" />
-        <path className="gs-moon" d="M65,13 A7,7 0 1 0 71,25 A6,6 0 0 1 65,13 Z" />
+        {/* Lucide "sun" and "moon", 14px, centred on each end of the track. */}
+        <svg className="gs-icon gs-sun" x="13" y="13" width="14" height="14" viewBox="0 0 24 24">
+          <circle cx="12" cy="12" r="4" />
+          <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41" />
+        </svg>
+        <svg className="gs-icon gs-moon" x="57" y="13" width="14" height="14" viewBox="0 0 24 24">
+          <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z" />
+        </svg>
       </svg>
     </button>
   );
