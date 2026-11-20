@@ -1,0 +1,256 @@
+.project-row {
+  display: grid;
+  grid-template-areas: "meta" "main" "cover" "facts";
+  gap: 20px;
+  padding: 48px var(--row-pad, 0px);
+}
+
+.project-row + .project-row {
+  border-top: 1px solid var(--hairline);
+}
+
+.row-meta {
+  grid-area: meta;
+}
+
+.row-main {
+  grid-area: main;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  min-width: 0;
+}
+
+.row-facts {
+  grid-area: facts;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.cover-frame {
+  grid-area: cover;
+  position: relative;
+  aspect-ratio: 280 / 190;
+}
+
+.cover-frame::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border: 1.5px dashed var(--muted);
+  border-radius: 8px;
+  opacity: 0;
+  transition: opacity 150ms ease;
+}
+
+.cover-card {
+  position: relative;
+  height: 100%;
+  overflow: hidden;
+  border-radius: 8px;
+  background: var(--slot);
+  transition: transform 200ms var(--ease-out);
+}
+
+.cover-backdrop {
+  position: absolute;
+  inset: -16px;
+  background-position: center;
+  background-size: cover;
+  filter: blur(12px);
+}
+
+/* The image wipes between two inset() shapes so the clip interpolates instead of popping. */
+@media (prefers-reduced-motion: no-preference) {
+  [data-entrance="pending"] .cover-wipe {
+    clip-path: inset(0 0 100% 0);
+  }
+
+  [data-entrance="shown"] .cover-wipe {
+    clip-path: inset(0 0 0 0);
+    transition: clip-path 300ms var(--ease-out) 120ms;
+  }
+
+  [data-entrance]:focus-within .cover-wipe {
+    clip-path: inset(0 0 0 0);
+    transition: none;
+  }
+}
+
+@media (min-width: 768px) {
+  .project-row {
+    grid-template-columns: minmax(0, 1fr) 280px;
+    grid-template-rows: auto 1fr auto;
+    grid-template-areas: "meta cover" "main cover" "facts facts";
+    column-gap: 40px;
+    row-gap: 16px;
+    padding-block: 56px;
+  }
+
+  .cover-frame {
+    align-self: start;
+  }
+
+  .row-facts {
+    margin-top: 16px;
+  }
+}
+
+@media (min-width: 1280px) {
+  .project-row {
+    /* Up to a 1440px page one fr is one pixel and the cover is 280px. Past that the row grows to the
+       content cap and the cover grows with the text columns. */
+    grid-template-columns: 120px minmax(0, 440fr) minmax(0, 352fr) minmax(280px, 280fr);
+    grid-template-rows: auto;
+    grid-template-areas: "meta main facts cover";
+    align-items: start;
+  }
+
+  .row-meta {
+    padding-top: 18px;
+  }
+
+  .row-main {
+    gap: 16px;
+  }
+
+  .row-facts {
+    gap: 20px;
+    margin-top: 0;
+  }
+}
+
+.dcai-packet {
+  opacity: 0;
+  animation: 1.8s linear infinite;
+  animation-play-state: paused;
+}
+
+.dcai-packet-top {
+  animation-name: packet-top;
+}
+
+.dcai-packet-middle {
+  animation-name: packet-middle;
+}
+
+.dcai-packet-bottom {
+  animation-name: packet-bottom;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .project-row:hover .cover-card {
+    transform: rotate(-3deg) translate(-4px, -6px);
+  }
+
+  .project-row:hover .cover-frame::before {
+    opacity: 1;
+  }
+
+  .project-row:hover .dcai-packet {
+    animation-play-state: running;
+  }
+}
+
+@media (hover: none) {
+  .project-row .dcai-packet {
+    animation-play-state: running;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .project-row .dcai-packet,
+  .project-row:hover .dcai-packet {
+    animation-play-state: paused;
+  }
+
+  .project-row:hover .cover-card {
+    transform: none;
+  }
+}
+
+@keyframes packet-top {
+  0% {
+    opacity: 0;
+    transform: translate(0, 0);
+  }
+  12% {
+    opacity: 1;
+  }
+  50% {
+    transform: translate(159px, 37px);
+  }
+  80% {
+    opacity: 1;
+    transform: translate(280px, 85px);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(330px, 95px);
+  }
+}
+
+@keyframes packet-middle {
+  0% {
+    opacity: 0;
+    transform: translate(0, 0);
+  }
+  12% {
+    opacity: 1;
+  }
+  80% {
+    opacity: 1;
+    transform: translate(280px, 0);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(330px, 0);
+  }
+}
+
+@keyframes packet-bottom {
+  0% {
+    opacity: 0;
+    transform: translate(0, 0);
+  }
+  12% {
+    opacity: 1;
+  }
+  50% {
+    transform: translate(159px, -37px);
+  }
+  80% {
+    opacity: 1;
+    transform: translate(280px, -85px);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(330px, -95px);
+  }
+}
+
+.project-page-list > .project-row {
+  --row-pad: var(--shell-pad);
+  border-top: 1px solid var(--hairline);
+}
+
+.project-page-list > .project-row:first-child {
+  border-top-color: var(--rule);
+}
+
+.filter-pill {
+  border: 1.5px solid var(--rule);
+  color: var(--ink);
+  transition: transform 160ms var(--ease-out);
+}
+
+.filter-pill[aria-pressed="true"] {
+  border-color: #3366ff;
+  background: #3366ff;
+  color: #ffffff;
+}
+
+.project-row[hidden] {
+  display: none;
+}
