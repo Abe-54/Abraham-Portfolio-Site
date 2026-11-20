@@ -73,7 +73,7 @@ export const projects: Project[] = [
     name: "NJ HOMES",
     side: "day",
     year: 2026,
-    summary: "Affordable-housing planning tools for New Jersey towns.",
+    summary: "Tools that help New Jersey towns plan affordable housing.",
     role: "Full-stack engineer",
     built: [
       "Sign-in and admin tools",
@@ -234,15 +234,15 @@ export const sampleNoteBody: NoteBlock[] = [
 ];
 
 export const focus = [
-  { title: "Public services", body: "Housing and staff tools for the state, built to be dependable." },
-  { title: "Full-stack products", body: "Database to interface, with Next.js, Prisma and AWS." },
+  { title: "Public services", body: "Housing and staff tools for the state of New Jersey." },
+  { title: "Full-stack products", body: "Database to UI, with Next.js, Prisma and AWS." },
   { title: "Games", body: "Gameplay, UI and editor tools in Unity." },
 ];
 
 export const proudOf = [
   { title: "Running the games club", body: "President for three years, 2022 to 2025." },
   { title: "A summer at NASA", body: "One of three interns picked from 600+ applicants." },
-  { title: "Shipping Market Dash", body: "Led five people for nine months to a finished game." },
+  { title: "Shipping Market Dash", body: "Led a team of five for nine months and finished it." },
 ];
 
 export const toolkit = [

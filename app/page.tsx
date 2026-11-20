@@ -74,13 +74,13 @@ export default function Home() {
         <div className="flex max-w-[720px] flex-col gap-7 xl:w-[720px] xl:shrink-0">
           <h2 className="t-label">Hi, I&apos;m Abraham</h2>
           <p className="t-statement">
-            By day I build public services for New Jersey: tools that help towns plan affordable housing, and an
+            By day I write software for New Jersey: tools that help towns plan affordable housing, and an
             AI workspace for state staff. <span className="text-link">By night I make games.</span>
           </p>
           <p className="t-lede">
             I studied computer science and game programming at Bloomfield College, where I ran the games club for
-            three years and led a team of five to ship Market Dash. I care about clean code, clear UX and shipping
-            reliably.
+            three years and led a team of five to ship Market Dash. I care about clean code and clear UX, and I like
+            to ship.
           </p>
         </div>
         <ol className="flex flex-col xl:flex-1 xl:pt-11">
@@ -103,7 +103,7 @@ export default function Home() {
         </ol>
       </section>
 
-      <WorkSection side="day" id="work" title="Software that ships.">
+      <WorkSection side="day" id="work" title={"Built for New\u00A0Jersey."}>
         <div className="flex flex-col gap-4 pt-8">
           <p className="t-label">Toolkit</p>
           <p className="font-display text-[22px] leading-[1.35] font-semibold tracking-[-0.02em] lg:text-[28px]">
@@ -145,7 +145,7 @@ export default function Home() {
             Off the clock
           </h2>
           <p className="t-statement">
-            Off the clock I design and play games, watch anime and tinker with small creative projects.
+            Outside work I make and play games, watch anime, and tinker with small creative projects.
           </p>
         </div>
         <div className="flex flex-col gap-8 border-t border-rule pt-8 lg:flex-row lg:gap-12">

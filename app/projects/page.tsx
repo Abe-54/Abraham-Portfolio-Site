@@ -3,7 +3,7 @@ import ProjectFilter from "@/components/project-filter";
 
 export const metadata: Metadata = {
   title: "Projects",
-  description: "Public-service software by day, games by night.",
+  description: "Software for New Jersey by day, games by night.",
 };
 
 export default function ProjectsPage() {
