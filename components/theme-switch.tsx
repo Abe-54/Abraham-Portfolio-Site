@@ -7,8 +7,6 @@ type Theme = "day" | "night";
 // The knob travels 44px between the sun and the moon.
 const TRAVEL = 44;
 const SWAP_MS = 560;
-// How long the page takes to fade to the new theme once the knob has landed.
-const FADE_MS = 480;
 // The knob lands on the far icon this far into the swap. The page sweep starts on that beat.
 const IMPACT = 0.72;
 const SEGMENT_EASE = "cubic-bezier(0.45, 0, 0.55, 1)";
@@ -165,8 +163,8 @@ export default function ThemeSwitch() {
   }, []);
 
   /**
-   * The knob has landed: change the page. The new theme fades in over the old one, switch
-   * included, so everything changes together.
+   * The knob has landed: change the page. The new theme opens as a circle out of the knob. The
+   * switch is part of the page, so the circle reveals its new face along with everything else.
    */
   function sweep(next: Theme, animate: boolean) {
     const root = document.documentElement;
@@ -179,6 +177,10 @@ export default function ThemeSwitch() {
       commit();
       return;
     }
+    const box = button?.getBoundingClientRect();
+    const x = box ? box.left + (box.width * (next === "night" ? 64 : 20)) / 84 : window.innerWidth;
+    const y = box ? box.top + box.height / 2 : 0;
+    const knob = box ? (box.width * 14) / 84 : 0;
     // Anything that redraws every frame (the portrait goo) holds still for the sweep, so the
     // browser is not re-capturing the page on each frame of it.
     window.dispatchEvent(new CustomEvent("theme-sweep", { detail: true }));
@@ -198,14 +200,13 @@ export default function ThemeSwitch() {
     transition.ready
       .then(() => {
         if (transitionRef.current !== transition) return;
-        // The whole page fades to the new theme together. A hard-edged shape crossing the screen
-        // made the header and the bands under the hero flip one after another, which read as
-        // separate parts flashing, because the hero itself looks the same in both themes.
+        const radius = Math.hypot(Math.max(x, window.innerWidth - x), Math.max(y, window.innerHeight - y));
         discRef.current = root.animate(
-          { opacity: [0, 1] },
+          { clipPath: [`circle(${knob}px at ${x}px ${y}px)`, `circle(${radius}px at ${x}px ${y}px)`] },
           {
-            duration: FADE_MS,
-            easing: "cubic-bezier(0.45, 0, 0.55, 1)",
+            // A wider screen gets a longer sweep, so it reads as a sweep and not a flash.
+            duration: Math.min(1200, Math.max(700, 500 + radius * 0.2)),
+            easing: "cubic-bezier(0.4, 0.3, 0.3, 1)",
             fill: "both",
             pseudoElement: "::view-transition-new(root)",
           },
