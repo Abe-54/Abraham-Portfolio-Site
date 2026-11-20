@@ -6,34 +6,59 @@ import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { NavGoo, type GooBox } from "./nav-goo";
 import ThemeSwitch from "./theme-switch";
 
-// `section` matches the data-nav marks on the home page's sections.
+// In page order. On the home page every link glides to its section (`hash`); elsewhere Projects and
+// Notes open their own pages. `section` matches the data-nav marks on the home page's sections, and a
+// section marked "none" (the history and Off the clock, which come after Notes) lights no link.
 const links = [
-  { label: "Projects", href: "/projects", section: "projects" },
-  { label: "Notes", href: "/notes", section: "notes" },
-  { label: "About", href: "/#about", section: "about" },
-  { label: "Contact", href: "/#contact", section: "contact" },
+  { label: "About", section: "about", hash: "#about" },
+  { label: "Projects", section: "projects", hash: "#work", page: "/projects" },
+  { label: "Notes", section: "notes", hash: "#notes", page: "/notes" },
+  { label: "Contact", section: "contact", hash: "#contact" },
 ];
 
 /**
- * The section of the home page being read: the last mark whose top has passed 40% of the window. At
- * the very bottom the last marks can never get that high, so the last one on screen counts instead.
+ * The section of the home page being read with the page scrolled to `y`: the last mark whose top has
+ * passed 40% of the window. At the very bottom the last marks can never get that high, so the last one
+ * on screen counts instead.
  */
-function sectionInView(): string | null {
+function sectionAt(y: number): string | null {
   const marks = Array.from(document.querySelectorAll<HTMLElement>("[data-nav]"));
+  const shift = y - window.scrollY;
   const line = window.innerHeight * 0.4;
   let current: string | null = null;
   for (const mark of marks) {
-    if (mark.getBoundingClientRect().top <= line) current = mark.dataset.nav ?? null;
+    if (mark.getBoundingClientRect().top - shift <= line) current = mark.dataset.nav ?? null;
   }
-  const root = document.documentElement;
   const last = marks[marks.length - 1];
-  if (last && window.scrollY + window.innerHeight >= root.scrollHeight - 2 && last.getBoundingClientRect().top < window.innerHeight) {
-    current = last.dataset.nav ?? null;
-  }
+  const bottom = y + window.innerHeight >= document.documentElement.scrollHeight - 2;
+  if (last && bottom && last.getBoundingClientRect().top - shift < window.innerHeight) current = last.dataset.nav ?? null;
   return current;
 }
 
-/** The home page's section in view, or undefined until it has been measured (and off the home page). */
+/** Where a click scrolls the page to, when it follows a link to a spot on the page already open. */
+function glideTarget(event: MouseEvent): number | null {
+  if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return null;
+  const link = event.target instanceof Element ? event.target.closest("a[href]") : null;
+  if (!(link instanceof HTMLAnchorElement) || link.hasAttribute("download")) return null;
+  if (link.target && link.target !== "_self") return null;
+  const url = new URL(link.href);
+  const here = window.location;
+  if (url.origin !== here.origin || url.pathname !== here.pathname || url.search !== here.search) return null;
+  if (!url.hash) return 0;
+  const target = document.getElementById(decodeURIComponent(url.hash.slice(1)));
+  if (!target) return null;
+  const root = document.documentElement;
+  const gap = (parseFloat(getComputedStyle(root).scrollPaddingTop) || 0) + (parseFloat(getComputedStyle(target).scrollMarginTop) || 0);
+  const top = target.getBoundingClientRect().top + window.scrollY - gap;
+  return Math.min(Math.max(0, top), root.scrollHeight - root.clientHeight);
+}
+
+/**
+ * The home page's section in view, or undefined until it has been measured (and off the home page).
+ * A click on a link to a spot on the page (a nav link, the name, the hero's button) settles the section
+ * at once, from where the page will stop, and holds it until the glide ends: the goo goes straight
+ * there instead of stopping at every section the page passes on the way.
+ */
 function useSectionInView(enabled: boolean) {
   const [section, setSection] = useState<string | null | undefined>(undefined);
   useEffect(() => {
@@ -43,20 +68,46 @@ function useSectionInView(enabled: boolean) {
     }
     // Measured on the next frame, after the router has scrolled to a #section it was sent to.
     let frame = 0;
+    let holding = false;
+    let idle = 0;
     const measure = () => {
       frame = 0;
-      setSection(sectionInView());
+      setSection(sectionAt(window.scrollY));
     };
     const schedule = () => {
       if (!frame) frame = requestAnimationFrame(measure);
     };
+    const release = () => {
+      holding = false;
+      schedule();
+    };
+    const onScroll = () => {
+      if (!holding) return schedule();
+      window.clearTimeout(idle);
+      idle = window.setTimeout(release, 150);
+    };
+    // Capture sees the click before the router or the same-page handler in route-scroll.tsx acts on it.
+    const onClick = (event: MouseEvent) => {
+      const y = glideTarget(event);
+      if (y === null) return;
+      holding = true;
+      cancelAnimationFrame(frame);
+      frame = 0;
+      setSection(sectionAt(y));
+      // Long enough for the glide to start; each scroll event then extends it.
+      window.clearTimeout(idle);
+      idle = window.setTimeout(release, 400);
+    };
     schedule();
-    window.addEventListener("scroll", schedule, { passive: true });
+    window.addEventListener("scroll", onScroll, { passive: true });
     window.addEventListener("resize", schedule);
+    document.addEventListener("click", onClick, { capture: true });
     return () => {
       cancelAnimationFrame(frame);
-      window.removeEventListener("scroll", schedule);
+      window.clearTimeout(idle);
+      window.removeEventListener("scroll", onScroll);
       window.removeEventListener("resize", schedule);
+      document.removeEventListener("click", onClick, { capture: true });
     };
   }, [enabled]);
   return section;
@@ -105,7 +156,7 @@ export default function Nav() {
   // The link the goo marks, or -1, for the resize observer below.
   const currentIndex = useRef(-1);
 
-  const pageIndex = links.findIndex((link) => !link.href.includes("#") && pathname.startsWith(link.href));
+  const pageIndex = links.findIndex((link) => link.page && pathname.startsWith(link.page));
   const home = pathname === "/";
   const section = useSectionInView(home);
   // On the home page the goo follows the section being read; elsewhere it marks the page. While the
@@ -171,8 +222,12 @@ export default function Nav() {
         <div ref={chipRef} className="nav-chip">
           <ul ref={listRef} className="nav-list">
             {links.map((link, index) => (
-              <li key={link.href} className="flex">
-                <Link href={link.href} aria-current={index === pageIndex ? "page" : undefined} className="nav-link">
+              <li key={link.label} className="flex">
+                <Link
+                  href={home || !link.page ? `/${link.hash}` : link.page}
+                  aria-current={index === pageIndex ? (pathname === link.page ? "page" : "true") : undefined}
+                  className="nav-link"
+                >
                   {link.label}
                 </Link>
               </li>
@@ -185,7 +240,7 @@ export default function Nav() {
             <div className="nav-ink-text">
               <ul className="nav-list">
                 {links.map((link) => (
-                  <li key={link.href} className="flex">
+                  <li key={link.label} className="flex">
                     <span className="nav-link">{link.label}</span>
                   </li>
                 ))}

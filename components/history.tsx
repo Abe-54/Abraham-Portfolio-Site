@@ -192,7 +192,7 @@ export default function History() {
   return (
     <section
       id="history"
-      data-nav="about"
+      data-nav="none"
       data-tone="night"
       data-live={live || undefined}
       aria-labelledby="history-title"

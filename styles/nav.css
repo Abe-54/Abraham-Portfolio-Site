@@ -21,6 +21,14 @@ html {
   scroll-padding-top: calc(var(--float-top) + var(--chip-h) + 12px);
 }
 
+/* Links to a section on the same page glide there. A new page still opens in place (data-scroll-behavior
+   on <html> tells the router to jump), and reduced motion keeps every jump. */
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
 .site-head {
   position: relative;
   /* On a phone the chip sits in this space under the row. */
@@ -133,14 +141,14 @@ html[data-theme="night"] .nav-float {
 }
 
 /* Without JS the current page's link fills itself. With JS the goo does it. */
-.nav-chip:not([data-goo]) .nav-link[aria-current="page"] {
+.nav-chip:not([data-goo]) .nav-link[aria-current] {
   background: #3366ff;
   color: #ffffff;
 }
 
 /* The colour fades only into hover, so a theme swap or a new page never fades it. */
 @media (hover: hover) and (pointer: fine) {
-  .nav-link:not([aria-current="page"]):hover {
+  .nav-link:not([aria-current]):hover {
     color: var(--link);
     transition: color 150ms ease;
   }

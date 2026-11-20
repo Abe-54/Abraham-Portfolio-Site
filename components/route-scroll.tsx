@@ -53,7 +53,8 @@ export default function RouteScroll() {
       return;
     }
     if (restoring || window.location.hash) return;
-    window.scrollTo(0, 0);
+    // A new page opens at the top at once; only a scroll within a page glides.
+    window.scrollTo({ top: 0, left: 0, behavior: "instant" });
   }, [pathname]);
 
   return null;

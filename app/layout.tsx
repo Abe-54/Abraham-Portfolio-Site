@@ -28,6 +28,7 @@ const themeScript = `try{var t=localStorage.getItem("theme");if(t!=="day"&&t!=="
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html
+      data-scroll-behavior="smooth"
       lang="en"
       suppressHydrationWarning
       className={`${display.variable} ${body.variable} ${mono.variable}`}
