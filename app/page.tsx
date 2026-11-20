@@ -150,7 +150,7 @@ export default function Home() {
 
       <History />
 
-      <section aria-labelledby="off-title" data-nav="none" className="shell flex flex-col gap-14 pt-20 pb-20 lg:gap-[72px] lg:pt-[120px] lg:pb-24">
+      <section aria-labelledby="off-title" data-nav="history" className="shell flex flex-col gap-14 pt-20 pb-20 lg:gap-[72px] lg:pt-[120px] lg:pb-24">
         <div className="flex max-w-[860px] flex-col gap-4">
           <h2 id="off-title" className="t-label">
             Off the clock

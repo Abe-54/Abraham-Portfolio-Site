@@ -102,10 +102,9 @@ html[data-theme="night"] .nav-float {
 
 .nav-chip {
   position: relative;
-  /* The white copy of the labels blends with the chip alone, never with the page behind it. */
-  isolation: isolate;
   display: flex;
-  padding: 6px;
+  align-items: center;
+  max-width: 100%;
   border: 1px solid var(--chip-border);
   border-radius: 999px;
   background: var(--chip);
@@ -114,11 +113,52 @@ html[data-theme="night"] .nav-float {
   pointer-events: auto;
 }
 
+/* The links' strip. On a phone it can be wider than the chip, and then it scrolls sideways in it. */
+.nav-track {
+  min-width: 0;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  /* Rounded by a clip-path, which cuts the finished row as one picture. A border-radius clip is cut layer
+     by layer in Firefox, so the black backing of the labels' white copy showed as a grey arc on the curve. */
+  clip-path: inset(0 round 999px);
+  scrollbar-width: none;
+}
+
+.nav-track::-webkit-scrollbar {
+  display: none;
+}
+
+/* An end with links scrolled out of view fades out (components/nav.tsx marks which). */
+.nav-track[data-fade="end"] {
+  -webkit-mask-image: linear-gradient(to right, #000000 calc(100% - 36px), transparent);
+  mask-image: linear-gradient(to right, #000000 calc(100% - 36px), transparent);
+}
+
+.nav-track[data-fade="start"] {
+  -webkit-mask-image: linear-gradient(to left, #000000 calc(100% - 36px), transparent);
+  mask-image: linear-gradient(to left, #000000 calc(100% - 36px), transparent);
+}
+
+.nav-track[data-fade="both"] {
+  -webkit-mask-image: linear-gradient(to right, transparent, #000000 36px, #000000 calc(100% - 36px), transparent);
+  mask-image: linear-gradient(to right, transparent, #000000 36px, #000000 calc(100% - 36px), transparent);
+}
+
+.nav-row {
+  position: relative;
+  /* The white copy of the labels blends with the row alone, never with the page behind it. */
+  isolation: isolate;
+  display: flex;
+  width: max-content;
+  padding: 6px;
+  /* Square, so the copy's black backing has a solid row under every pixel. A rounded end left it a grey
+     arc beside the initials; the strip (.nav-track) still clips the row to a pill. */
+  background: var(--chip);
+}
+
 .nav-list {
   display: flex;
-  flex-wrap: wrap;
   align-items: center;
-  justify-content: center;
   gap: 2px;
 }
 
@@ -127,9 +167,9 @@ html[data-theme="night"] .nav-float {
   display: inline-flex;
   align-items: center;
   height: 44px;
-  padding-inline: 14px;
-  /* Narrow phones tighten the links so the chip still fits with the initials docked. */
-  padding-inline: clamp(7px, calc((100cqi - 260px) / 8), 14px);
+  padding-inline: 12px;
+  /* Phones tighten the links to fit the width they have, down to 8px; past that the strip scrolls. */
+  padding-inline: clamp(8px, calc((100cqi - 271px) / 10), 14px);
   border-radius: 999px;
   font-size: 16px;
   font-weight: 500;
@@ -139,11 +179,13 @@ html[data-theme="night"] .nav-float {
 
 @media (max-width: 380px) {
   .nav-link {
+    padding-inline: clamp(8px, calc((100cqi - 256px) / 10), 14px);
     font-size: 15px;
   }
 }
 
-/* The initials: hidden while the name is in view, then they dock at the chip's start and rise in. */
+/* The initials: hidden while the name is in view, then they dock at the chip's start and rise in. They
+   sit outside the strip, so they stay put when it scrolls. */
 .nav-home {
   display: inline-flex;
   flex-shrink: 0;
@@ -151,7 +193,7 @@ html[data-theme="night"] .nav-float {
   justify-content: center;
   width: 0;
   height: 44px;
-  margin-right: 0;
+  margin-left: 0;
   overflow: hidden;
   border-radius: 999px;
   visibility: hidden;
@@ -162,17 +204,17 @@ html[data-theme="night"] .nav-float {
   letter-spacing: -0.03em;
   transition:
     width 240ms var(--ease-out),
-    margin-right 240ms var(--ease-out),
+    margin-left 240ms var(--ease-out),
     visibility 0s linear 240ms;
 }
 
 .nav-chip[data-docked] .nav-home {
   width: 40px;
-  margin-right: 2px;
+  margin-left: 6px;
   visibility: visible;
   transition:
     width 300ms var(--ease-out),
-    margin-right 300ms var(--ease-out),
+    margin-left 300ms var(--ease-out),
     visibility 0s;
 }
 
@@ -224,7 +266,7 @@ html[data-theme="night"] .nav-float {
   }
 }
 
-/* The goo layers (components/nav-goo.ts), clipped to the chip so an overshoot squashes against its edge. */
+/* The goo layers (components/nav-goo.ts), clipped to the row so an overshoot squashes against its edge. */
 .nav-goo {
   position: absolute;
   inset: 0;
@@ -237,7 +279,7 @@ html[data-theme="night"] .nav-float {
   pointer-events: none;
 }
 
-/* White labels where the goo is, black elsewhere, screened onto the chip: only the white shows. */
+/* White labels where the goo is, black elsewhere, screened onto the row: only the white shows. */
 .nav-ink {
   position: absolute;
   inset: 0;
