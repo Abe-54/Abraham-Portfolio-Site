@@ -149,6 +149,7 @@ function GooLayer({ filter }: { filter?: boolean }) {
 
 export default function Nav() {
   const pathname = usePathname();
+  const nameRef = useRef<HTMLAnchorElement>(null);
   const chipRef = useRef<HTMLDivElement>(null);
   const listRef = useRef<HTMLUListElement>(null);
   const gooRef = useRef<NavGoo | null>(null);
@@ -162,6 +163,23 @@ export default function Nav() {
   // On the home page the goo follows the section being read; elsewhere it marks the page. While the
   // section is still unmeasured the goo stays where it is.
   const gooIndex = home ? (section === undefined ? undefined : links.findIndex((link) => link.section === section)) : pageIndex;
+
+  // Once the name has scrolled out of view its initials dock in the chip, so the way home stays on
+  // screen (nav.css). They leave again as the name comes back.
+  useEffect(() => {
+    const name = nameRef.current;
+    const chip = chipRef.current;
+    if (!name || !chip || typeof IntersectionObserver !== "function") return;
+    const observer = new IntersectionObserver(([entry]) => {
+      if (entry.isIntersecting) delete chip.dataset.docked;
+      else chip.dataset.docked = "";
+    });
+    observer.observe(name);
+    return () => {
+      observer.disconnect();
+      delete chip.dataset.docked;
+    };
+  }, []);
 
   // The goo replaces the CSS fill of the current page's link (the fill shows without JS).
   useLayoutEffect(() => {
@@ -178,9 +196,13 @@ export default function Nav() {
     };
     // Fonts arriving or the window resizing move the links; the goo follows them. The chip's height is
     // also the space anchor jumps leave at the top (nav.css).
+    // Only a new height is written: the root's style changing restyles the whole page.
+    let chipHeight = 0;
     const observer = new ResizeObserver(() => {
       goo.refit(target());
-      document.documentElement.style.setProperty("--chip-h", `${chip.offsetHeight}px`);
+      if (chip.offsetHeight === chipHeight) return;
+      chipHeight = chip.offsetHeight;
+      document.documentElement.style.setProperty("--chip-h", `${chipHeight}px`);
     });
     observer.observe(chip);
     if (listRef.current) observer.observe(listRef.current);
@@ -209,7 +231,7 @@ export default function Nav() {
     <>
       <header className="site-head">
         <div className="shell site-head-row">
-          <Link href="/" className="site-name">
+          <Link ref={nameRef} href="/" className="site-name">
             Abraham Rubio
           </Link>
           <ThemeSwitch />
@@ -220,6 +242,10 @@ export default function Nav() {
           on phones. */}
       <nav aria-label="Main" className="nav-float">
         <div ref={chipRef} className="nav-chip">
+          <Link href="/" aria-label="Abraham Rubio" className="nav-home">
+            <span aria-hidden="true">A</span>
+            <span aria-hidden="true">R</span>
+          </Link>
           <ul ref={listRef} className="nav-list">
             {links.map((link, index) => (
               <li key={link.label} className="flex">
@@ -238,6 +264,8 @@ export default function Nav() {
           <div className="nav-ink" aria-hidden="true" inert>
             <GooLayer />
             <div className="nav-ink-text">
+              {/* Keeps the copy's labels over the real ones while the initials dock. */}
+              <span className="nav-home" />
               <ul className="nav-list">
                 {links.map((link) => (
                   <li key={link.label} className="flex">
