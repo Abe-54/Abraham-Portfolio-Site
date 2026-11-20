@@ -63,12 +63,33 @@ function useStretchPill(activeIndex: number) {
 export default function Nav() {
   const pathname = usePathname();
   const [menuOpen, setMenuOpen] = useState(false);
+  const headerRef = useRef<HTMLElement>(null);
   const menuButtonRef = useRef<HTMLButtonElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
   const activeIndex = links.findIndex((link) => link.page && pathname.startsWith(link.href));
   const { listRef, pillRef } = useStretchPill(activeIndex);
 
   useEffect(() => setMenuOpen(false), [pathname]);
+
+  // The page keeps a set space at the top for the nav (--nav-space). Enlarged text can wrap the nav
+  // onto a second row, so the space grows to fit whatever the nav measures.
+  useEffect(() => {
+    const row = headerRef.current?.querySelector<HTMLElement>(".nav-row");
+    if (!row) return;
+    const root = document.documentElement;
+    const fit = () => {
+      root.style.removeProperty("--nav-space");
+      const preset = parseFloat(getComputedStyle(root).getPropertyValue("--nav-space"));
+      const needed = Math.ceil(row.getBoundingClientRect().bottom + 12);
+      if (needed > preset) root.style.setProperty("--nav-space", `${needed}px`);
+    };
+    const observer = new ResizeObserver(fit);
+    observer.observe(row);
+    return () => {
+      observer.disconnect();
+      root.style.removeProperty("--nav-space");
+    };
+  }, []);
 
   useEffect(() => {
     const onPointer = () => (lastInput = "pointer");
@@ -109,27 +130,19 @@ export default function Nav() {
   }
 
   return (
-    <header className="relative z-30 border-b border-hairline bg-ground">
+    // The header holds the nav's place at the top of the page; the nav itself floats over the page
+    // and stays on screen. The home hero slides up under it (hero.css).
+    <header ref={headerRef} className="site-nav">
       <div aria-hidden="true" data-open={menuOpen || undefined} className="menu-scrim lg:hidden" />
-      {/* The brand takes the free width and wraps before it can touch the controls. When even its
-          longest word does not fit (large text), the controls move to their own line instead. */}
-      <nav
-        aria-label="Main"
-        className="shell relative flex min-h-[72px] flex-wrap items-center gap-x-3 gap-y-1 bg-ground py-2 lg:min-h-24"
-      >
-        <div className="flex-[1_1_0%]">
-          <Link
-            href="/"
-            className="inline-flex min-h-11 items-center font-display text-[18px] leading-7 font-extrabold tracking-[-0.02em] min-[375px]:text-[20px] lg:text-[22px]"
-          >
-            Abraham Rubio
-          </Link>
-        </div>
+      <nav aria-label="Main" className="nav-row">
+        <Link href="/" className="nav-chip nav-name">
+          Abraham Rubio
+        </Link>
 
-        <div className="ml-auto flex items-center gap-3 lg:gap-6">
-          <div className="relative hidden lg:block">
+        <div className="nav-chip nav-links">
+          <div className="relative">
             <span ref={pillRef} aria-hidden="true" className="nav-pill" />
-            <ul ref={listRef} className="flex items-center gap-2">
+            <ul ref={listRef} className="flex items-center gap-0.5">
               {links.map((link, index) => (
                 <li key={link.href} className="flex">
                   <Link
@@ -143,32 +156,32 @@ export default function Nav() {
               ))}
             </ul>
           </div>
-          <a href={contact.resume} target="_blank" rel="noopener" className="btn btn-outline press hidden min-h-11 py-2.5 lg:inline-flex">
-            Résumé ↓
-          </a>
+        </div>
+
+        <div className="nav-chip nav-tools">
           <ThemeSwitch />
           <button
             ref={menuButtonRef}
             type="button"
             aria-expanded={menuOpen}
             aria-controls="mobile-menu"
+            aria-label="Menu"
             onClick={() => setMenuOpen((open) => !open)}
-            className="menu-toggle btn btn-outline press min-h-11 px-4 py-2 lg:hidden"
+            className="menu-toggle press lg:hidden"
           >
-            {menuOpen ? "Close" : "Menu"}
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              {menuOpen ? <path d="M18 6 6 18M6 6l12 12" /> : <path d="M4 7h16M4 12h16M4 17h16" />}
+            </svg>
           </button>
         </div>
       </nav>
 
-      {/* Without JS the menu cannot open, so phones get the same links in the header flow. */}
+      {/* Without JS the menu cannot open, so every width gets the link chip, on its own row on a phone. */}
       <noscript
         dangerouslySetInnerHTML={{
           __html:
-            "<style>.menu-toggle,.goo-switch{display:none}</style>" +
-            `<ul class="nojs-menu shell">${links
-              .concat({ label: "Résumé ↓", href: contact.resume, page: false })
-              .map((link) => `<li><a href="${link.href}">${link.label}</a></li>`)
-              .join("")}</ul>`,
+            "<style>.nav-tools{display:none}.nav-links{display:flex}:root{--nav-space:144px}" +
+            "@media (min-width:64rem){:root{--nav-space:96px}}</style>",
         }}
       />
 
@@ -180,9 +193,9 @@ export default function Nav() {
         onBlur={closeOnFocusLeave}
         className="mobile-menu lg:hidden"
       >
-        <ul className="shell flex flex-col pt-2 pb-6">
+        <ul className="flex flex-col">
           {links.map((link, index) => (
-            <li key={link.href} className="border-b border-hairline">
+            <li key={link.href}>
               <Link
                 href={link.href}
                 onClick={() => setMenuOpen(false)}
