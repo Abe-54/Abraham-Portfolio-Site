@@ -205,8 +205,8 @@ export default function ThemeSwitch() {
           { clipPath: [`circle(${knob}px at ${x}px ${y}px)`, `circle(${radius}px at ${x}px ${y}px)`] },
           {
             // A wider screen gets a longer sweep, so it reads as a sweep and not a flash.
-            duration: Math.min(620, Math.max(420, 260 + radius * 0.09)),
-            easing: "cubic-bezier(0.37, 0.6, 0.45, 1)",
+            duration: Math.min(1200, Math.max(700, 500 + radius * 0.2)),
+            easing: "cubic-bezier(0.4, 0.3, 0.3, 1)",
             fill: "both",
             pseudoElement: "::view-transition-new(root)",
           },
