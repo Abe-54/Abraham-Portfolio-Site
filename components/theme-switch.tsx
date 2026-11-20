@@ -185,6 +185,13 @@ export default function ThemeSwitch() {
     // Anything that redraws every frame (the portrait goo) holds still for the sweep, so the
     // browser is not re-capturing the page on each frame of it.
     window.dispatchEvent(new CustomEvent("theme-sweep", { detail: true }));
+    // The new page starts out clipped to the knob by plain CSS. Firefox paints one frame of the
+    // transition before a script-made animation applies, and without this that frame shows the
+    // whole page in the new theme: a full-screen flash.
+    root.style.setProperty("--sweep-x", `${x}px`);
+    root.style.setProperty("--sweep-y", `${y}px`);
+    root.style.setProperty("--sweep-r", `${knob}px`);
+    root.dataset.sweep = "";
     const transition = document.startViewTransition(commit);
     transitionRef.current = transition;
     // Scrolling ends the sweep at once, so the page is never shown at two scroll positions.
@@ -242,6 +249,7 @@ export default function ThemeSwitch() {
       discRef.current = null;
       ringRef.current?.remove();
       ringRef.current = null;
+      delete root.dataset.sweep;
       if (queuedRef.current) {
         queuedRef.current = false;
         toggle(!prefersReducedMotion());

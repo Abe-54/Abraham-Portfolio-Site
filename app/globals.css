@@ -157,6 +157,11 @@ html[data-theme-swap] :is(.nav-link, .t-link, .footer-link, .email-copy, .note-t
   transition: none !important;
 }
 
+/* From its first frame the new page shows only inside the knob; the switch then opens the circle. */
+html[data-sweep]::view-transition-new(root) {
+  clip-path: circle(var(--sweep-r) at var(--sweep-x) var(--sweep-y));
+}
+
 /* The ring that rides the edge of the day/night circle. Sized and placed by the switch. */
 .theme-ring {
   position: fixed;
