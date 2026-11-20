@@ -1,11 +1,19 @@
 /*
  * The name and the theme switch sit at the top of the page and scroll away with it. The page links
- * float in a chip that stays on screen: centred in the header row on wide screens, under it on phones.
+ * float in a chip that stays on screen: centred in the header row from tablet width (46rem), under it
+ * on phones, where the name, five links and the switch can't share one row.
  */
 :root {
   --head-h: 72px;
   --chip-h: 58px;
   --float-top: 12px;
+}
+
+@media (min-width: 46rem) {
+  :root {
+    /* The chip centred in the row, 12px from its top: where it stays when the page scrolls. */
+    --head-h: 82px;
+  }
 }
 
 @media (min-width: 64rem) {
@@ -85,18 +93,20 @@ html[data-theme="night"] .nav-float {
   --chip-shadow: 0 10px 28px -10px rgb(0 0 0 / 0.75);
 }
 
-@media (min-width: 64rem) {
+@media (min-width: 46rem) {
   .site-head {
     padding-bottom: 0;
-  }
-
-  .site-name {
-    font-size: 22px;
   }
 
   .nav-float {
     margin-top: calc(var(--float-top) - var(--head-h) - 1px);
     margin-bottom: calc(var(--head-h) + 1px - var(--float-top));
+  }
+}
+
+@media (min-width: 64rem) {
+  .site-name {
+    font-size: 22px;
   }
 }
 
@@ -181,6 +191,15 @@ html[data-theme="night"] .nav-float {
   .nav-link {
     padding-inline: clamp(8px, calc((100cqi - 256px) / 10), 14px);
     font-size: 15px;
+  }
+}
+
+/* In the header row the chip is centred on the page, so on a narrow tablet its links tighten until it
+   clears the name by 24px. 100cqi + 16px is the window's width, 271px the chip less its link padding,
+   147px the name at 20px. */
+@media (min-width: 46rem) {
+  .nav-link {
+    padding-inline: clamp(8px, calc((100cqi + 16px - 271px - 2 * (var(--gutter) + 147px + 24px)) / 10), 14px);
   }
 }
 
