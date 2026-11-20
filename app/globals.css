@@ -157,6 +157,16 @@ html[data-theme-swap] :is(.nav-link, .t-link, .footer-link, .email-copy, .note-t
   transition: none !important;
 }
 
+/* The ring that rides the edge of the day/night circle. Sized and placed by the switch. */
+.theme-ring {
+  position: fixed;
+  z-index: 100;
+  box-sizing: border-box;
+  border: 0 solid #3366ff;
+  border-radius: 50%;
+  pointer-events: none;
+}
+
 ::view-transition-old(root),
 ::view-transition-new(root) {
   animation: none;

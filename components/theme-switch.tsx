@@ -87,6 +87,7 @@ export default function ThemeSwitch() {
   const themeRef = useRef<Theme>("day");
   const transitionRef = useRef<ViewTransition | null>(null);
   const discRef = useRef<Animation | null>(null);
+  const ringRef = useRef<HTMLDivElement | null>(null);
   const gooAnimationsRef = useRef<Animation[]>([]);
   // The frame loop that waits for the knob to land.
   const landingRef = useRef(0);
@@ -201,15 +202,34 @@ export default function ThemeSwitch() {
       .then(() => {
         if (transitionRef.current !== transition) return;
         const radius = Math.hypot(Math.max(x, window.innerWidth - x), Math.max(y, window.innerHeight - y));
+        // A wider screen gets a longer sweep, so it reads as a sweep and not a flash.
+        const timing = {
+          duration: Math.min(1000, Math.max(600, 400 + radius * 0.15)),
+          easing: "cubic-bezier(0.4, 0.3, 0.3, 1)",
+          fill: "both" as const,
+        };
         discRef.current = root.animate(
           { clipPath: [`circle(${knob}px at ${x}px ${y}px)`, `circle(${radius}px at ${x}px ${y}px)`] },
-          {
-            // A wider screen gets a longer sweep, so it reads as a sweep and not a flash.
-            duration: Math.min(1200, Math.max(700, 500 + radius * 0.2)),
-            easing: "cubic-bezier(0.4, 0.3, 0.3, 1)",
-            fill: "both",
-            pseudoElement: "::view-transition-new(root)",
-          },
+          { ...timing, pseudoElement: "::view-transition-new(root)" },
+        );
+        // A blue ring rides the edge of the circle. The hero looks the same in both themes, so
+        // without it the circle is invisible there and the bands above and below seem to flip on
+        // their own. The ring makes it one wave crossing the whole screen.
+        const ring = document.createElement("div");
+        ring.className = "theme-ring";
+        ring.style.left = `${x - radius}px`;
+        ring.style.top = `${y - radius}px`;
+        ring.style.width = ring.style.height = `${radius * 2}px`;
+        ring.style.borderWidth = `${Math.max(14, radius * 0.012)}px`;
+        document.body.appendChild(ring);
+        ringRef.current = ring;
+        ring.animate(
+          [
+            { transform: `scale(${knob / radius})`, opacity: 1, offset: 0 },
+            { opacity: 1, offset: 0.7 },
+            { transform: "scale(1)", opacity: 0, offset: 1 },
+          ],
+          timing,
         );
       })
       .catch(() => {});
@@ -220,6 +240,8 @@ export default function ThemeSwitch() {
       window.dispatchEvent(new CustomEvent("theme-sweep", { detail: false }));
       discRef.current?.cancel();
       discRef.current = null;
+      ringRef.current?.remove();
+      ringRef.current = null;
       if (queuedRef.current) {
         queuedRef.current = false;
         toggle(!prefersReducedMotion());
