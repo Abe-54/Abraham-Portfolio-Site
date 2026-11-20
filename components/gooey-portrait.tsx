@@ -22,18 +22,31 @@ export default function GooeyPortrait() {
     // the page without having moved, so tell the goo where it is now.
     let last: { x: number; y: number } | null = null;
     const onMove = (event: PointerEvent) => {
-      if (event.isTrusted) last = { x: event.clientX, y: event.clientY };
+      if (event.isTrusted && event.pointerType === "mouse") last = { x: event.clientX, y: event.clientY };
+    };
+    // A finger that has lifted, or a mouse that has left the window, is nowhere.
+    const forget = () => {
+      last = null;
+    };
+    const forgetTouch = (event: PointerEvent) => {
+      if (event.pointerType !== "mouse") forget();
     };
     const onScroll = () => {
       if (last) window.dispatchEvent(new PointerEvent("pointermove", { clientX: last.x, clientY: last.y }));
     };
     window.addEventListener("pointermove", onMove, { passive: true });
     window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("pointerup", forgetTouch);
+    window.addEventListener("pointercancel", forget);
+    document.documentElement.addEventListener("pointerleave", forget);
     return () => {
       query.removeEventListener("change", sync);
       window.removeEventListener("theme-sweep", onSweep);
       window.removeEventListener("pointermove", onMove);
       window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("pointerup", forgetTouch);
+      window.removeEventListener("pointercancel", forget);
+      document.documentElement.removeEventListener("pointerleave", forget);
     };
   }, []);
 
@@ -46,11 +59,10 @@ export default function GooeyPortrait() {
             cursorBallColor="#3366FF"
             enableTransparency
             paused={held}
-            intro={false}
             ballCount={40}
             clumpFactor={0.95}
             cursorBallSize={1.8}
-            animationSize={30}
+            animationSize={38}
             speed={0.3}
             hoverSmoothness={0.08}
             gooeyness={0.7}

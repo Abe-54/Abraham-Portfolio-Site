@@ -69,20 +69,31 @@
   margin-left: -94px;
 }
 
-/* The metaball canvas is one and a half times the portrait's size and centred on the photo, so the goo has room
+/* The metaball canvas is nearly twice the portrait's size and centred on the photo, so the goo has room
    to orbit past the rim and to reach for the pointer. It never takes clicks. */
 .portrait-goo {
   position: absolute;
   left: 47.06%;
   top: 46.47%;
-  width: 150%;
-  height: 150%;
+  width: 190%;
+  height: 190%;
   transform: translate(-50%, -50%);
   pointer-events: none;
   /* The canvas is square. Fading it out in a circle means goo that follows the pointer melts
      away near the edge and is never cut by a straight line. */
   -webkit-mask-image: radial-gradient(circle closest-side, #000 88%, transparent 100%);
   mask-image: radial-gradient(circle closest-side, #000 88%, transparent 100%);
+}
+
+/* The goo fades in a moment after load, once its intro has settled behind the photo. */
+.portrait-goo canvas {
+  animation: goo-in 300ms ease-out 700ms both;
+}
+
+@keyframes goo-in {
+  from {
+    opacity: 0;
+  }
 }
 
 /* The blue button keeps a dark ring, so blue goo passing behind it never swallows its shape. */

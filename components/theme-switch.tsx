@@ -188,7 +188,11 @@ export default function ThemeSwitch() {
     transitionRef.current = transition;
     // Scrolling ends the sweep at once, so the page is never shown at two scroll positions.
     const endOnScroll = (event: Event) => {
-      if (event instanceof KeyboardEvent && !SCROLL_KEYS.has(event.key)) return;
+      if (event instanceof KeyboardEvent) {
+        if (!SCROLL_KEYS.has(event.key)) return;
+        // Space on a focused button presses it; it does not scroll.
+        if (event.key === " " && event.target instanceof HTMLElement && event.target.closest("button, a, input, textarea, select")) return;
+      }
       transition.skipTransition();
     };
     const scrollEvents = ["wheel", "touchmove", "keydown"] as const;
@@ -256,7 +260,8 @@ export default function ThemeSwitch() {
     let left = false;
     const watch = () => {
       const time = Number(knob.currentTime ?? 0);
-      if (!left && time >= SWAP_MS * 0.5) {
+      // Only a knob that set off from rest is leaving an icon. One turned round is heading home.
+      if (!left && fromRest && time >= SWAP_MS * 0.5) {
         left = true;
         button.dataset.lit = "";
       }
