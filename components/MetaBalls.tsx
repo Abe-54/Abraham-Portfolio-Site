@@ -30,6 +30,18 @@ interface MetaBallsProps {
   paused?: boolean;
   dpr?: number;
   style?: CSSProperties;
+  /** Local addition: runs right after each frame is drawn, with what the frame was drawn from. */
+  onDraw?: (canvas: HTMLCanvasElement, frame: MetaBallsFrame) => void;
+}
+
+/** Local addition: the uniforms one frame was drawn with, so the same goo can be drawn elsewhere. */
+export interface MetaBallsFrame {
+  balls: Float32Array;
+  shapes: Float32Array;
+  count: number;
+  gamma: number;
+  threshold: number;
+  animationSize: number;
 }
 
 interface Body {
@@ -86,14 +98,14 @@ const easeInOut = (t: number) => {
   return x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2;
 };
 
-const VERTEX = `#version 300 es
+export const VERTEX = `#version 300 es
 in vec2 position;
 void main() {
   gl_Position = vec4(position, 0.0, 1.0);
 }
 `;
 
-const FRAGMENT = `#version 300 es
+export const FRAGMENT = `#version 300 es
 precision highp float;
 
 uniform vec2 uResolution;
@@ -219,7 +231,8 @@ const MetaBalls = ({
   intro = true,
   paused = false,
   dpr,
-  style
+  style,
+  onDraw
 }: MetaBallsProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -244,7 +257,8 @@ const MetaBalls = ({
     rings,
     clickBurst,
     paused,
-    dpr
+    dpr,
+    onDraw
   };
   const settingsRef = useRef(settings);
   settingsRef.current = settings;
@@ -569,6 +583,7 @@ const MetaBalls = ({
       gl.clear(gl.COLOR_BUFFER_BIT);
       gl.drawArrays(gl.TRIANGLES, 0, 3);
       dirty = false;
+      s.onDraw?.(canvas, { balls: ballData, shapes: shapeData, count: count + 1, gamma, threshold, animationSize: s.animationSize });
     };
 
     const frame = (now: number) => {

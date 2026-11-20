@@ -1,5 +1,6 @@
 import Link from "next/link";
 import EmailCopy from "@/components/email-copy";
+import GooInk from "@/components/goo-ink";
 import Hero from "@/components/hero";
 import History from "@/components/history";
 import NoteRow from "@/components/note-row";
@@ -53,16 +54,19 @@ export default function Home() {
     <main id="main" tabIndex={-1}>
       <Hero />
 
-      <section aria-label="At a glance" className="shell relative z-[2] bg-ground flex flex-col gap-6 border-b-[1.5px] border-rule py-8 lg:flex-row lg:items-center lg:gap-14">
-        <dl className="flex flex-col gap-5 md:flex-row md:gap-10 lg:flex-1 lg:gap-14">
-          {glance.map((item) => (
-            <div key={item.label} className="flex flex-col gap-1.5 last:flex-1 last:whitespace-nowrap">
-              <dt className="t-label text-[12px]">{item.label}</dt>
-              <dd className="text-[17px] leading-[22px] font-semibold lg:text-[18px]">{item.value}</dd>
-            </div>
-          ))}
-        </dl>
-        <div className="flex flex-wrap gap-2.5">
+      {/* The portrait goo spills over this strip: the words it covers turn white, the buttons stay on top. */}
+      <section aria-label="At a glance" className="shell flex flex-col gap-6 border-b-[1.5px] border-rule py-8 lg:flex-row lg:items-center lg:gap-14">
+        <GooInk className="lg:flex-1">
+          <dl className="flex flex-col gap-5 md:flex-row md:gap-10 lg:gap-14">
+            {glance.map((item) => (
+              <div key={item.label} className="flex flex-col gap-1.5 last:flex-1 last:whitespace-nowrap">
+                <dt className="t-label text-[12px]">{item.label}</dt>
+                <dd className="text-[17px] leading-[22px] font-semibold lg:text-[18px]">{item.value}</dd>
+              </div>
+            ))}
+          </dl>
+        </GooInk>
+        <div className="relative z-[2] flex flex-wrap gap-2.5">
           <EmailCopy email={contact.email} label="Email me" />
           <a href={contact.resume} target="_blank" rel="noopener" className="btn btn-outline press">
             Résumé ↓

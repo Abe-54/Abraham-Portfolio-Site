@@ -3,12 +3,16 @@
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import portrait from "@/public/abraham_professional.jpg";
+import { clearInk, paintInk } from "./goo-ink";
 import MetaBalls from "./MetaBalls";
 
 /** The photo with liquid metaballs (React Bits) orbiting behind it and reaching for the pointer. */
 export default function GooeyPortrait() {
   const [still, setStill] = useState(false);
   const [held, setHeld] = useState(false);
+
+  // Without the goo, the white copies of the words it covered must go too.
+  useEffect(() => clearInk, [still]);
 
   useEffect(() => {
     const query = window.matchMedia("(prefers-reduced-motion: reduce)");
@@ -69,6 +73,7 @@ export default function GooeyPortrait() {
             stickiness={0.45}
             stretch={0.6}
             wobble={0.55}
+            onDraw={paintInk}
           />
         )}
       </div>

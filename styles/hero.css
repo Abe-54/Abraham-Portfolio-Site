@@ -9,8 +9,10 @@
   font-size: 1rem;
 }
 
+/* The stage sits above the band below it, so the portrait goo can spill over that band. */
 .hero-stage {
   position: relative;
+  z-index: 1;
 }
 
 .hero-disc-clip {
@@ -41,6 +43,12 @@
   font-size: 18px;
   line-height: 1.55;
   color: var(--muted);
+}
+
+.hero-night-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
 }
 
 .hero-btn {
@@ -101,17 +109,61 @@
   box-shadow: 0 0 0 5px #0b0b0c;
 }
 
-/* Words and buttons always sit above the goo. */
-.hero-copy,
-.hero-btn,
-.hero-night > p,
-.hero-night > h2 {
+/* Buttons sit above the goo. Words sit under it and are drawn again in white where it covers them. */
+.hero-btn {
   position: relative;
   z-index: 2;
 }
 
+/* The white copy (components/goo-ink.tsx). It reaches 12px past its block so no letter is cut. */
+.goo-ink {
+  position: relative;
+}
+
+.ink {
+  position: absolute;
+  z-index: 2;
+  inset: -12px;
+  overflow: hidden;
+  background: #000000;
+  mix-blend-mode: screen;
+  pointer-events: none;
+  /* In step with the goo's own fade-in. */
+  animation: goo-in 300ms ease-out 700ms both;
+}
+
+/* The mirror: white goo on the black ground. */
+.ink canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+/* The words, white on black, multiplied over the mirror: white only where both are. */
+.ink-text {
+  position: absolute;
+  inset: 0;
+  padding: 12px;
+  background: #000000;
+  color: #ffffff;
+  mix-blend-mode: multiply;
+}
+
+.ink-text * {
+  color: #ffffff !important;
+  text-decoration-color: #ffffff !important;
+  background: none !important;
+  border-color: transparent !important;
+  box-shadow: none !important;
+}
+
 /* Reduced motion: a still blue rim instead of moving goo. */
 @media (prefers-reduced-motion: reduce) {
+  .ink {
+    display: none;
+  }
+
   .portrait-goo {
     width: 90%;
     height: 90%;
@@ -212,11 +264,15 @@
     width: calc(420 * var(--u));
   }
 
+  .hero .hero-night,
+  .hero-night-copy {
+    gap: calc(24 * var(--u));
+  }
+
   .hero .hero-night {
     position: static;
     flex: 1;
     justify-content: center;
-    gap: calc(24 * var(--u));
     padding: 0 calc(64 * var(--u)) 0 calc(300 * var(--u));
     border-radius: 0;
     background: transparent;
