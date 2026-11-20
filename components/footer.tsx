@@ -3,7 +3,7 @@ import EmailCopy from "./email-copy";
 
 export default function Footer() {
   return (
-    <footer id="contact" className="grid scroll-mt-4 lg:grid-cols-2">
+    <footer id="contact" data-nav="contact" className="grid scroll-mt-4 lg:grid-cols-2">
       <div data-tone="day" className="flex flex-col gap-5 border-t-[1.5px] border-rule pr-[var(--gutter)] pl-[var(--shell-pad-half)] py-14 lg:py-[72px] lg:pr-14">
         <h2 className="font-display text-[40px] leading-[1.04] font-extrabold tracking-[-0.035em] lg:text-[56px]">
           Say hi, any shift.

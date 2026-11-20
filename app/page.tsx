@@ -27,6 +27,7 @@ function WorkSection({
   return (
     <section
       id={id}
+      data-nav="projects"
       data-side={side}
       aria-labelledby={`${id}-title`}
       className="shell flex scroll-mt-4 flex-col pt-20 pb-16 lg:pt-[120px] lg:pb-28"
@@ -74,7 +75,7 @@ export default function Home() {
         </div>
       </section>
 
-      <section id="about" className="shell flex scroll-mt-4 flex-col gap-12 pt-20 pb-8 lg:py-28 xl:flex-row xl:items-start xl:gap-24">
+      <section id="about" data-nav="about" className="shell flex scroll-mt-4 flex-col gap-12 pt-20 pb-8 lg:py-28 xl:flex-row xl:items-start xl:gap-24">
         <div className="flex max-w-[720px] flex-col gap-7 xl:w-[720px] xl:shrink-0">
           <h2 className="t-label">Hi, I&apos;m Abraham</h2>
           <p className="t-statement">
@@ -122,7 +123,7 @@ export default function Home() {
       </WorkSection>
       <WorkSection side="night" id="games" title="Worlds, after hours." />
 
-      <section aria-labelledby="notes-title" className="shell flex flex-col gap-10 py-20 lg:gap-12 lg:py-28">
+      <section aria-labelledby="notes-title" data-nav="notes" className="shell flex flex-col gap-10 py-20 lg:gap-12 lg:py-28">
         <div className="flex flex-wrap items-end justify-between gap-6">
           <div className="flex flex-col gap-3">
             <p className="t-label">Notes</p>
@@ -149,7 +150,7 @@ export default function Home() {
 
       <History />
 
-      <section aria-labelledby="off-title" className="shell flex flex-col gap-14 pt-20 pb-20 lg:gap-[72px] lg:pt-[120px] lg:pb-24">
+      <section aria-labelledby="off-title" data-nav="about" className="shell flex flex-col gap-14 pt-20 pb-20 lg:gap-[72px] lg:pt-[120px] lg:pb-24">
         <div className="flex max-w-[860px] flex-col gap-4">
           <h2 id="off-title" className="t-label">
             Off the clock

@@ -5,9 +5,6 @@
  */
 .hero {
   container-type: inline-size;
-  /* The hero runs up under the floating nav to the top of the window; everything in it moves down by
-     the same space, so its content stays where it was. */
-  margin-top: calc(-1 * var(--nav-space));
   background: #ffffff;
   font-size: 1rem;
 }
@@ -26,7 +23,7 @@
   display: flex;
   flex-direction: column;
   gap: 32px;
-  padding: calc(40px + var(--nav-space)) var(--gutter) 128px;
+  padding: 40px var(--gutter) 128px;
 }
 
 .hero-copy {
@@ -194,7 +191,7 @@
     --u: min(1.25px, calc(100cqw / 1440));
     display: flex;
     width: calc(1440 * var(--u));
-    min-height: calc(660 * var(--u) + var(--nav-space));
+    min-height: calc(660 * var(--u));
     margin-inline: auto;
     background: #ffffff;
     isolation: isolate;
@@ -232,7 +229,7 @@
   .hero-disc {
     position: absolute;
     left: calc(740 * var(--u));
-    top: calc(-170 * var(--u) + var(--nav-space));
+    top: calc(-170 * var(--u));
     width: calc(1000 * var(--u));
     height: calc(1000 * var(--u));
     border-radius: 50%;
@@ -245,7 +242,7 @@
     justify-content: space-between;
     width: calc(700 * var(--u));
     gap: 0;
-    padding: calc(72 * var(--u) + var(--nav-space)) 0 calc(64 * var(--u)) calc(64 * var(--u));
+    padding: calc(72 * var(--u)) 0 calc(64 * var(--u)) calc(64 * var(--u));
     background: transparent;
   }
 
@@ -276,7 +273,7 @@
     position: static;
     flex: 1;
     justify-content: center;
-    padding: var(--nav-space) calc(64 * var(--u)) 0 calc(300 * var(--u));
+    padding: 0 calc(64 * var(--u)) 0 calc(300 * var(--u));
     border-radius: 0;
     background: transparent;
   }
@@ -288,7 +285,7 @@
 
   .portrait {
     left: calc(620 * var(--u));
-    top: calc(300 * var(--u) + var(--nav-space));
+    top: calc(300 * var(--u));
     width: calc(340 * var(--u));
     height: calc(340 * var(--u));
     margin-left: 0;

@@ -3,216 +3,197 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
-import { contact } from "@/lib/content";
+import { NavGoo, type GooBox } from "./nav-goo";
 import ThemeSwitch from "./theme-switch";
 
+// `section` matches the data-nav marks on the home page's sections.
 const links = [
-  { label: "Projects", href: "/projects", page: true },
-  { label: "Notes", href: "/notes", page: true },
-  { label: "About", href: "/#about", page: false },
-  { label: "Contact", href: "/#contact", page: false },
+  { label: "Projects", href: "/projects", section: "projects" },
+  { label: "Notes", href: "/notes", section: "notes" },
+  { label: "About", href: "/#about", section: "about" },
+  { label: "Contact", href: "/#contact", section: "contact" },
 ];
 
-// Route changes started from the keyboard move the active fill at once; pointer navigation stretches it.
-let lastInput: "pointer" | "keyboard" = "pointer";
-
 /**
- * The active link always carries its own fill, so it reads on every frame, with or without JS. On a
- * pointer route change between two page links a ghost pill stretches from the old link to the new one
- * and disappears into the new link's fill.
+ * The section of the home page being read: the last mark whose top has passed 40% of the window. At
+ * the very bottom the last marks can never get that high, so the last one on screen counts instead.
  */
-function useStretchPill(activeIndex: number) {
-  const listRef = useRef<HTMLUListElement>(null);
-  const pillRef = useRef<HTMLSpanElement>(null);
-  const previousIndex = useRef(activeIndex);
+function sectionInView(): string | null {
+  const marks = Array.from(document.querySelectorAll<HTMLElement>("[data-nav]"));
+  const line = window.innerHeight * 0.4;
+  let current: string | null = null;
+  for (const mark of marks) {
+    if (mark.getBoundingClientRect().top <= line) current = mark.dataset.nav ?? null;
+  }
+  const root = document.documentElement;
+  const last = marks[marks.length - 1];
+  if (last && window.scrollY + window.innerHeight >= root.scrollHeight - 2 && last.getBoundingClientRect().top < window.innerHeight) {
+    current = last.dataset.nav ?? null;
+  }
+  return current;
+}
 
-  useLayoutEffect(() => {
-    const fromIndex = previousIndex.current;
-    previousIndex.current = activeIndex;
-    const pill = pillRef.current;
-    const list = listRef.current;
-    if (!pill || !list || fromIndex === activeIndex || fromIndex < 0 || activeIndex < 0) return;
-    if (lastInput === "keyboard" || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-    const from = list.children[fromIndex] as HTMLElement | undefined;
-    const to = list.children[activeIndex] as HTMLElement | undefined;
-    // The desktop list is display:none below the lg breakpoint, so it measures 0 there.
-    if (!from || !to || to.offsetWidth === 0) return;
-    const next = { left: to.offsetLeft, width: to.offsetWidth };
-    const spanLeft = Math.min(from.offsetLeft, next.left);
-    const spanRight = Math.max(from.offsetLeft + from.offsetWidth, next.left + next.width);
-    pill.style.left = `${next.left}px`;
-    pill.style.width = `${next.width}px`;
-    pill.getAnimations().forEach((animation) => animation.cancel());
-    pill.animate(
-      [
-        { opacity: 1, transform: `translateX(${from.offsetLeft - next.left}px) scaleX(${from.offsetWidth / next.width})` },
-        {
-          opacity: 1,
-          transform: `translateX(${spanLeft - next.left}px) scaleX(${(spanRight - spanLeft) / next.width})`,
-          offset: 0.45,
-        },
-        { opacity: 1, transform: "none" },
-      ],
-      { duration: 300, easing: "cubic-bezier(0.77, 0, 0.175, 1)" },
-    );
-  }, [activeIndex]);
+/** The home page's section in view, or undefined until it has been measured (and off the home page). */
+function useSectionInView(enabled: boolean) {
+  const [section, setSection] = useState<string | null | undefined>(undefined);
+  useEffect(() => {
+    if (!enabled) {
+      setSection(undefined);
+      return;
+    }
+    // Measured on the next frame, after the router has scrolled to a #section it was sent to.
+    let frame = 0;
+    const measure = () => {
+      frame = 0;
+      setSection(sectionInView());
+    };
+    const schedule = () => {
+      if (!frame) frame = requestAnimationFrame(measure);
+    };
+    schedule();
+    window.addEventListener("scroll", schedule, { passive: true });
+    window.addEventListener("resize", schedule);
+    return () => {
+      cancelAnimationFrame(frame);
+      window.removeEventListener("scroll", schedule);
+      window.removeEventListener("resize", schedule);
+    };
+  }, [enabled]);
+  return section;
+}
 
-  return { listRef, pillRef };
+/** A link's box in the chip's padding box, where the goo layers sit. */
+function boxOf(chip: HTMLElement, link: Element | undefined): GooBox | null {
+  if (!(link instanceof HTMLElement)) return null;
+  const c = chip.getBoundingClientRect();
+  const l = link.getBoundingClientRect();
+  if (l.width === 0) return null;
+  return {
+    cx: l.left + l.width / 2 - c.left - chip.clientLeft,
+    cy: l.top + l.height / 2 - c.top - chip.clientTop,
+    w: l.width,
+    h: l.height,
+  };
+}
+
+function GooLayer({ filter }: { filter?: boolean }) {
+  return (
+    <svg className="nav-goo" aria-hidden="true">
+      {filter ? (
+        <defs>
+          <filter id="nav-goo-filter" x="-50%" y="-100%" width="200%" height="300%" colorInterpolationFilters="sRGB">
+            <feGaussianBlur in="SourceGraphic" stdDeviation="4" />
+            <feColorMatrix values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 12 -5.5" />
+          </filter>
+        </defs>
+      ) : null}
+      <g filter="url(#nav-goo-filter)">
+        <rect className="nav-blob" width="0" height="0" />
+        <rect className="nav-blob" width="0" height="0" />
+        <rect className="nav-blob" width="0" height="0" />
+      </g>
+    </svg>
+  );
 }
 
 export default function Nav() {
   const pathname = usePathname();
-  const [menuOpen, setMenuOpen] = useState(false);
-  const headerRef = useRef<HTMLElement>(null);
-  const menuButtonRef = useRef<HTMLButtonElement>(null);
-  const menuRef = useRef<HTMLDivElement>(null);
-  const activeIndex = links.findIndex((link) => link.page && pathname.startsWith(link.href));
-  const { listRef, pillRef } = useStretchPill(activeIndex);
+  const chipRef = useRef<HTMLDivElement>(null);
+  const listRef = useRef<HTMLUListElement>(null);
+  const gooRef = useRef<NavGoo | null>(null);
+  const placedRef = useRef(false);
+  // The link the goo marks, or -1, for the resize observer below.
+  const currentIndex = useRef(-1);
 
-  useEffect(() => setMenuOpen(false), [pathname]);
+  const pageIndex = links.findIndex((link) => !link.href.includes("#") && pathname.startsWith(link.href));
+  const home = pathname === "/";
+  const section = useSectionInView(home);
+  // On the home page the goo follows the section being read; elsewhere it marks the page. While the
+  // section is still unmeasured the goo stays where it is.
+  const gooIndex = home ? (section === undefined ? undefined : links.findIndex((link) => link.section === section)) : pageIndex;
 
-  // The page keeps a set space at the top for the nav (--nav-space). Enlarged text can wrap the nav
-  // onto a second row, so the space grows to fit whatever the nav measures.
-  useEffect(() => {
-    const row = headerRef.current?.querySelector<HTMLElement>(".nav-row");
-    if (!row) return;
-    const root = document.documentElement;
-    const fit = () => {
-      root.style.removeProperty("--nav-space");
-      const preset = parseFloat(getComputedStyle(root).getPropertyValue("--nav-space"));
-      const needed = Math.ceil(row.getBoundingClientRect().bottom + 12);
-      if (needed > preset) root.style.setProperty("--nav-space", `${needed}px`);
+  // The goo replaces the CSS fill of the current page's link (the fill shows without JS).
+  useLayoutEffect(() => {
+    const chip = chipRef.current;
+    if (!chip) return;
+    const layers = Array.from(chip.querySelectorAll(".nav-goo"));
+    const parts = [0, 1, 2].map((part) => layers.map((layer) => layer.querySelectorAll<SVGRectElement>(".nav-blob")[part]));
+    const goo = new NavGoo(parts);
+    gooRef.current = goo;
+    chip.dataset.goo = "";
+    const target = () => {
+      const index = currentIndex.current;
+      return index >= 0 ? boxOf(chip, listRef.current?.children[index]?.firstElementChild ?? undefined) : null;
     };
-    const observer = new ResizeObserver(fit);
-    observer.observe(row);
+    // Fonts arriving or the window resizing move the links; the goo follows them. The chip's height is
+    // also the space anchor jumps leave at the top (nav.css).
+    const observer = new ResizeObserver(() => {
+      goo.refit(target());
+      document.documentElement.style.setProperty("--chip-h", `${chip.offsetHeight}px`);
+    });
+    observer.observe(chip);
+    if (listRef.current) observer.observe(listRef.current);
     return () => {
       observer.disconnect();
-      root.style.removeProperty("--nav-space");
+      goo.stop();
+      gooRef.current = null;
+      delete chip.dataset.goo;
+      document.documentElement.style.removeProperty("--chip-h");
     };
   }, []);
 
-  useEffect(() => {
-    const onPointer = () => (lastInput = "pointer");
-    const onKey = () => (lastInput = "keyboard");
-    window.addEventListener("pointerdown", onPointer, { capture: true, passive: true });
-    window.addEventListener("keydown", onKey, { capture: true, passive: true });
-    return () => {
-      window.removeEventListener("pointerdown", onPointer, { capture: true });
-      window.removeEventListener("keydown", onKey, { capture: true });
-    };
-  }, []);
-
-  useEffect(() => {
-    if (!menuOpen) return;
-    const onKey = (event: KeyboardEvent) => {
-      if (event.key !== "Escape") return;
-      // Focus leaves the menu before it turns inert, so it lands on the button that opened it.
-      menuButtonRef.current?.focus();
-      setMenuOpen(false);
-    };
-    const onPointerDown = (event: PointerEvent) => {
-      const target = event.target as Node;
-      if (menuRef.current?.contains(target) || menuButtonRef.current?.contains(target)) return;
-      setMenuOpen(false);
-    };
-    window.addEventListener("keydown", onKey);
-    document.addEventListener("pointerdown", onPointerDown);
-    return () => {
-      window.removeEventListener("keydown", onKey);
-      document.removeEventListener("pointerdown", onPointerDown);
-    };
-  }, [menuOpen]);
-
-  function closeOnFocusLeave(event: React.FocusEvent<HTMLDivElement>) {
-    const next = event.relatedTarget as Node | null;
-    if (!next || event.currentTarget.contains(next) || menuButtonRef.current?.contains(next)) return;
-    setMenuOpen(false);
-  }
+  useLayoutEffect(() => {
+    const chip = chipRef.current;
+    const goo = gooRef.current;
+    if (gooIndex === undefined || !chip || !goo) return;
+    currentIndex.current = gooIndex;
+    const box = gooIndex >= 0 ? boxOf(chip, listRef.current?.children[gooIndex]?.firstElementChild ?? undefined) : null;
+    // The first mark is simply there, matching the fill it replaces.
+    const animate = placedRef.current && !window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    placedRef.current = true;
+    goo.set(box, animate);
+  }, [gooIndex]);
 
   return (
-    // The header holds the nav's place at the top of the page; the nav itself floats over the page
-    // and stays on screen. The home hero slides up under it (hero.css).
-    <header ref={headerRef} className="site-nav">
-      <div aria-hidden="true" data-open={menuOpen || undefined} className="menu-scrim lg:hidden" />
-      <nav aria-label="Main" className="nav-row">
-        <Link href="/" className="nav-chip nav-name">
-          Abraham Rubio
-        </Link>
+    <>
+      <header className="site-head">
+        <div className="shell site-head-row">
+          <Link href="/" className="site-name">
+            Abraham Rubio
+          </Link>
+          <ThemeSwitch />
+        </div>
+      </header>
 
-        <div className="nav-chip nav-links">
-          <div className="relative">
-            <span ref={pillRef} aria-hidden="true" className="nav-pill" />
-            <ul ref={listRef} className="flex items-center gap-0.5">
-              {links.map((link, index) => (
-                <li key={link.href} className="flex">
-                  <Link
-                    href={link.href}
-                    aria-current={index === activeIndex ? "page" : undefined}
-                    className="nav-link"
-                  >
-                    {link.label}
-                  </Link>
-                </li>
-              ))}
-            </ul>
+      {/* The links float on their own and stay on screen: in the header row on wide screens, under it
+          on phones. */}
+      <nav aria-label="Main" className="nav-float">
+        <div ref={chipRef} className="nav-chip">
+          <ul ref={listRef} className="nav-list">
+            {links.map((link, index) => (
+              <li key={link.href} className="flex">
+                <Link href={link.href} aria-current={index === pageIndex ? "page" : undefined} className="nav-link">
+                  {link.label}
+                </Link>
+              </li>
+            ))}
+          </ul>
+          {/* The blue goo covers the link it marks; the white copy of the labels shows only inside it. */}
+          <GooLayer filter />
+          <div className="nav-ink" aria-hidden="true" inert>
+            <GooLayer />
+            <div className="nav-ink-text">
+              <ul className="nav-list">
+                {links.map((link) => (
+                  <li key={link.href} className="flex">
+                    <span className="nav-link">{link.label}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
           </div>
         </div>
-
-        <div className="nav-chip nav-tools">
-          <ThemeSwitch />
-          <button
-            ref={menuButtonRef}
-            type="button"
-            aria-expanded={menuOpen}
-            aria-controls="mobile-menu"
-            aria-label="Menu"
-            onClick={() => setMenuOpen((open) => !open)}
-            className="menu-toggle press lg:hidden"
-          >
-            <svg viewBox="0 0 24 24" aria-hidden="true">
-              {menuOpen ? <path d="M18 6 6 18M6 6l12 12" /> : <path d="M4 7h16M4 12h16M4 17h16" />}
-            </svg>
-          </button>
-        </div>
       </nav>
-
-      {/* Without JS the menu cannot open, so every width gets the link chip, on its own row on a phone. */}
-      <noscript
-        dangerouslySetInnerHTML={{
-          __html:
-            "<style>.nav-tools{display:none}.nav-links{display:flex}:root{--nav-space:144px}" +
-            "@media (min-width:64rem){:root{--nav-space:96px}}</style>",
-        }}
-      />
-
-      <div
-        ref={menuRef}
-        id="mobile-menu"
-        data-open={menuOpen || undefined}
-        inert={!menuOpen}
-        onBlur={closeOnFocusLeave}
-        className="mobile-menu lg:hidden"
-      >
-        <ul className="flex flex-col">
-          {links.map((link, index) => (
-            <li key={link.href}>
-              <Link
-                href={link.href}
-                onClick={() => setMenuOpen(false)}
-                aria-current={index === activeIndex ? "page" : undefined}
-                className="mobile-menu-link"
-              >
-                {link.label}
-              </Link>
-            </li>
-          ))}
-          <li>
-            <a href={contact.resume} target="_blank" rel="noopener" className="mobile-menu-link">
-              Résumé ↓
-            </a>
-          </li>
-        </ul>
-      </div>
-    </header>
+    </>
   );
 }
