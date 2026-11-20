@@ -5,6 +5,9 @@
  */
 .hero {
   container-type: inline-size;
+  /* On narrow phones the portrait goo's square canvas reaches past the screen's right edge, which let
+     the page pan sideways. Its spill down over the band below stays. */
+  overflow-x: clip;
   background: #ffffff;
   font-size: 1rem;
 }
