@@ -126,15 +126,21 @@ export default function Home() {
               Things I figured out.
             </h2>
           </div>
-          <Link href="/notes" className="t-link inline-flex min-h-11 items-center text-[17px]">
-            All notes →
-          </Link>
+          {notes.length > 0 ? (
+            <Link href="/notes" className="t-link inline-flex min-h-11 items-center text-[17px]">
+              All notes →
+            </Link>
+          ) : null}
         </div>
-        <div className="note-list">
-          {notes.slice(0, 3).map((note, index) => (
-            <NoteRow key={note.slug} note={note} index={index} />
-          ))}
-        </div>
+        {notes.length > 0 ? (
+          <div className="note-list">
+            {notes.slice(0, 3).map((note, index) => (
+              <NoteRow key={note.slug} note={note} index={index} />
+            ))}
+          </div>
+        ) : (
+          <p className="notes-empty">No notes yet.</p>
+        )}
       </section>
 
       <History />

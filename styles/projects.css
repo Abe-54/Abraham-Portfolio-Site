@@ -61,11 +61,6 @@
   filter: blur(12px);
 }
 
-.drawn-cover {
-  width: 100%;
-  height: 100%;
-}
-
 /* The image wipes between two inset() shapes so the clip interpolates instead of popping. */
 @media (prefers-reduced-motion: no-preference) {
   [data-entrance="pending"] .cover-wipe {

@@ -1,3 +1,11 @@
+/* Until the first note is written, the list is one ruled row saying so. */
+.notes-empty {
+  padding-block: 28px;
+  border-top: 1px solid var(--rule);
+  border-bottom: 1px solid var(--hairline);
+  color: var(--muted);
+}
+
 .note-list > .note-row:first-child {
   border-top-color: var(--rule);
 }

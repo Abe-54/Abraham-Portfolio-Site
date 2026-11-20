@@ -1,39 +1,30 @@
 import Image from "next/image";
 import { sideLabel, type Cover, type Project } from "@/lib/content";
-import { drawnCovers } from "./drawn-covers";
 
 function ProjectCover({ cover, priority }: { cover: Cover; priority?: boolean }) {
-  if (cover.kind === "image") {
-    const contain = cover.fit === "contain";
-    return (
-      <div className="cover-wipe absolute inset-0">
-        {contain && cover.src.blurDataURL ? (
-          <div
-            aria-hidden="true"
-            className="cover-backdrop"
-            style={{ backgroundImage: `url(${cover.src.blurDataURL})` }}
-          />
-        ) : null}
-        <Image
-          src={cover.src}
-          alt={cover.alt}
-          fill
-          placeholder="blur"
-          priority={priority}
-          fetchPriority={priority ? "high" : undefined}
-          // The covers are small. Lazy loading starts them so late that a quick scroll reaches them
-          // while they still show the blur placeholder.
-          loading={priority ? undefined : "eager"}
-          sizes="(min-width: 1441px) 368px, (min-width: 768px) 280px, calc(100vw - 40px)"
-          style={{ objectFit: contain ? "contain" : "cover" }}
-        />
-      </div>
-    );
-  }
-  const { background, Art } = drawnCovers[cover.id];
+  const contain = cover.fit === "contain";
   return (
-    <div className="flex h-full w-full items-center justify-center" style={{ background }}>
-      <Art />
+    <div className="cover-wipe absolute inset-0">
+      {contain && cover.src.blurDataURL ? (
+        <div
+          aria-hidden="true"
+          className="cover-backdrop"
+          style={{ backgroundImage: `url(${cover.src.blurDataURL})` }}
+        />
+      ) : null}
+      <Image
+        src={cover.src}
+        alt={cover.alt}
+        fill
+        placeholder="blur"
+        priority={priority}
+        fetchPriority={priority ? "high" : undefined}
+        // The covers are small. Lazy loading starts them so late that a quick scroll reaches them
+        // while they still show the blur placeholder.
+        loading={priority ? undefined : "eager"}
+        sizes="(min-width: 1441px) 368px, (min-width: 768px) 280px, calc(100vw - 40px)"
+        style={{ objectFit: contain ? "contain" : "cover" }}
+      />
     </div>
   );
 }

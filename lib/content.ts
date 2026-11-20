@@ -4,12 +4,12 @@ import njHomesImage from "@/public/nj_homes.webp";
 
 export type Side = "day" | "night";
 
-export type DrawnCoverId = "dc-ai" | "climate-game";
-
-export type Cover =
+export type Cover = {
+  src: StaticImageData;
+  alt: string;
   /** "contain" shows the whole image over a blurred copy of itself instead of cropping it. */
-  | { kind: "image"; src: StaticImageData; alt: string; fit?: "cover" | "contain" }
-  | { kind: "drawn"; id: DrawnCoverId };
+  fit?: "cover" | "contain";
+};
 
 export type Project = {
   slug: string;
@@ -75,35 +75,14 @@ export const projects: Project[] = [
     year: 2026,
     summary: "Tools that help New Jersey towns plan affordable housing.",
     role: "Full-stack engineer",
-    built: [
-      "Sign-in and admin tools",
-      "RFP board with review before publishing",
-    ],
+    built: ["Sign-in and admin tools"],
     stackLabel: "Stack",
     stack: "Next.js · Prisma · MapLibre",
     link: { label: "njhomes.dca.nj.gov", href: "https://njhomes.dca.nj.gov" },
     cover: {
-      kind: "image",
       src: njHomesImage,
       alt: "NJ HOMES home page: the headline “Every municipality’s affordable housing record, in one place.” beside a sample municipality record",
     },
-  },
-  {
-    slug: "dc-ai",
-    name: "DC AI",
-    side: "day",
-    year: 2026,
-    summary: "An AI workspace for state staff, with specialist agents behind one chat.",
-    role: "Full-stack engineer",
-    built: [
-      "Auto-routing between specialist agents",
-      "Chat that survives stalls and disconnects",
-      "Form-filling agent and its eval harness",
-    ],
-    stackLabel: "Stack",
-    stack: "Next.js · AI SDK",
-    link: { label: "Internal tool · no public link" },
-    cover: { kind: "drawn", id: "dc-ai" },
   },
   {
     slug: "market-dash",
@@ -117,24 +96,10 @@ export const projects: Project[] = [
     stack: "Unity · C# · Photoshop",
     link: { label: "Play it on itch.io", href: marketDashUrl },
     cover: {
-      kind: "image",
       src: marketDashImage,
       alt: "Market Dash title screen: a grocery store aisle with Play and Settings buttons",
       fit: "contain",
     },
-  },
-  {
-    slug: "climate-game",
-    name: "Climate game",
-    side: "night",
-    year: 2024,
-    summary: "A multiplayer climate strategy game for classrooms, from my NASA internship.",
-    role: "Climate Game Intern, NASA",
-    built: ["Built with two other interns", "Picked from 600+ applicants"],
-    stackLabel: "Team",
-    stack: "Three interns",
-    link: { label: "Summer 2024" },
-    cover: { kind: "drawn", id: "climate-game" },
   },
 ];
 
@@ -178,47 +143,7 @@ export const history: Stop[] = [
   },
 ];
 
-export const notes: Note[] = [
-  {
-    slug: "chat-stream-dropped-connection",
-    date: "2026-11-01",
-    title: "Keeping a chat stream alive through a dropped connection",
-    summary: "What breaks when the network drops mid-answer, and how the chat picks back up.",
-    side: "day",
-    minutes: 6,
-    project: "DC AI",
-    sample: true,
-  },
-  {
-    slug: "platformer-ui-feel",
-    date: "2026-10-01",
-    title: "What a platformer taught me about making UI feel good",
-    summary: "Game feel tricks that carry over to buttons, loading states and transitions.",
-    side: "night",
-    minutes: 8,
-    sample: true,
-  },
-  {
-    slug: "scoring-form-filling-agent",
-    date: "2026-09-01",
-    title: "How I score an AI agent that fills out forms",
-    summary: "Building a test harness that says whether a change made the agent better or worse.",
-    side: "day",
-    minutes: 5,
-    project: "DC AI",
-    sample: true,
-  },
-  {
-    slug: "unity-editor-tools",
-    date: "2026-08-01",
-    title: "Unity editor tools that cut level-design time",
-    summary: "The small custom tools I wrote for Market Dash, and which ones the team kept using.",
-    side: "night",
-    minutes: 4,
-    project: "Market Dash",
-    sample: true,
-  },
-];
+export const notes: Note[] = [];
 
 export const sampleNoteBody: NoteBlock[] = [
   {

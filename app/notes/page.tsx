@@ -16,11 +16,15 @@ export default function NotesPage() {
           Short write-ups on things I figured out, at the day job and on game projects.
         </p>
       </div>
-      <div className="note-list">
-        {notes.map((note, index) => (
-          <NoteRow key={note.slug} note={note} index={index} headingLevel={2} />
-        ))}
-      </div>
+      {notes.length > 0 ? (
+        <div className="note-list">
+          {notes.map((note, index) => (
+            <NoteRow key={note.slug} note={note} index={index} headingLevel={2} />
+          ))}
+        </div>
+      ) : (
+        <p className="notes-empty">No notes yet.</p>
+      )}
     </main>
   );
 }
