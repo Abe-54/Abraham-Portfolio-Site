@@ -97,22 +97,28 @@ function dripPath(x: number, length: number, r: number, pinch: number, swing: nu
 /**
  * Where a band's drips hang (share of the width), how long they hang at rest, and their bulb. Dropped
  * at random along the edge, so they bunch in places and leave gaps in others, a few more on a wide band;
- * drawn again while one stretch of the edge is left bare for more than about a third of it.
+ * drawn again while one stretch of the edge is left bare for more than about a third of it. Most draws
+ * miss that at four or five drips, so it keeps the most even draw, never just the last one.
  */
 function layout(width: number) {
   const count = clamp(Math.round(width / 240), 3, MAX_DRIPS - 1) + (Math.random() < 0.5 ? 1 : 0);
   const gap = DRIP_GAP / Math.max(1, width);
   const bare = Math.max(0.3, 1.6 / (count + 1));
   let spots: number[] = [];
-  for (let attempt = 0; attempt < 20; attempt++) {
-    spots = [];
-    for (let tries = 0; spots.length < count && tries < 200; tries++) {
+  let widest = Infinity;
+  for (let attempt = 0; attempt < 200 && widest > bare; attempt++) {
+    const picked: number[] = [];
+    for (let tries = 0; picked.length < count && tries < 200; tries++) {
       const at = 0.04 + Math.random() * 0.92;
-      if (spots.every((spot) => Math.abs(spot - at) >= gap)) spots.push(at);
+      if (picked.every((spot) => Math.abs(spot - at) >= gap)) picked.push(at);
     }
-    spots.sort((a, b) => a - b);
-    const ends = [0, ...spots, 1];
-    if (ends.every((at, i) => i === 0 || at - ends[i - 1] <= bare)) break;
+    picked.sort((a, b) => a - b);
+    const ends = [0, ...picked, 1];
+    const most = Math.max(...ends.slice(1).map((at, i) => at - ends[i]));
+    if (most < widest) {
+      spots = picked;
+      widest = most;
+    }
   }
   return spots.map((at) => ({ at, rest: 6 + Math.random() * 26, r: 4.5 + Math.random() * 5.5 }));
 }
