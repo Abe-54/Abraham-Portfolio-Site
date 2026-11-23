@@ -376,10 +376,25 @@
   height: 260px;
 }
 
+/* The drops fall behind everything on the page: behind the words of the sections they pass, and hidden
+   behind the next night band, until they reach the footer. Same place as the drips. */
+.liquid-rain {
+  position: absolute;
+  z-index: -1;
+  top: calc(100% - 1px);
+  left: 0;
+  display: block;
+  width: 100%;
+  height: 1px;
+  overflow: visible;
+  fill: var(--ground);
+  pointer-events: none;
+}
+
 /* In night theme the bands next door are the same black, so the liquid shows as the blue goo instead:
-   blue drips and drops hanging from a thin rim along the band's bottom, and of a surface only the rings
-   where a drop lands. */
-html[data-theme="night"] :is(.liquid-bottom, .liquid-bead) {
+   blue drips and drops hanging from a thin rim along the band's bottom, and of the footer's edge only
+   the rings where a drop lands. */
+html[data-theme="night"] :is(.liquid-bottom, .liquid-rain) {
   fill: #3366ff;
 }
 
@@ -392,7 +407,6 @@ html[data-theme="night"] .liquid-rim {
   display: inline;
 }
 
-.liquid-rings,
 .puddle-rings {
   fill: #3366ff;
 }

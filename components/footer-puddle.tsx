@@ -5,8 +5,8 @@ import { animate, reducedMotion } from "@/lib/goo";
 import { Puddle, addSurface } from "@/lib/rain";
 
 /*
- * The footer's top edge is the last surface the rain reaches (lib/rain.ts). The drops that fall from
- * the History band land on it, and it takes them like a puddle: it dips where each one goes in and
+ * The footer's top edge is where the rain lands (lib/rain.ts). The drops that fall from every night
+ * band land on it, and it takes them like a puddle: it dips where each one goes in and
  * rings out along the edge, and the drop goes on through into the footer's lava, which hears a
  * `goo-rain` event for each one (components/goo-pool.tsx). On a wide screen the edge runs along the
  * tops of both halves; on a phone, along the day half.
@@ -115,8 +115,8 @@ export default function FooterPuddle() {
       },
       hit: (x, r, speed) => {
         const box = footer.getBoundingClientRect();
-        // No splash: the drop goes on into the footer, where the lava takes it (components/goo-pool.tsx).
-        puddle.hit(x - box.left, r, speed, false);
+        // The drop goes on into the footer, where the lava takes it (components/goo-pool.tsx).
+        puddle.hit(x - box.left, r, speed);
         stop ??= animate(tick);
         footer.dispatchEvent(new CustomEvent<Rain>("goo-rain", { detail: { x, y: box.top, r, speed } }));
       },

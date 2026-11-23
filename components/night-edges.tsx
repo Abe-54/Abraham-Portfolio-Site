@@ -2,7 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import { animate, reducedMotion, spring, step, type Feel, type Spring } from "@/lib/goo";
-import { Puddle, addSurface, surfaceBelow, type Surface } from "@/lib/rain";
+import { surfaceBelow, type Surface } from "@/lib/rain";
 
 /*
  * Night is the other liquid. Put this inside a full-width night band marked .liquid.
@@ -12,17 +12,16 @@ import { Puddle, addSurface, surfaceBelow, type Surface } from "@/lib/rain";
  * the page moves. The drips are soft: they sway on their own, stretch and jiggle. Scrolling tugs at them
  * but never tears a drop off. A mouse pointer that comes near draws them: they lean after it and reach
  * down toward it, brushing through one flicks it, and a full drip pulled far enough lets go. A drop
- * wobbles as it falls, and falls at a gentle pace, until it reaches the next liquid surface below
- * (lib/rain.ts): the top of the next night band, or the footer.
+ * wobbles as it falls, at a gentle pace and behind everything on the page: behind the words of the
+ * sections it passes and hidden behind the next night band, until it reaches the footer (lib/rain.ts),
+ * whose lava it becomes (components/goo-pool.tsx).
  *
- * Its top edge is such a surface. It sloshes as the page scrolls, and takes the drops from the band
- * above like a puddle takes rain. Each one it takes fills the drip below it a little sooner, so in the
- * end all the rain reaches the footer, where it becomes the lava (components/goo-pool.tsx).
+ * Its top edge sloshes as the page scrolls.
  *
  * Both edges reach into the day bands next door. In night theme those are the same black, so the liquid
- * shows as the blue goo instead: blue drips and drops hanging from a thin rim along the band's bottom,
- * and of the top surface only the rings where a drop lands (styles/goo.css). No filter: every edge is a computed path. It runs only while an edge is near
- * the screen or a drop is still falling, and never with reduced motion, which gets the edges at rest.
+ * shows as the blue goo instead: blue drips and drops hanging from a thin rim along the band's bottom
+ * (styles/goo.css). No filter: every edge is a computed path. It runs only while an edge is near the
+ * screen or a drop is still falling, and never with reduced motion, which gets the edges at rest.
  */
 
 const SLOSH: Feel = { stiffness: 90, damping: 7 };
@@ -51,12 +50,12 @@ const REACH_Y = 220;
 // How far past its grown length a well-filled drip must be pulled before it lets go. Scrolling alone
 // never pulls this far.
 const PLUCK = 56;
-// The top surface's box, and where in it the surface rests.
+// The top surface's box, where in it the surface rests, and how far apart its points are drawn.
 const EDGE = 90;
 const LEVEL = EDGE - 24;
-// Drops and beads drawn at once.
-const FALLS = 12;
-const BEADS = 9;
+const COLUMN = 10;
+// Drops in the air at once: enough for the long fall to the footer.
+const FALLS = 16;
 
 const between = ([low, high]: [number, number]) => low + Math.random() * (high - low);
 const clamp = (value: number, low: number, high: number) => Math.min(high, Math.max(low, value));
@@ -115,22 +114,21 @@ const bulbOf = (drip: Drip) => drip.r * (0.7 + 0.5 * drip.fill * drip.fill);
 export default function NightEdges() {
   const topRef = useRef<SVGSVGElement>(null);
   const surfaceRef = useRef<SVGPathElement>(null);
-  const ringsRef = useRef<SVGPathElement>(null);
   const bottomRef = useRef<SVGSVGElement>(null);
   const dripsRef = useRef<SVGGElement>(null);
+  const rainRef = useRef<SVGSVGElement>(null);
 
   useEffect(() => {
     const topSvg = topRef.current;
     const surfacePath = surfaceRef.current;
-    const ringsPath = ringsRef.current;
     const bottomSvg = bottomRef.current;
     const dripLayer = dripsRef.current;
+    const rainSvg = rainRef.current;
     const band = topSvg?.closest<HTMLElement>(".liquid");
-    if (!topSvg || !surfacePath || !ringsPath || !bottomSvg || !dripLayer || !band) return;
+    if (!topSvg || !surfacePath || !bottomSvg || !dripLayer || !rainSvg || !band) return;
     const still = reducedMotion();
     const paths = Array.from(dripLayer.querySelectorAll<SVGPathElement>(".liquid-drip"));
-    const fallEls = Array.from(dripLayer.querySelectorAll<SVGEllipseElement>(".liquid-fall"));
-    const beadEls = Array.from(topSvg.querySelectorAll<SVGCircleElement>(".liquid-bead"));
+    const fallEls = Array.from(rainSvg.querySelectorAll<SVGEllipseElement>(".liquid-fall"));
     const modes = [spring(), spring(), spring()];
     const drips: Drip[] = DRIPS.map((drip) => ({
       ...drip,
@@ -143,9 +141,7 @@ export default function NightEdges() {
       phase: Math.random() * Math.PI * 2,
     }));
     const falls: Fall[] = [];
-    const puddle = new Puddle();
     let width = band.clientWidth;
-    puddle.resize(width);
     let clock = 0;
     let lastY = window.scrollY;
     let lastT = performance.now();
@@ -157,7 +153,6 @@ export default function NightEdges() {
     let topOn = false;
     let bottomOn = false;
     let quiet = 0;
-    const night = () => document.documentElement.dataset.theme === "night";
 
     // A mouse pointer, in the window, with its speed in px/s. Fine pointers only: touch gets no hover.
     const fine = window.matchMedia("(hover: hover) and (pointer: fine)");
@@ -170,28 +165,19 @@ export default function NightEdges() {
       modes[1].value * Math.sin(u * Math.PI * 3.3 + 1.1) +
       modes[2].value * Math.sin(u * Math.PI * 6.2 + 2.0) * 0.6;
 
-    // The top surface at column i: the meniscus, the scroll's slosh, and the rings of any drop that went
-    // in, kept inside its box so a hard slosh never dips below the band it sits on.
-    const surfaceAt = (i: number) => {
-      const u = Math.min(width, i * puddle.dx) / Math.max(1, width);
-      return Math.min(EDGE - 1, Math.max(6, LEVEL + meniscus(u) + slosh(u) + puddle.h[i]));
-    };
+    // The top surface at share u of the width: the meniscus and the scroll's slosh, kept inside its box
+    // so a hard slosh never dips below the band it sits on.
+    const surfaceAt = (u: number) => Math.min(EDGE - 1, Math.max(6, LEVEL + meniscus(u) + slosh(u)));
 
     const draw = () => {
       const w = width;
+      const columns = Math.max(8, Math.min(240, Math.round(w / COLUMN) + 1));
       let d = `M0,${EDGE}`;
-      for (let i = 0; i < puddle.h.length; i++) d += ` L${n(Math.min(w, i * puddle.dx))},${n(surfaceAt(i))}`;
+      for (let i = 0; i < columns; i++) {
+        const u = i / (columns - 1);
+        d += ` L${n(u * w)},${n(surfaceAt(u))}`;
+      }
       surfacePath.setAttribute("d", `${d} L${w},${EDGE} Z`);
-      // In night theme the surface is black on black: only its rings show.
-      ringsPath.setAttribute("d", night() && !puddle.calm ? puddle.rings((i) => surfaceAt(i) - puddle.h[i]) : "");
-      beadEls.forEach((el, i) => {
-        const bead = puddle.beads[i];
-        if (!bead || bead.wait > 0) return el.setAttribute("r", "0");
-        const u = bead.x / Math.max(1, w);
-        el.setAttribute("cx", n(bead.x));
-        el.setAttribute("cy", n(LEVEL + meniscus(u) + slosh(u) + bead.y));
-        el.setAttribute("r", bead.r.toFixed(2));
-      });
       // The bottom: each drip swells as it fills, and its neck narrows just before it lets go, or as it
       // is pulled long.
       drips.forEach((drip, i) => {
@@ -341,19 +327,17 @@ export default function NightEdges() {
         } else if (fall.floor === Infinity && fall.y > 2400) fall.wait = -1;
       }
       for (let i = falls.length - 1; i >= 0; i--) if (falls[i].wait === -1) falls.splice(i, 1);
-      puddle.step(dt);
       draw();
       const calm =
         Math.abs(speed) < 4 &&
         Math.abs(drive) < 4 &&
         modes.every((m) => Math.abs(m.value) < 0.05 && Math.abs(m.velocity) < 0.5) &&
         drips.every((drip) => Math.abs(drip.length.velocity) < 0.5) &&
-        falls.length === 0 &&
-        puddle.calm;
+        falls.length === 0;
       quiet = calm ? quiet + dt : 0;
       // While the drips are near the screen it keeps raining; otherwise it sleeps once all is still.
       if (!bottomOn && (quiet > 0.3 || !topOn)) {
-        if (falls.length === 0 && puddle.calm) {
+        if (falls.length === 0) {
           stop = null;
           return false;
         }
@@ -362,7 +346,7 @@ export default function NightEdges() {
     };
 
     const wake = () => {
-      if (still || stop || !(topOn || bottomOn || falls.length || !puddle.calm)) return;
+      if (still || stop || !(topOn || bottomOn || falls.length)) return;
       lastY = window.scrollY;
       lastT = performance.now();
       speed = 0;
@@ -390,29 +374,8 @@ export default function NightEdges() {
       if (!event.relatedTarget) pointer.on = false;
     };
 
-    // The top edge takes the drops from the band above.
-    const removeSurface = still
-      ? () => {}
-      : addSurface({
-          lineAt: (x) => {
-            const box = band.getBoundingClientRect();
-            if (x < box.left || x > box.right) return null;
-            return box.top + 1 - EDGE + LEVEL + meniscus((x - box.left) / Math.max(1, box.width));
-          },
-          hit: (x, r, fallSpeed) => {
-            const local = x - band.getBoundingClientRect().left;
-            puddle.hit(local, r, fallSpeed);
-            // The drop joins the band: the drip below where it went in fills faster, so the rain carries
-            // on down the page until it reaches the footer's pool.
-            const below = drips.reduce((a, b) => (Math.abs(b.at * width - local) < Math.abs(a.at * width - local) ? b : a));
-            below.fill = Math.min(1, below.fill + 0.08 + r / 60);
-            wake();
-          },
-        });
-
     const resize = new ResizeObserver(() => {
       width = band.clientWidth;
-      puddle.resize(width);
       draw();
     });
     resize.observe(band);
@@ -429,7 +392,7 @@ export default function NightEdges() {
     );
     observer.observe(topSvg);
     observer.observe(bottomSvg);
-    // A new theme recolours the liquid; the rings only draw in night theme.
+    // A new theme recolours the liquid.
     const theme = new MutationObserver(() => {
       draw();
       wake();
@@ -443,7 +406,6 @@ export default function NightEdges() {
     draw();
     return () => {
       stop?.();
-      removeSurface();
       resize.disconnect();
       observer.disconnect();
       theme.disconnect();
@@ -457,10 +419,6 @@ export default function NightEdges() {
     <>
       <svg ref={topRef} className="liquid-top" aria-hidden="true" preserveAspectRatio="none">
         <path ref={surfaceRef} />
-        <path ref={ringsRef} className="liquid-rings" />
-        {Array.from({ length: BEADS }, (_, index) => (
-          <circle key={index} className="liquid-bead" r="0" />
-        ))}
       </svg>
       <svg ref={bottomRef} className="liquid-bottom" aria-hidden="true">
         <g ref={dripsRef}>
@@ -470,10 +428,13 @@ export default function NightEdges() {
           {DRIPS.map((_, index) => (
             <path key={index} className="liquid-drip" />
           ))}
-          {Array.from({ length: FALLS }, (_, index) => (
-            <ellipse key={index} className="liquid-fall" rx="0" ry="0" />
-          ))}
         </g>
+      </svg>
+      {/* The falling drops, in the same place as the drips but behind everything on the page. */}
+      <svg ref={rainRef} className="liquid-rain" aria-hidden="true">
+        {Array.from({ length: FALLS }, (_, index) => (
+          <ellipse key={index} className="liquid-fall" rx="0" ry="0" />
+        ))}
       </svg>
     </>
   );

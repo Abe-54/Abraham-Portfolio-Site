@@ -1,9 +1,9 @@
 /*
- * Rain. The night bands drip (components/night-edges.tsx), and every drop falls until it lands on the
- * next liquid surface below it: the top of the next night band, or the footer's top edge
- * (components/footer-puddle.tsx). A surface takes a drop the way a puddle takes rain: it dips where
- * the drop went in, rings out both ways along the edge, and throws a bead back up. In night theme the
- * rain is the blue goo, and where a surface is black on black only its rings show.
+ * Rain. The night bands drip (components/night-edges.tsx), and every drop falls, behind everything on
+ * the page, until it lands on a liquid surface below it: the footer's top edge
+ * (components/footer-puddle.tsx). The surface takes a drop the way a puddle takes rain: it dips where
+ * the drop went in and rings out both ways along the edge. In night theme the rain is the blue goo,
+ * and where the edge is black on black only its rings show.
  */
 
 export type Surface = {
@@ -32,7 +32,6 @@ export function surfaceBelow(x: number, y: number) {
   return found;
 }
 
-export const GRAVITY = 1500;
 // The rings: how fast they travel along the edge, how hard the edge pulls back flat (which also makes
 // a ring of several crests rather than one bump), and how quickly they die out.
 const WAVE = 260;
@@ -41,16 +40,12 @@ const DAMP = 3.5;
 // Columns of the edge, in pixels.
 const COLUMN = 10;
 
-/** A bead thrown up by a landing. `y` is above (negative) or below the resting line, in pixels. */
-export type Bead = { x: number; y: number; vx: number; vy: number; r: number; wait: number; done?: boolean };
-
-/** A liquid edge: how far each column sits below its resting line (negative is above), and the beads in the air. */
+/** A liquid edge: how far each column sits below its resting line (negative is above). */
 export class Puddle {
   width = 0;
   dx = COLUMN;
   h = new Float32Array(0);
   v = new Float32Array(0);
-  beads: Bead[] = [];
 
   resize(width: number) {
     const n = Math.max(8, Math.min(240, Math.round(width / COLUMN) + 1));
@@ -74,8 +69,8 @@ export class Puddle {
     return this.h[i] * (1 - t) + this.h[Math.min(n - 1, i + 1)] * t;
   }
 
-  /** A drop of radius `r` goes in at x, falling at `speed` px/s. A big enough one throws beads back up. */
-  hit(x: number, r: number, speed: number, splash = true) {
+  /** A drop of radius `r` goes in at x, falling at `speed` px/s. */
+  hit(x: number, r: number, speed: number) {
     const n = this.h.length;
     if (!n) return;
     const centre = x / this.dx;
@@ -86,19 +81,6 @@ export class Puddle {
     for (let i = from; i <= to; i++) {
       const d = (i - centre) / spread;
       this.v[i] += push * Math.exp((-d * d) / 2);
-    }
-    if (!splash || r < 2.5) return;
-    // A moment after the drop goes in, the middle throws a bead straight up and two specks to the sides.
-    this.beads.push({ x, y: 0, vx: 0, vy: -(110 + r * 14 + speed * 0.05), r: r * 0.42, wait: 0.07 });
-    for (const side of [-1, 1]) {
-      this.beads.push({
-        x,
-        y: 0,
-        vx: side * (50 + r * 7 + Math.random() * 30),
-        vy: -(80 + r * 9 + Math.random() * 40),
-        r: r * (0.16 + Math.random() * 0.08),
-        wait: 0.02,
-      });
     }
   }
 
@@ -112,20 +94,6 @@ export class Puddle {
       v[i] += (k * (left + right - 2 * h[i]) - SETTLE * h[i] - DAMP * v[i]) * dt;
     }
     for (let i = 0; i < n; i++) h[i] += v[i] * dt;
-    for (const bead of this.beads) {
-      if (bead.wait > 0) {
-        bead.wait -= dt;
-        continue;
-      }
-      bead.vy += GRAVITY * dt;
-      bead.x += bead.vx * dt;
-      bead.y += bead.vy * dt;
-      if (bead.vy > 0 && bead.y >= this.at(bead.x)) {
-        bead.done = true;
-        if (bead.x >= 0 && bead.x <= this.width) this.hit(bead.x, bead.r, bead.vy, false);
-      }
-    }
-    if (this.beads.some((bead) => bead.done)) this.beads = this.beads.filter((bead) => !bead.done);
   }
 
   /**
@@ -163,7 +131,6 @@ export class Puddle {
   }
 
   get calm() {
-    if (this.beads.length) return false;
     for (let i = 0; i < this.h.length; i++) {
       if (Math.abs(this.h[i]) > 0.05 || Math.abs(this.v[i]) > 1) return false;
     }
