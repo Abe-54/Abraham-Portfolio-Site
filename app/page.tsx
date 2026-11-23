@@ -64,7 +64,7 @@ export default function Home() {
         <GooInk className="lg:flex-1">
           <dl className="flex flex-col gap-5 md:flex-row md:gap-10 lg:gap-14">
             {glance.map((item) => (
-              <div key={item.label} className="flex flex-col gap-1.5 last:flex-1 last:whitespace-nowrap">
+              <div key={item.label} className="flex flex-col gap-1.5 last:flex-1 min-[20em]:last:whitespace-nowrap">
                 <dt className="t-label text-[12px]">{item.label}</dt>
                 <dd className="text-[17px] leading-[22px] font-semibold lg:text-[18px]">{item.value}</dd>
               </div>
