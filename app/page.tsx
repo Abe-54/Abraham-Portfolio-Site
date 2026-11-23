@@ -5,6 +5,7 @@ import GooInk from "@/components/goo-ink";
 import GooWire from "@/components/goo-wire";
 import Hero from "@/components/hero";
 import History from "@/components/history";
+import NightEdges from "@/components/night-edges";
 import NoteRow from "@/components/note-row";
 import ProjectRow from "@/components/project-row";
 import withDrop from "@/components/with-drop";
@@ -32,8 +33,9 @@ function WorkSection({
       data-nav="projects"
       data-side={side}
       aria-labelledby={`${id}-title`}
-      className="shell flex scroll-mt-4 flex-col pt-20 pb-16 lg:pt-[120px] lg:pb-28"
+      className={`shell flex scroll-mt-4 flex-col pt-20 pb-16 lg:pt-[120px] lg:pb-28 ${side === "night" ? "liquid" : ""}`}
     >
+      {side === "night" ? <NightEdges /> : null}
       <div className="flex flex-col gap-3 border-b-[1.5px] border-rule pb-6">
         <p className="t-label t-tag">{sideLabel[side].long}</p>
         <h2 id={`${id}-title`} className="t-section">

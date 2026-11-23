@@ -235,3 +235,38 @@
       color 150ms var(--ease-out) 170ms;
   }
 }
+
+/* Night is liquid: the edges of a full-width night band (components/night-edges.tsx) ------------- */
+
+.liquid {
+  position: relative;
+}
+
+.liquid-top,
+.liquid-bottom {
+  position: absolute;
+  z-index: 2;
+  left: 0;
+  display: block;
+  width: 100%;
+  overflow: visible;
+  fill: var(--ground);
+  pointer-events: none;
+}
+
+/* The surface sits on the band's top edge and reaches up into the band above. */
+.liquid-top {
+  bottom: calc(100% - 1px);
+  height: 90px;
+}
+
+/* The drips hang from the band's bottom edge into the band below. */
+.liquid-bottom {
+  top: calc(100% - 1px);
+  height: 260px;
+}
+
+/* In night theme the bands next door are the same black, so there is no edge to show. */
+html[data-theme="night"] :is(.liquid-top, .liquid-bottom) {
+  display: none;
+}
