@@ -1,10 +1,13 @@
 import Link from "next/link";
 import EmailCopy from "@/components/email-copy";
+import GooFlood from "@/components/goo-flood";
 import GooInk from "@/components/goo-ink";
+import GooWire from "@/components/goo-wire";
 import Hero from "@/components/hero";
 import History from "@/components/history";
 import NoteRow from "@/components/note-row";
 import ProjectRow from "@/components/project-row";
+import withDrop from "@/components/with-drop";
 import { contact, focus, notes, projects, sideLabel, toolkit, type Side } from "@/lib/content";
 
 const glance = [
@@ -34,7 +37,7 @@ function WorkSection({
       <div className="flex flex-col gap-3 border-b-[1.5px] border-rule pb-6">
         <p className="t-label t-tag">{sideLabel[side].long}</p>
         <h2 id={`${id}-title`} className="t-section">
-          {title}
+          {withDrop(title)}
         </h2>
       </div>
       <div className="pt-2">
@@ -69,6 +72,7 @@ export default function Home() {
         <div className="relative z-[2] flex flex-wrap gap-2.5">
           <EmailCopy email={contact.email} label="Email me" />
           <a href={contact.resume} target="_blank" rel="noopener" className="btn btn-outline press">
+            <GooFlood id="flood-resume" />
             Résumé ↓
           </a>
         </div>
@@ -87,24 +91,30 @@ export default function Home() {
             to ship.
           </p>
         </div>
-        <ol className="flex flex-col xl:flex-1 xl:pt-11">
-          {focus.map((item, index) => (
-            <li
-              key={item.title}
-              data-reveal
-              style={{ "--delay": `${index * 60}ms` } as React.CSSProperties}
-              className="flex gap-6 border-t border-hairline py-6 first:border-rule last:border-b"
-            >
-              <span className="w-8 shrink-0 font-mono text-[13px] leading-8 font-medium tracking-[0.08em] text-link">
-                {String(index + 1).padStart(2, "0")}
-              </span>
-              <div className="flex flex-col gap-1.5">
-                <h3 className="t-item">{item.title}</h3>
-                <p className="text-[17px] leading-[26px] text-muted">{item.body}</p>
-              </div>
-            </li>
-          ))}
-        </ol>
+        <GooWire id="focus" shape="bead" className="xl:flex-1 xl:pt-11">
+          <ol className="flex flex-col">
+            {focus.map((item, index) => (
+              <li
+                key={item.title}
+                data-reveal
+                data-wire-item
+                style={{ "--delay": `${index * 60}ms` } as React.CSSProperties}
+                className="flex gap-6 border-t border-hairline py-6 first:border-rule last:border-b"
+              >
+                <span
+                  data-wire-over
+                  className="grid size-8 shrink-0 place-items-center font-mono text-[13px] font-medium tracking-[0.08em] text-link"
+                >
+                  {String(index + 1).padStart(2, "0")}
+                </span>
+                <div className="flex flex-col gap-1.5">
+                  <h3 className="t-item">{item.title}</h3>
+                  <p className="text-[17px] leading-[26px] text-muted">{item.body}</p>
+                </div>
+              </li>
+            ))}
+          </ol>
+        </GooWire>
       </section>
 
       <WorkSection side="day" id="work" title={"Built for New\u00A0Jersey."}>
@@ -127,7 +137,7 @@ export default function Home() {
           <div className="flex flex-col gap-3">
             <p className="t-label">Notes</p>
             <h2 id="notes-title" className="t-section">
-              Things I figured out.
+              {withDrop("Things I figured out.")}
             </h2>
           </div>
           {notes.length > 0 ? (

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import GooFlood from "./goo-flood";
 
 const DROPLETS = [
   { cx: 40, cy: 60, r: 9 },
@@ -42,6 +43,7 @@ export default function EmailCopy({ email, label }: { email: string; label?: str
       <button type="button" onClick={copy} className={label ? "btn btn-solid press" : "email-copy press"}>
         {label ? (
           <>
+            <GooFlood id="flood-email" />
             <span className="email-copy-label">{label}</span>
             <span className="sr-only"> (copy address)</span>
           </>

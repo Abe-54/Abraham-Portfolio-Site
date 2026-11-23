@@ -15,6 +15,11 @@ function readSeen(): string[] {
   }
 }
 
+/** True once this path's entrances have played in this visit; then they stay put. */
+export function entrancesSeen(path: string) {
+  return readSeen().includes(path);
+}
+
 function markSeen(path: string) {
   try {
     sessionStorage.setItem(SEEN_KEY, JSON.stringify([...readSeen(), path]));

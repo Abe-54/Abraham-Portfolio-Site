@@ -5,6 +5,7 @@
 @import "../styles/notes.css";
 @import "../styles/history.css";
 @import "../styles/footer.css";
+@import "../styles/goo.css";
 
 @theme inline {
   --color-ground: var(--ground);
@@ -34,6 +35,9 @@
   --slot: #f1f1f2;
   --tag: #5c5c61;
   --button: #0b0b0c;
+  /* The goo that floods a solid button, and its label once flooded. */
+  --solid-flood: #3366ff;
+  --solid-flood-ink: #ffffff;
 }
 
 /* Pages with and without a scrollbar share the same centre line. */
@@ -53,6 +57,8 @@ html[data-theme="night"],
   --slot: #1a1a1d;
   --tag: #7c9cff;
   --button: #3366ff;
+  --solid-flood: #ffffff;
+  --solid-flood-ink: #3366ff;
 }
 
 :root {

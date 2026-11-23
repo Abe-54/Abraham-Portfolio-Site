@@ -1,4 +1,5 @@
 import { marketDashUrl } from "@/lib/content";
+import GooFlood from "./goo-flood";
 import GooInk from "./goo-ink";
 import GooeyPortrait from "./gooey-portrait";
 
@@ -21,6 +22,7 @@ export default function Hero() {
             </div>
           </GooInk>
           <a href="#work" className="btn btn-solid hero-btn press">
+            <GooFlood id="flood-work" />
             See my work →
           </a>
         </div>
@@ -36,6 +38,7 @@ export default function Hero() {
             </div>
           </GooInk>
           <a href={marketDashUrl} target="_blank" rel="noopener" className="btn btn-blue hero-btn press">
+            <GooFlood id="flood-play" />
             Play Market Dash ▸
           </a>
         </div>
