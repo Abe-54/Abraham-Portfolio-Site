@@ -1,3 +1,5 @@
+/* History: a level map that sticks while the levels scroll up under it (components/history.tsx). */
+
 .history {
   display: flex;
   flex-direction: column;
@@ -5,217 +7,206 @@
   padding-block: 88px 96px;
 }
 
-.history-map {
-  display: flex;
-  gap: 12px;
-}
-
-.history-column {
-  position: relative;
-  flex-shrink: 0;
-  width: 88px;
-}
-
-.history-layer {
-  position: absolute;
-  top: 0;
-  left: 0;
-  overflow: visible;
-}
-
-/*
- * The marker and the cover over the solid path are sticky on the 55dvh reading line, bounded by the
- * first and last stop, so the compositor moves them in the same frame as the scroll.
- */
-.history-track {
-  position: absolute;
-  left: 0;
-  right: 0;
-}
-
-.history-anchor,
-.history-cover {
+/* The map holds just under the nav chip while its levels scroll by. */
+.lv-stage {
   position: sticky;
-  top: 55vh;
-  top: 55dvh;
-  will-change: transform;
+  z-index: 1;
+  top: calc(var(--float-top) + var(--chip-h) + 8px);
+  padding-block: 4px 12px;
+  background: var(--ground);
+  container-type: inline-size;
 }
 
-.history-anchor {
-  height: 0;
-}
-
-/* Scroll-timeline subject: its exit-crossing range is exactly the anchor's sticky travel. */
-.history-probe {
+/* Levels slip under the map through a short fade rather than a hard edge. */
+.lv-stage::after {
+  content: "";
   position: absolute;
-  top: -55vh;
-  top: -55dvh;
+  top: 100%;
+  right: 0;
   left: 0;
-  width: 1px;
-  height: 100%;
-  visibility: hidden;
+  height: 24px;
+  background: linear-gradient(var(--ground), transparent);
   pointer-events: none;
 }
 
-.history-cover-clip {
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  overflow: clip;
-}
-
-.history-cover {
-  background: var(--ground);
-}
-
-.history-marker {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 140px;
+.lv-map {
+  position: relative;
   height: 140px;
-  margin: -70px 0 0 -70px;
+}
+
+@container (min-width: 560px) {
+  .lv-map {
+    height: 230px;
+  }
+}
+
+.lv-svg {
+  position: absolute;
+  inset: 0;
   overflow: visible;
-  will-change: transform;
 }
 
-.history-droplet {
-  transition: opacity 200ms ease;
+.lv-path {
+  fill: none;
+  stroke: #3366ff;
+  stroke-dasharray: 1 10;
+  stroke-linecap: round;
+  stroke-opacity: 0.6;
+  stroke-width: 3;
 }
 
-.history-droplet[data-hidden] {
-  opacity: 0;
+.lv-trail {
+  fill: none;
+  stroke: #3366ff;
+  stroke-linecap: round;
 }
 
-.history-ring,
-.history-tick {
-  transition: opacity 200ms ease;
-}
-
-.history-tick,
-[data-state="passed"] > .history-ring {
-  opacity: 0;
-}
-
-[data-state="passed"] > .history-tick {
-  opacity: 1;
-}
-
-.history-list {
-  flex: 1;
-  min-width: 0;
-}
-
-.history-row {
+.lv-node {
+  position: absolute;
   display: grid;
-  grid-template-columns: minmax(0, 1fr);
-  grid-template-areas: "level" "main";
-  gap: 10px;
-  padding-block: 20px 24px;
+  place-items: center;
+  width: 56px;
+  height: 56px;
+  margin: -28px 0 0 -28px;
+  border-radius: 50%;
+  color: #ffffff;
+  cursor: pointer;
 }
 
-.history-row + .history-row {
+.lv-node:focus-visible {
+  outline: 2px solid #ffffff;
+  outline-offset: 4px;
+}
+
+.lv-num {
+  position: relative;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1;
+  transition: transform 200ms var(--ease-out);
+}
+
+.lv-node[aria-current="step"] .lv-num {
+  transform: scale(1.5);
+}
+
+.lv-caption {
+  position: absolute;
+  left: 50%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  white-space: nowrap;
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+
+.lv-caption.below {
+  top: calc(100% + 4px);
+}
+
+.lv-caption.above {
+  bottom: calc(100% + 4px);
+  flex-direction: column-reverse;
+}
+
+.lv-year {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+  transition: color 150ms var(--ease-out);
+}
+
+.lv-node[aria-current="step"] .lv-year {
+  color: var(--tag);
+}
+
+.lv-name {
+  display: none;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+@media (min-width: 768px) {
+  .lv-name {
+    display: block;
+  }
+}
+
+/* The levels: plain text, oldest first. */
+.lv-steps {
+  display: flex;
+  flex-direction: column;
+}
+
+.lv-step {
+  display: grid;
+  gap: 16px;
+  padding-block: 28px 36px;
   border-top: 1px solid var(--hairline);
 }
 
-.history-main {
-  grid-area: main;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  /* Enlarged text on a phone can make one word wider than the column; break it rather than overflow. */
-  overflow-wrap: anywhere;
+/* Once the map is live, each level is at least as tall as the room above the reading line (set by
+   the script), so the one being read is always in full view; it stands out and the rest step back. */
+.lv[data-live] .lv-step {
+  min-height: calc(var(--lv-room, 0px) + 24px);
 }
 
-.history-level {
-  grid-area: level;
+.lv[data-live] .lv-step:not([data-state="current"]) {
+  opacity: 0.42;
 }
 
-.history-title {
+.lv[data-live] .lv-step {
+  transition: opacity 300ms var(--ease-out);
+}
+
+.lv-step-level {
+  color: var(--tag);
+}
+
+.lv-title {
   font-family: var(--font-display);
-  font-size: clamp(28px, 3.056vw, 44px);
+  font-size: clamp(30px, 3.4vw, 48px);
   font-weight: 800;
-  line-height: 1.1;
+  line-height: 1.05;
   letter-spacing: -0.03em;
-  transition: opacity 200ms ease;
 }
 
-.history-org {
-  font-size: 16px;
-  line-height: 22px;
+.lv-org {
+  font-size: 17px;
+  line-height: 24px;
   color: var(--muted);
 }
 
-.history-details {
+.lv-details {
   display: flex;
   flex-direction: column;
   gap: 8px;
   font-size: 17px;
   line-height: 26px;
-  transition:
-    opacity 300ms var(--ease-out),
-    transform 300ms var(--ease-out);
-}
-
-/* Details hide only once the scroll logic runs, so without JavaScript every stop reads in full. */
-.history[data-live] .history-row:not([data-state="open"]) .history-details {
-  opacity: 0;
-  transform: translateY(8px);
-}
-
-[data-state="open"] .history-level {
-  color: #7c9cff;
-}
-
-[data-state="ahead"] .history-title {
-  opacity: 0.45;
 }
 
 @media (min-width: 1024px) {
   .history {
-    gap: 48px;
-    padding-block: 112px 120px;
+    padding-block: 120px;
   }
 
-  .history-map {
-    gap: 40px;
-  }
-
-  .history-column {
-    width: 200px;
-  }
-
-  .history-row {
-    grid-template-columns: minmax(0, 1fr) auto;
-    grid-template-areas: "main level";
-    column-gap: 32px;
-    padding-block: 28px 32px;
-  }
-
-  .history-org {
-    font-size: 18px;
-  }
-
-  .history-details {
-    flex-direction: row;
-    gap: 48px;
-    padding-top: 6px;
-  }
-
-  .history-details li {
-    width: 300px;
+  .lv-step {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    column-gap: 48px;
+    align-content: start;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .history-anchor,
-  .history-cover {
-    position: relative;
-    top: 0;
-  }
-
-  .history[data-live] .history-row:not([data-state="open"]) .history-details {
-    transform: none;
+  .lv-num,
+  .lv[data-live] .lv-step {
+    transition: none;
   }
 }
