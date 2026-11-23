@@ -5,7 +5,7 @@ import Hero from "@/components/hero";
 import History from "@/components/history";
 import NoteRow from "@/components/note-row";
 import ProjectRow from "@/components/project-row";
-import { contact, focus, notes, projects, proudOf, sideLabel, toolkit, type Side } from "@/lib/content";
+import { contact, focus, notes, projects, sideLabel, toolkit, type Side } from "@/lib/content";
 
 const glance = [
   { label: "Now", value: "Software Engineer, NJ Dept. of Community Affairs" },
@@ -149,7 +149,7 @@ export default function Home() {
 
       <History />
 
-      <section aria-labelledby="off-title" data-nav="history" className="shell flex flex-col gap-14 pt-20 pb-20 lg:gap-[72px] lg:pt-[120px] lg:pb-24">
+      <section aria-labelledby="off-title" data-nav="history" className="shell flex flex-col pt-20 pb-20 lg:pt-[120px] lg:pb-24">
         <div className="flex max-w-[860px] flex-col gap-4">
           <h2 id="off-title" className="t-label">
             Off the clock
@@ -157,20 +157,6 @@ export default function Home() {
           <p className="t-statement">
             Outside work I make and play games, watch anime, and tinker with small creative projects.
           </p>
-        </div>
-        <div className="flex flex-col gap-8 border-t border-rule pt-8 lg:flex-row lg:gap-12">
-          <h3 className="t-label w-[200px] shrink-0 lg:leading-8">Proud of</h3>
-          {proudOf.map((item, index) => (
-            <div
-              key={item.title}
-              data-reveal
-              style={{ "--delay": `${index * 60}ms` } as React.CSSProperties}
-              className="flex flex-1 flex-col gap-1.5"
-            >
-              <p className="t-item">{item.title}</p>
-              <p className="text-[17px] leading-[26px] text-muted">{item.body}</p>
-            </div>
-          ))}
         </div>
       </section>
     </main>

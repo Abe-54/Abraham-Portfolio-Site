@@ -118,21 +118,15 @@ export const history: Stop[] = [
     level: 3,
     label: "2025",
     title: "B.S. CS & Game Programming",
-    org: "Bloomfield College of Montclair State · shipped Market Dash",
-    details: [
-      "Led a team of five for nine months to ship Market Dash.",
-      "Ran the games club as president from 2022 to 2025.",
-    ],
+    org: "Bloomfield College of Montclair State",
+    details: ["Led a team of five for nine months to ship Market Dash."],
   },
   {
     level: 2,
     label: "2024",
     title: "Climate Game Intern",
-    org: "NASA · picked from 600+ applicants",
-    details: [
-      "Built a multiplayer climate strategy game for classrooms.",
-      "One of three interns picked from 600+ applicants.",
-    ],
+    org: "NASA",
+    details: ["Built a multiplayer climate strategy game for classrooms."],
   },
   {
     level: 1,
@@ -162,12 +156,6 @@ export const focus = [
   { title: "Public services", body: "Housing and staff tools for the state of New Jersey." },
   { title: "Full-stack products", body: "Database to UI, with Next.js, Prisma and AWS." },
   { title: "Games", body: "Gameplay, UI and editor tools in Unity." },
-];
-
-export const proudOf = [
-  { title: "Running the games club", body: "President for three years, 2022 to 2025." },
-  { title: "A summer at NASA", body: "One of three interns picked from 600+ applicants." },
-  { title: "Shipping Market Dash", body: "Led a team of five for nine months and finished it." },
 ];
 
 export const toolkit = [
