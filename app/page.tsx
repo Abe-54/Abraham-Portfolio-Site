@@ -9,7 +9,7 @@ import NightEdges from "@/components/night-edges";
 import NoteRow from "@/components/note-row";
 import ProjectRow from "@/components/project-row";
 import withDrop from "@/components/with-drop";
-import { contact, focus, notes, projects, sideLabel, toolkit, type Side } from "@/lib/content";
+import { contact, focus, notes, projects, showNotes, sideLabel, toolkit, type Side } from "@/lib/content";
 
 const glance = [
   { label: "Now", value: "Software Engineer, NJ Dept. of Community Affairs" },
@@ -134,18 +134,19 @@ export default function Home() {
       </WorkSection>
       <WorkSection side="night" id="games" title="Worlds, after hours." />
 
-      <section id="notes" aria-labelledby="notes-title" data-nav="notes" className="shell flex scroll-mt-4 flex-col gap-10 py-20 lg:gap-12 lg:py-28">
-        <div className="flex flex-wrap items-end justify-between gap-6">
-          <div className="flex flex-col gap-3">
-            <p className="t-label">Notes</p>
-            <h2 id="notes-title" className="t-section">
-              {withDrop("Things I figured out.")}
-            </h2>
-          </div>
-          {notes.length > 0 ? (
-            <Link href="/notes" className="t-link inline-flex min-h-11 items-center text-[17px]">
-              All notes →
-            </Link>
+      {showNotes ? (
+        <section id="notes" aria-labelledby="notes-title" data-nav="notes" className="shell flex scroll-mt-4 flex-col gap-10 py-20 lg:gap-12 lg:py-28">
+          <div className="flex flex-wrap items-end justify-between gap-6">
+            <div className="flex flex-col gap-3">
+              <p className="t-label">Notes</p>
+              <h2 id="notes-title" className="t-section">
+                {withDrop("Things I figured out.")}
+              </h2>
+            </div>
+            {notes.length > 0 ? (
+              <Link href="/notes" className="t-link inline-flex min-h-11 items-center text-[17px]">
+                All notes →
+              </Link>
           ) : null}
         </div>
         {notes.length > 0 ? (
@@ -158,6 +159,7 @@ export default function Home() {
           <p className="notes-empty">No notes yet.</p>
         )}
       </section>
+      ) : null}
 
       <History />
 

@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { showNotes } from "@/lib/content";
 import { NavGoo, type GooBox } from "./nav-goo";
 import ThemeSwitch from "./theme-switch";
 
@@ -11,7 +12,7 @@ import ThemeSwitch from "./theme-switch";
 const links = [
   { label: "About", section: "about", hash: "#about" },
   { label: "Projects", section: "projects", hash: "#work", page: "/projects" },
-  { label: "Notes", section: "notes", hash: "#notes", page: "/notes" },
+  ...(showNotes ? [{ label: "Notes", section: "notes", hash: "#notes", page: "/notes" }] : []),
   { label: "History", section: "history", hash: "#history" },
   { label: "Contact", section: "contact", hash: "#contact" },
 ];

@@ -139,6 +139,10 @@ export const history: Stop[] = [
 
 export const notes: Note[] = [];
 
+// Notes stay out of the nav and off the home page until there is one to read. Set to true to show
+// the section (with its "No notes yet." line) regardless.
+export const showNotes = notes.length > 0;
+
 export const sampleNoteBody: NoteBlock[] = [
   {
     kind: "p",
