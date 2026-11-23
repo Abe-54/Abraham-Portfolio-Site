@@ -194,7 +194,9 @@
     --u: min(1.25px, calc(100cqw / 1440));
     display: flex;
     width: calc(1440 * var(--u));
-    min-height: calc(660 * var(--u));
+    /* On a short window (a laptop with its browser bars) the board is held to the room under the
+       header, so its buttons are on the first screen. */
+    min-height: min(calc(660 * var(--u)), calc(100svh - var(--head-h) - 1px));
     margin-inline: auto;
     background: #ffffff;
     isolation: isolate;
