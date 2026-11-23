@@ -39,11 +39,10 @@ interface MetaBallsProps {
    */
   area?: { left: number; right: number; top: number; bottom: number };
   /**
-   * Local addition, for lava with an area: when the pointer leaves, its ball does not go home. It keeps
-   * the speed it was let go with and drifts on from where it was, rising and sinking like the rest of the
-   * lava, so it joins whichever blob is near instead of always the same one.
+   * Local addition, for lava with an area: no ball of its own follows the pointer. Instead the ball
+   * nearest the pointer reaches toward it, and goes back to its own path once another ball is nearer.
    */
-  cursorRoams?: boolean;
+  pointerReach?: boolean;
   /**
    * Local addition, for lava with an area: how many of the `ballCount` balls are there from the start.
    * The rest come one at a time, poured in through `pourRef`. Leave it out and every ball is there.
@@ -96,6 +95,17 @@ const VISITORS = 4;
 const SWELL = 0.8;
 const SETTLE = 1.4;
 const FADE = 0.6;
+// Local, for a poured drop: seconds it falls on into the goo before the lava takes it, how hard the goo
+// slows it, and the pull that keeps it sinking (per second, and world units per second squared).
+const SINK = 1.4;
+const DRAG = 3.5;
+const SINKING = 10;
+// Local, for pointerReach: how near the pointer must come to a ball's edge for it to reach, and the
+// farthest it reaches, in world units.
+const REACH = 14;
+const REACH_MAX = 6;
+
+const over = (value: number, low: number, high: number) => (value < low ? low - value : value > high ? high - value : 0);
 const VARIANTS: Record<string, number> = { solid: 0, outline: 1, contour: 2 };
 const VISIBLE = 0.877;
 
@@ -246,7 +256,12 @@ const createBall = (index: number) => {
     // colour while fresh), and, for a drop on its way into another ball, which one.
     grow: 1,
     fresh: 0,
-    feeds: -1
+    feeds: -1,
+    // Local: how much of its fall a poured drop has left, and how far a ball reaches off its path toward
+    // the pointer.
+    sink: 0,
+    ox: 0,
+    oy: 0
   };
 };
 
@@ -279,7 +294,7 @@ const MetaBalls = ({
   style,
   onDraw,
   area,
-  cursorRoams = false,
+  pointerReach = false,
   fill,
   pourRef,
   dropColor
@@ -310,7 +325,7 @@ const MetaBalls = ({
     dpr,
     onDraw,
     area,
-    cursorRoams,
+    pointerReach,
     fill,
     pourRef,
     dropColor
@@ -364,9 +379,8 @@ const MetaBalls = ({
     const shapeData = new Float32Array(SLOTS * 4);
     const balls = Array.from({ length: MAX_BALLS }, (_, index) => createBall(index));
     const idle = createBall(MAX_BALLS + 7);
-    // The lava path the pointer's ball drifts along once the pointer lets it go (cursorRoams).
-    const roam = createBall(MAX_BALLS + 11);
-    let roaming = false;
+    // With pointerReach, the ball reaching toward the pointer, or -1.
+    let reacher = -1;
     // Poured drops (pourRef): how many balls are there so far (they are always the first ones), the
     // drops on their way into a ball, and any drop poured before the first frame knew where anything is.
     const initialFill = settingsRef.current.fill;
@@ -481,14 +495,17 @@ const MetaBalls = ({
       ];
     };
 
-    const deform = (body: Body, h: number, s: typeof settings) => {
-      const speed = Math.hypot(body.vx, body.vy);
+    // A body stretches along the way it moves, and (local) along any pull (px, py) it feels at rest.
+    const deform = (body: Body, h: number, s: typeof settings, px = 0, py = 0) => {
+      const vx = body.vx + px;
+      const vy = body.vy + py;
+      const speed = Math.hypot(vx, vy);
       const amount = 0.6 * s.stretch * Math.tanh(speed / 14);
       let ta = 0;
       let tb = 0;
       if (speed > 1e-4) {
-        ta = (amount * (body.vx * body.vx - body.vy * body.vy)) / (speed * speed);
-        tb = (amount * 2 * body.vx * body.vy) / (speed * speed);
+        ta = (amount * (vx * vx - vy * vy)) / (speed * speed);
+        tb = (amount * 2 * vx * vy) / (speed * speed);
       }
       const omega = 13;
       const zeta = 0.85 - 0.68 * clamp(s.wobble, 0, 1);
@@ -508,17 +525,34 @@ const MetaBalls = ({
       const { reach } = bridge(s);
       const pull = 36 * clamp(s.stickiness, 0, 1);
       const cursorRadius = s.cursorBallSize * VISIBLE * look.size * (1 + cursor.pulse);
+      // The pointer's own ball, unless the nearest ball reaches for the pointer instead.
+      const own = !s.pointerReach;
+      const ease = 1 - Math.exp(-h / 0.12);
       phase += h * s.speed;
 
       for (let i = 0; i < count; i++) {
         const ball = balls[i];
+        // While a poured drop is still falling, its lava path keeps up with it, so the lava takes it on
+        // from wherever its fall ends.
+        if (ball.sink > 0) adopt(ball, s, ball.x, ball.y, ball.vy > 0);
         const [x, y] = anchor(ball, s, release(ball, look));
         ball.avx = clamp((x - ball.ax) / h, -40, 40);
         ball.avy = clamp((y - ball.ay) / h, -40, 40);
         ball.ax = x;
         ball.ay = y;
-        ball.fx = 20 * (x - ball.x) - 5.4 * (ball.vx - ball.avx);
-        ball.fy = 20 * (y - ball.y) - 5.4 * (ball.vy - ball.avy);
+        // The ball reaching for the pointer leans off its path toward it; any other eases back onto it.
+        const [rx, ry] = i === reacher ? reachFor(ball, x, y, look) : [0, 0];
+        ball.ox += (rx - ball.ox) * ease;
+        ball.oy += (ry - ball.oy) * ease;
+        ball.fx = 20 * (x + ball.ox - ball.x) - 5.4 * (ball.vx - ball.avx);
+        ball.fy = 20 * (y + ball.oy - ball.y) - 5.4 * (ball.vy - ball.avy);
+        if (ball.sink > 0) {
+          // Falling, the goo slows it and it sinks on, until the lava has it.
+          const falling = ball.sink;
+          ball.fx = ball.fx * (1 - falling) - DRAG * falling * ball.vx;
+          ball.fy = ball.fy * (1 - falling) - (DRAG * ball.vy + SINKING) * falling;
+          ball.sink = Math.max(0, ball.sink - h / SINK);
+        }
       }
 
       for (let i = 0; i < count; i++) {
@@ -548,6 +582,7 @@ const MetaBalls = ({
           q.fx -= (nx * force) / mq;
           q.fy -= (ny * force) / mq;
         }
+        if (!own) continue;
         const dx = cursor.x - p.x;
         const dy = cursor.y - p.y;
         const distance = Math.hypot(dx, dy) || 1e-4;
@@ -568,8 +603,6 @@ const MetaBalls = ({
       // Soft walls: a ball pushed or pulled toward the edge of its area is pressed back inside it.
       if (s.area) {
         const box = bounds(s);
-        const over = (value: number, low: number, high: number) =>
-          value < low ? low - value : value > high ? high - value : 0;
         for (let i = 0; i < count; i++) {
           const ball = balls[i];
           const room = margin(ball.radius * look.size * ball.grow);
@@ -584,7 +617,8 @@ const MetaBalls = ({
         ball.vy += ball.fy * h;
         ball.x += ball.vx * h;
         ball.y += ball.vy * h;
-        deform(ball, h, s);
+        // Reaching for the pointer draws it out toward it.
+        deform(ball, h, s, ball.ox * 5, ball.oy * 5);
         if (!Number.isFinite(ball.x + ball.y + ball.vx + ball.vy + ball.a + ball.b + ball.va + ball.vb)) {
           Object.assign(ball, { x: ball.ax, y: ball.ay, vx: 0, vy: 0, a: 0, b: 0, va: 0, vb: 0 });
         }
@@ -594,23 +628,36 @@ const MetaBalls = ({
         ball.fresh *= Math.exp(-h / FADE);
       }
 
-      // A drop on its way into a ball flows to it and, once inside, pours into it: the ball takes the
-      // drop's area as the drop shrinks away.
+      // A drop on its way into a ball falls on into the goo and, as its fall slows, flows to the ball
+      // nearest where it is. Whichever ball it meets first, it pours into: the ball takes the drop's area
+      // as the drop shrinks away.
+      const box = bounds(s);
+      const inside = (ball: Ball) => (ball.radius * ball.grow * VISIBLE + 0.1) * look.size;
       for (const drop of visitors) {
         if (drop.feeds < 0) continue;
-        if (drop.feeds >= count) drop.feeds = nearest(drop.x, drop.y, count);
+        if (drop.sink > 0 || drop.feeds >= count) drop.feeds = nearest(drop.x, drop.y, count);
         if (drop.feeds < 0) continue;
+        for (let i = 0; i < count; i++) {
+          if (Math.hypot(balls[i].x - drop.x, balls[i].y - drop.y) < inside(balls[i])) {
+            drop.feeds = i;
+            break;
+          }
+        }
         const target = balls[drop.feeds];
-        const dx = target.x - drop.x;
-        const dy = target.y - drop.y;
-        drop.vx += (10 * dx - 4.5 * (drop.vx - target.vx)) * h;
-        drop.vy += (10 * dy - 4.5 * (drop.vy - target.vy)) * h;
+        const falling = drop.sink;
+        const settled = 1 - falling;
+        const damping = 4.5 * settled + DRAG * falling;
+        const room = margin(drop.radius * look.size * drop.grow);
+        const wallX = 300 * over(drop.x, box.cx - box.hw + room, box.cx + box.hw - room);
+        const wallY = 300 * over(drop.y, box.cy - box.hh + room, box.cy + box.hh - room);
+        drop.vx += (10 * settled * (target.x - drop.x) - damping * (drop.vx - settled * target.vx) + wallX) * h;
+        drop.vy += (10 * settled * (target.y - drop.y) - damping * (drop.vy - settled * target.vy) - SINKING * falling + wallY) * h;
         drop.x += drop.vx * h;
         drop.y += drop.vy * h;
+        drop.sink = Math.max(0, drop.sink - h / SINK);
         deform(drop, h, s);
         drop.fresh *= Math.exp(-h / FADE);
-        const reach = (target.radius * target.grow + drop.radius * drop.grow * 0.3) * VISIBLE * look.size;
-        if (Math.hypot(dx, dy) < reach) {
+        if (Math.hypot(target.x - drop.x, target.y - drop.y) < inside(target)) {
           const before = drop.grow;
           drop.grow = Math.max(0, drop.grow - h * 3);
           const given = (before * before - drop.grow * drop.grow) * (drop.radius / target.radius) ** 2;
@@ -634,14 +681,37 @@ const MetaBalls = ({
       ball.start = (rising ? c : Math.PI - c) - phase * ball.rise * 1.6;
     };
 
-    // Let go, the pointer's ball takes a lava path of its own that starts exactly where it is, in a new
-    // lane and at a new pace each time, heading the way it was already going.
-    const letGo = (s: typeof settings) => {
-      roam.radius = s.cursorBallSize;
-      roam.rise = 0.55 + Math.random() * 0.7;
-      roam.sway = Math.random() * Math.PI * 2;
-      adopt(roam, s, cursor.x, cursor.y, cursor.vy >= 0);
-      roaming = true;
+    // How far a ball whose path is at (x, y) reaches toward the pointer: the nearer the pointer comes to
+    // its edge, the farther, never past REACH_MAX.
+    const reachFor = (ball: Ball, x: number, y: number, look: Look): [number, number] => {
+      const dx = pointer.x - x;
+      const dy = pointer.y - y;
+      const distance = Math.hypot(dx, dy) || 1e-4;
+      const edge = Math.max(0, distance - ball.radius * ball.grow * VISIBLE * look.size);
+      const length = Math.min(REACH_MAX, distance * 0.7) * (1 - smoothstep(0, REACH, edge));
+      return [(dx / distance) * length, (dy / distance) * length];
+    };
+
+    // Which ball reaches for the pointer: the one whose edge is nearest it, within REACH. It keeps
+    // reaching until another is clearly nearer, so two balls side by side do not take turns every frame.
+    const pickReacher = (s: typeof settings, count: number, look: Look) => {
+      if (!s.pointerReach || !pointer.inside || !s.enableMouseInteraction) {
+        reacher = -1;
+        return;
+      }
+      const gap = (i: number) =>
+        Math.hypot(balls[i].x - pointer.x, balls[i].y - pointer.y) - balls[i].radius * balls[i].grow * VISIBLE * look.size;
+      let found = -1;
+      let best = REACH;
+      for (let i = 0; i < count; i++) {
+        const g = gap(i);
+        if (g < best) {
+          best = g;
+          found = i;
+        }
+      }
+      if (reacher >= 0 && reacher < count && found !== reacher && gap(reacher) < REACH && best > gap(reacher) - 1) return;
+      reacher = found;
     };
 
     /** The index of the ball nearest (x, y) among the first `count`, or -1 if there are none. */
@@ -658,9 +728,9 @@ const MetaBalls = ({
       return found;
     };
 
-    // A drop comes in through the edge it landed on, just inside it, still falling but slowed by going
-    // in. Its visible size is the drop's own. While balls are missing it becomes the next one, swelling
-    // to that ball's size as it sinks along a lava path of its own; otherwise it flows into the nearest.
+    // A drop comes in through the edge it landed on, just inside it, at the speed it fell, and falls on
+    // into the goo. Its visible size is the drop's own. While balls are missing it becomes the next one,
+    // swelling to that ball's size as it sinks; otherwise it pours into the first ball it meets.
     const land: Pour = (clientX, clientY, r, fallSpeed, join = false) => {
       const s = settingsRef.current;
       const count = clamp(Math.round(s.ballCount), 0, MAX_BALLS);
@@ -670,9 +740,9 @@ const MetaBalls = ({
       const box = bounds(s);
       const x = clamp(point.x, box.cx - box.hw + radius, box.cx + box.hw - radius);
       const y = Math.min(point.y, s.animationSize / 2) - radius * VISIBLE;
-      const vy = -Math.min(fallSpeed, 900) * scale * 0.6;
+      const vy = -Math.min(fallSpeed, 900) * scale;
       const enter = (ball: Ball, grow: number) =>
-        Object.assign(ball, { x, y, vx: 0, vy, a: 0, b: 0, va: 0, vb: 0, grow, fresh: 1 });
+        Object.assign(ball, { x, y, vx: 0, vy, a: 0, b: 0, va: 0, vb: 0, ox: 0, oy: 0, grow, fresh: 1, sink: 1 });
       if (!join && filled < count) {
         const ball = balls[filled++];
         enter(ball, Math.min(1, radius / ball.radius));
@@ -702,37 +772,7 @@ const MetaBalls = ({
     };
     if (settingsRef.current.pourRef) settingsRef.current.pourRef.current = pour;
 
-    const roamCursor = (dt: number, s: typeof settings) => {
-      if (!cursor.ready) {
-        // Never held yet: it starts somewhere in the lava, not in the middle.
-        Object.assign(roam, { radius: s.cursorBallSize, lane: Math.random() * 2 - 1, start: Math.random() * Math.PI * 2 });
-        [cursor.x, cursor.y] = anchor(roam, s, 1);
-        cursor.ready = true;
-        roaming = true;
-      }
-      if (!roaming) letGo(s);
-      const [tx, ty] = anchor(roam, s, 1);
-      // A soft spring, so the speed it was let go with carries it on a while before the lava takes it.
-      cursor.vx += (4 * (tx - cursor.x) - 2.6 * cursor.vx) * dt;
-      cursor.vy += (4 * (ty - cursor.y) - 2.6 * cursor.vy) * dt;
-      cursor.x += cursor.vx * dt;
-      cursor.y += cursor.vy * dt;
-      // Whole inside the area: a fling that would carry it past an edge bounces softly off it.
-      const box = bounds(s);
-      const room = margin(s.cursorBallSize);
-      const keep = (value: number, velocity: number, low: number, high: number): [number, number] =>
-        value < low ? [low, Math.abs(velocity) * 0.3] : value > high ? [high, -Math.abs(velocity) * 0.3] : [value, velocity];
-      [cursor.x, cursor.vx] = keep(cursor.x, cursor.vx, box.cx - box.hw + room, box.cx + box.hw - room);
-      [cursor.y, cursor.vy] = keep(cursor.y, cursor.vy, box.cy - box.hh + room, box.cy + box.hh - room);
-    };
-
     const moveCursor = (dt: number, s: typeof settings, look: Look) => {
-      const held = pointer.inside && s.enableMouseInteraction;
-      if (s.cursorRoams && s.area && s.motion === 'lava' && !held) {
-        roamCursor(dt, s);
-        return;
-      }
-      roaming = false;
       let tx: number;
       let ty: number;
       if (pointer.inside && s.enableMouseInteraction) {
@@ -803,7 +843,7 @@ const MetaBalls = ({
       const s = settingsRef.current;
       const look = presence();
       const { gamma, threshold } = bridge(s);
-      // The balls that are there, then the drops on their way into them, then the pointer's ball.
+      // The balls that are there, then the drops on their way into them, then the pointer's own ball.
       const present = Math.min(filled, clamp(Math.round(s.ballCount), 0, MAX_BALLS));
       let count = 0;
       const put = (ball: Ball) => {
@@ -819,18 +859,21 @@ const MetaBalls = ({
       };
       for (let i = 0; i < present; i++) put(balls[i]);
       for (const drop of visitors) if (drop.feeds >= 0) put(drop);
-      const cursorRadius = s.cursorBallSize * look.size * (1 + cursor.pulse);
-      ballData[count * 4] = cursor.x;
-      ballData[count * 4 + 1] = cursor.y;
-      ballData[count * 4 + 2] = cursorRadius * cursorRadius;
-      ballData[count * 4 + 3] = 1;
-      shapeOf(cursor, shapeData, count * 4);
+      if (!s.pointerReach) {
+        const cursorRadius = s.cursorBallSize * look.size * (1 + cursor.pulse);
+        ballData[count * 4] = cursor.x;
+        ballData[count * 4 + 1] = cursor.y;
+        ballData[count * 4 + 2] = cursorRadius * cursorRadius;
+        ballData[count * 4 + 3] = 1;
+        shapeOf(cursor, shapeData, count * 4);
+        count++;
+      }
 
       gl.uniform2f(loc.resolution, canvas.width, canvas.height);
       gl.uniform1f(loc.scale, s.animationSize / canvas.height);
       gl.uniform4fv(loc.balls, ballData);
       gl.uniform4fv(loc.shapes, shapeData);
-      gl.uniform1i(loc.count, count + 1);
+      gl.uniform1i(loc.count, count);
       gl.uniform1f(loc.gamma, gamma);
       gl.uniform1f(loc.threshold, threshold);
       gl.uniform3fv(loc.color, rgb(s.color));
@@ -845,7 +888,7 @@ const MetaBalls = ({
       gl.clear(gl.COLOR_BUFFER_BIT);
       gl.drawArrays(gl.TRIANGLES, 0, 3);
       dirty = false;
-      s.onDraw?.(canvas, { balls: ballData, shapes: shapeData, count: count + 1, gamma, threshold, animationSize: s.animationSize });
+      s.onDraw?.(canvas, { balls: ballData, shapes: shapeData, count, gamma, threshold, animationSize: s.animationSize });
     };
 
     const frame = (now: number) => {
@@ -872,7 +915,8 @@ const MetaBalls = ({
           placed = true;
           for (const drop of pending.splice(0)) land(...drop);
         }
-        moveCursor(dt, s, look);
+        if (s.pointerReach) pickReacher(s, count, look);
+        else moveCursor(dt, s, look);
         const steps = Math.max(1, Math.ceil(dt / (1 / 240)));
         for (let i = 0; i < steps; i++) step(dt / steps, s, count, look);
         deform(cursor, dt, s);

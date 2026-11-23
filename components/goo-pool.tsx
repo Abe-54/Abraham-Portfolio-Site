@@ -9,11 +9,12 @@ import MetaBalls, { type Pour } from "./MetaBalls";
  * The page ends where the rain settles: a slow lava pool behind the whole footer, both halves, the same
  * metaballs as the portrait rising and sinking in lanes, and made of the rain. It starts part-full. Each
  * drop that falls into the footer (components/footer-puddle.tsx) comes through the edge where it landed
- * and swells into a new blob, turning from the colour it fell in to the goo's blue, until the pool is
- * full; after that each drop flows into the nearest blob and swells it for a moment.
+ * and falls on down into the goo, slowing as it goes, turning from the colour it fell in to the goo's
+ * blue. While the pool is not yet full, it stays as a new blob and swells to full size; after that it
+ * pours into the first blob it meets, which swells for a moment.
  *
- * One blob follows the pointer anywhere in the footer; let go, it drifts on with the lava from wherever
- * it was left instead of going home. The lava flows behind the words, and where it passes under them
+ * No blob of its own follows the pointer: the blob nearest it reaches toward it, and goes back to its
+ * place in the lava once another is nearer. The lava flows behind the words, and where it passes under them
  * they are drawn again in white (components/goo-ink.tsx), so every line stays readable on the blue. Soft
  * walls keep every blob whole: nothing is cut by an edge, except a drop the moment it comes through.
  *
@@ -123,20 +124,17 @@ export default function GooPool() {
       {!still && near && area ? (
         <MetaBalls
           color="#3366FF"
-          cursorBallColor="#3366FF"
           enableTransparency
           clickBurst={false}
           motion="lava"
           area={area}
-          cursorRoams
+          pointerReach
           paused={!inView || held}
           ballCount={BALLS[size]}
           fill={Math.min(BALLS[size], BASE[size] + caught)}
           pourRef={pourRef}
           dropColor={night ? DROP.night : DROP.day}
           clumpFactor={1}
-          cursorBallSize={1.5}
-          hoverSmoothness={0.07}
           animationSize={height / SCALE[size]}
           speed={0.18}
           gooeyness={0.75}
