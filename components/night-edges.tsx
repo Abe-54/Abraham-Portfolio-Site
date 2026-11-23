@@ -186,6 +186,7 @@ export default function NightEdges() {
     let clock = 0;
     let lastY = window.scrollY;
     let lastT = performance.now();
+    let floorAt = 0;
     let speed = 0;
     // The scroll speed the liquid feels: it catches up fast and lets go slowly, so a quick flick keeps
     // pulling for a moment after the page stops, like a weight that has to settle.
@@ -245,8 +246,8 @@ export default function NightEdges() {
       });
     };
 
-    // A drop leaves a drip: find what it will land on, measured once in the window, where scrolling
-    // moves both ends together.
+    // A drop leaves a drip: find what it will land on, in the window, where scrolling moves both ends
+    // together. A resize or a reflow does not, so each frame measures the surface again (in tick).
     const drop = (x: number, y: number, r: number, vx: number, vy: number, wait = 0) => {
       if (falls.length >= FALLS) return;
       const box = bottomSvg.getBoundingClientRect();
@@ -355,6 +356,15 @@ export default function NightEdges() {
         if (!held && !drip.going && (drip.fill >= 1 || (drip.length.value - grown > PLUCK && drip.fill > 0.45))) letGo(drip);
       }
       for (let i = drips.length - 1; i >= 0; i--) if (drips[i].going && drips[i].size === 0) drips.splice(i, 1);
+      // Once a frame: where each drop's surface is now, which is where the drop lands when it gets there.
+      if (falls.length && now - floorAt > 2) {
+        floorAt = now;
+        const box = bottomSvg.getBoundingClientRect();
+        for (const fall of falls) {
+          const line = fall.surface?.lineAt(box.left + fall.x) ?? null;
+          fall.floor = line === null ? Infinity : line - box.top;
+        }
+      }
       for (const fall of falls) {
         if (fall.wait > 0) {
           fall.wait -= dt;

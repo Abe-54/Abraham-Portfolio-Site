@@ -7,7 +7,8 @@
  */
 
 export type Surface = {
-  /** Where the surface is in the window at window x, or null where it does not reach. */
+  /** Where the surface is in the window at window x, or null where it does not reach. A falling drop asks
+   * again every frame, so this follows the surface when a resize moves it. */
   lineAt: (x: number) => number | null;
   /** A drop of radius `r` went in at window x, falling at `speed` px/s. */
   hit: (x: number, r: number, speed: number) => void;
