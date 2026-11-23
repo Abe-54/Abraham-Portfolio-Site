@@ -10,7 +10,6 @@ import { contact, focus, notes, projects, proudOf, sideLabel, toolkit, type Side
 const glance = [
   { label: "Now", value: "Software Engineer, NJ Dept. of Community Affairs" },
   { label: "Education", value: "B.S. CS & Game Programming, 2025" },
-  { label: "Based", value: "Newark, NJ" },
 ];
 
 function WorkSection({

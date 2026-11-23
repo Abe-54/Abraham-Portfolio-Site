@@ -13,7 +13,7 @@ const mono = Geist_Mono({ subsets: ["latin"], variable: "--font-geist-mono" });
 
 export const metadata: Metadata = {
   title: { default: "Abraham Rubio", template: "%s · Abraham Rubio" },
-  description: "Full-stack developer by day, indie game dev by night. Newark, NJ.",
+  description: "Full-stack developer by day, indie game dev by night.",
 };
 
 export const viewport: Viewport = {
