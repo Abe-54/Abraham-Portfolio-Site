@@ -1,0 +1,789 @@
+/* The goo lab: a sketchbook page of specimens. Everything here is scoped under .lab. */
+
+.lab-intro {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding-block: 64px 48px;
+}
+
+.lab-lede {
+  max-width: 46rem;
+  font-size: 19px;
+  line-height: 1.55;
+  color: var(--muted);
+}
+
+.lab-jobs {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 20px 40px;
+  padding-top: 20px;
+  border-top: 1.5px solid var(--rule);
+}
+
+.lab-jobs dt {
+  font-family: var(--font-display);
+  font-size: 24px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+.lab-jobs dd {
+  margin-top: 4px;
+  font-size: 16px;
+  line-height: 1.5;
+  color: var(--muted);
+}
+
+.lab-history-intro {
+  padding-block: 88px 8px;
+  border-top: 1.5px solid var(--rule);
+}
+
+.lab-specimen {
+  padding-block: 56px;
+  border-top: 1px solid var(--hairline);
+}
+
+.lab-spec-head {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 28px;
+}
+
+.lab-spec-title {
+  font-family: var(--font-display);
+  font-size: clamp(28px, 3vw, 40px);
+  font-weight: 800;
+  line-height: 1.05;
+  letter-spacing: -0.03em;
+}
+
+.lab-spec-body {
+  max-width: 44rem;
+  font-size: 17px;
+  line-height: 1.55;
+  color: var(--muted);
+}
+
+.lab-pair {
+  position: relative;
+  display: grid;
+  overflow: hidden;
+  border: 1px solid var(--hairline);
+  border-radius: 24px;
+}
+
+@media (min-width: 768px) {
+  .lab-pair {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.lab-panel {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 24px;
+  min-height: 220px;
+  padding: 48px 28px 64px;
+  background: var(--ground);
+  color: var(--ink);
+}
+
+.lab-panel-wide,
+.lab-wire-panel {
+  overflow: hidden;
+  border: 1px solid var(--hairline);
+  border-radius: 24px;
+  background: var(--ground);
+  color: var(--ink);
+}
+
+.lab-wire-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 48px;
+  padding: 32px 28px 40px;
+}
+
+.lab-proud {
+  padding-top: 8px;
+}
+
+.lab-replay {
+  position: absolute;
+  right: 14px;
+  bottom: 14px;
+  z-index: 3;
+  min-height: 36px;
+  padding: 0 16px;
+  border-radius: 999px;
+  background: #3366ff;
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.lab-buttons {
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+}
+
+/* 01 · The drop ----------------------------------------------------------------------------- */
+
+.drop {
+  position: relative;
+  display: inline-block;
+  color: #3366ff;
+  /* About the baseline, so the splat flattens onto the line the letters sit on. */
+  transform-origin: 50% 78%;
+}
+
+.drop[data-state="armed"] {
+  opacity: 0;
+}
+
+.drop[data-state="fall"] {
+  animation: drop-fall 860ms both;
+}
+
+.drop::before,
+.drop::after {
+  content: "";
+  position: absolute;
+  bottom: 0.2em;
+  left: 50%;
+  width: 0.075em;
+  height: 0.075em;
+  margin-left: -0.0375em;
+  border-radius: 50%;
+  background: currentColor;
+  opacity: 0;
+}
+
+.drop[data-state="fall"]::before {
+  animation: drop-splash-left 860ms both;
+}
+
+.drop[data-state="fall"]::after {
+  animation: drop-splash-right 860ms both;
+}
+
+@keyframes drop-fall {
+  0% {
+    opacity: 0;
+    transform: translateY(-1.4em) scale(0.55, 1.6);
+    /* A fall speeds up. */
+    animation-timing-function: cubic-bezier(0.55, 0, 1, 0.45);
+  }
+
+  10% {
+    opacity: 1;
+  }
+
+  40% {
+    transform: translateY(0) scale(0.8, 1.25);
+    animation-timing-function: cubic-bezier(0.2, 0.8, 0.3, 1);
+  }
+
+  52% {
+    transform: translateY(0.03em) scale(1.55, 0.5);
+  }
+
+  66% {
+    transform: scale(0.86, 1.16);
+  }
+
+  80% {
+    transform: scale(1.07, 0.94);
+  }
+
+  90% {
+    transform: scale(0.98, 1.02);
+  }
+
+  100% {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes drop-splash-left {
+  0%,
+  50% {
+    opacity: 0;
+    transform: none;
+  }
+
+  54% {
+    opacity: 1;
+  }
+
+  72% {
+    transform: translate(-0.26em, -0.2em);
+  }
+
+  92% {
+    opacity: 1;
+    transform: translate(-0.34em, 0);
+  }
+
+  100% {
+    opacity: 0;
+    transform: translate(-0.34em, 0);
+  }
+}
+
+@keyframes drop-splash-right {
+  0%,
+  50% {
+    opacity: 0;
+    transform: none;
+  }
+
+  54% {
+    opacity: 1;
+  }
+
+  72% {
+    transform: translate(0.2em, -0.14em);
+  }
+
+  92% {
+    opacity: 1;
+    transform: translate(0.27em, 0);
+  }
+
+  100% {
+    opacity: 0;
+    transform: translate(0.27em, 0);
+  }
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .drop-heading:hover .drop[data-state="done"],
+  .drop-heading:hover .drop[data-state="rest"] {
+    animation: drop-jelly 620ms;
+  }
+}
+
+@keyframes drop-jelly {
+  20% {
+    transform: scale(1.32, 0.74);
+  }
+
+  40% {
+    transform: scale(0.84, 1.2);
+  }
+
+  60% {
+    transform: scale(1.1, 0.92);
+  }
+
+  80% {
+    transform: scale(0.97, 1.03);
+  }
+}
+
+/* 02 · Goo on the wire ------------------------------------------------------------------------ */
+
+.wire {
+  position: relative;
+  isolation: isolate;
+}
+
+.wire-goo {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  pointer-events: none;
+}
+
+/*
+ * The bead runs over the row rules but under the number, and the number turns white once the bead has
+ * reached it.
+ */
+.wire-goo[data-shape="bead"] {
+  z-index: 0;
+}
+
+.wire[data-shape="bead"] [data-wire-over] {
+  position: relative;
+  z-index: 1;
+  transition: color 120ms var(--ease-out);
+}
+
+.wire[data-shape="bead"] [data-wire-active] [data-wire-over] {
+  color: #fff;
+  transition-delay: 110ms;
+}
+
+.wire [data-wire-item]:focus-visible [data-wire-title] {
+  outline: 2px solid var(--link);
+  outline-offset: 4px;
+  border-radius: 4px;
+}
+
+/* 03 · Covers -------------------------------------------------------------------------------- */
+
+.lab-cover-stage {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  padding: 56px 32px 88px;
+}
+
+.lab-cover {
+  width: min(620px, 100%);
+}
+
+.lab-cover svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+
+/* The origin is each cell's centre, set inline in user units. */
+.lab-cover-cell {
+  transform: scale(0);
+  transform-box: view-box;
+  transition: transform 560ms cubic-bezier(0.34, 1.4, 0.64, 1);
+}
+
+.lab-cover[data-phase="pour"] .lab-cover-cell,
+.lab-cover[data-phase="done"] .lab-cover-cell {
+  transform: none;
+}
+
+/* 04 · Buttons ------------------------------------------------------------------------------- */
+
+.goo-btn {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+}
+
+.goo-btn-fill {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  pointer-events: none;
+}
+
+.goo-btn-label {
+  position: relative;
+  z-index: 1;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  /* The label turns white once the goo has reached most of it, and back at once on the way out. */
+  .goo-btn.btn-outline:hover .goo-btn-label {
+    color: #ffffff;
+    transition: color 150ms var(--ease-out) 120ms;
+  }
+}
+
+/* 05 · Night is liquid ----------------------------------------------------------------------- */
+
+.lab-seam-stage {
+  padding-block: 120px 300px;
+  background: var(--ground);
+}
+
+.lab-seam {
+  position: relative;
+}
+
+.lab-seam-top {
+  position: absolute;
+  bottom: calc(100% - 1px);
+  left: 0;
+  display: block;
+  width: 100%;
+  height: 90px;
+  overflow: visible;
+  pointer-events: none;
+}
+
+.lab-seam-band {
+  padding-block: 40px 72px;
+  background: #0b0b0c;
+  color: #ffffff;
+}
+
+.lab-seam-bottom {
+  position: absolute;
+  top: calc(100% - 1px);
+  left: 0;
+  display: block;
+  width: 100%;
+  height: 260px;
+  overflow: visible;
+  pointer-events: none;
+}
+
+/* 06 · The pool ------------------------------------------------------------------------------ */
+
+.lab-footer {
+  display: grid;
+}
+
+@media (min-width: 1024px) {
+  .lab-footer {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.lab-footer-day {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 56px var(--gutter);
+  border-top: 1.5px solid var(--rule);
+  background: var(--ground);
+  color: var(--ink);
+}
+
+.lab-pool {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  gap: 12px;
+  min-height: 340px;
+  overflow: hidden;
+  padding: 48px var(--gutter);
+  background: var(--ground);
+  color: var(--ink);
+}
+
+/*
+ * The lava's floor sits on the footer's bottom edge, so the blobs resting there are half sunk into it and
+ * merge into one pool, and the ones that rise come up out of it. It keeps to the right, clear of the
+ * links and the small print.
+ */
+.lab-pool-goo {
+  position: absolute;
+  right: 0;
+  bottom: -14%;
+  left: 48%;
+  height: 84%;
+}
+
+.lab-pool-still {
+  position: absolute;
+  inset: 55% -10% -10%;
+  border-radius: 50% 50% 0 0 / 40% 40% 0 0;
+  background: #3366ff;
+}
+
+.lab-pool-content {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* History, shared --------------------------------------------------------------------------- */
+
+.lab-history {
+  display: flex;
+  flex-direction: column;
+  gap: 40px;
+  padding: 72px var(--shell-pad) 88px;
+  background: var(--ground);
+  color: var(--ink);
+}
+
+/* A · The strand ----------------------------------------------------------------------------- */
+
+.strand-map {
+  display: flex;
+  gap: 8px;
+}
+
+.strand-rail {
+  position: relative;
+  flex-shrink: 0;
+  width: 44px;
+}
+
+.strand-svg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  overflow: visible;
+}
+
+.strand-wire {
+  stroke: #3366ff;
+  stroke-dasharray: 1 9;
+  stroke-linecap: round;
+  stroke-opacity: 0.6;
+  stroke-width: 3;
+}
+
+.strand-list {
+  flex: 1;
+  min-width: 0;
+}
+
+.strand-row {
+  display: grid;
+  gap: 10px;
+  padding-block: 24px 28px;
+}
+
+.strand-row + .strand-row {
+  border-top: 1px solid var(--hairline);
+}
+
+.strand-level {
+  transition: color 200ms ease;
+}
+
+.strand-row[data-current] .strand-level {
+  color: #7c9cff;
+}
+
+.strand-main {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.strand-title {
+  font-family: var(--font-display);
+  font-size: clamp(26px, 2.6vw, 38px);
+  font-weight: 800;
+  line-height: 1.1;
+  letter-spacing: -0.03em;
+}
+
+.strand-org {
+  font-size: 16px;
+  line-height: 22px;
+  color: var(--muted);
+}
+
+.strand-details {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 17px;
+  line-height: 26px;
+}
+
+@media (min-width: 1024px) {
+  .strand-map {
+    gap: 24px;
+  }
+
+  .strand-rail {
+    width: 96px;
+  }
+
+  .strand-row {
+    grid-template-columns: 200px minmax(0, 1fr);
+    column-gap: 32px;
+    align-items: start;
+    padding-block: 32px;
+  }
+
+  .strand-level {
+    padding-top: 14px;
+  }
+
+  .strand-main {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 32px;
+  }
+
+  .strand-org {
+    font-size: 18px;
+  }
+
+  .strand-details {
+    padding-top: 6px;
+  }
+}
+
+/* B · Level select --------------------------------------------------------------------------- */
+
+.lv-map {
+  position: relative;
+  width: 100%;
+}
+
+.lv-svg {
+  position: absolute;
+  inset: 0;
+  overflow: visible;
+}
+
+.lv-path {
+  fill: none;
+  stroke: #3366ff;
+  stroke-dasharray: 1 10;
+  stroke-linecap: round;
+  stroke-opacity: 0.6;
+  stroke-width: 3;
+}
+
+.lv-tabs {
+  position: absolute;
+  inset: 0;
+}
+
+.lv-node {
+  position: absolute;
+  display: grid;
+  place-items: center;
+  width: 56px;
+  height: 56px;
+  margin: -28px 0 0 -28px;
+  border-radius: 50%;
+  color: #ffffff;
+  cursor: pointer;
+}
+
+.lv-node:focus-visible {
+  outline: 2px solid #ffffff;
+  outline-offset: 4px;
+}
+
+.lv-num {
+  position: relative;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1;
+  transition: transform 200ms var(--ease-out);
+}
+
+.lv-node[aria-selected="true"] .lv-num {
+  transform: scale(1.5);
+}
+
+.lv-caption {
+  position: absolute;
+  left: 50%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  white-space: nowrap;
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+
+.lv-caption.below {
+  top: calc(100% + 4px);
+}
+
+.lv-caption.above {
+  bottom: calc(100% + 4px);
+  flex-direction: column-reverse;
+}
+
+.lv-year {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+  transition: color 200ms ease;
+}
+
+.lv-node[aria-selected="true"] .lv-year {
+  color: #7c9cff;
+}
+
+.lv-name {
+  display: none;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+@media (min-width: 768px) {
+  .lv-name {
+    display: block;
+  }
+}
+
+.lv-panel {
+  display: grid;
+  gap: 20px;
+  padding-top: 28px;
+  border-top: 1px solid var(--hairline);
+  animation: lv-in 300ms var(--ease-out) both;
+}
+
+@keyframes lv-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+}
+
+.lv-panel-level {
+  color: #7c9cff;
+}
+
+.lv-title {
+  font-family: var(--font-display);
+  font-size: clamp(30px, 3.4vw, 48px);
+  font-weight: 800;
+  line-height: 1.05;
+  letter-spacing: -0.03em;
+}
+
+.lv-org {
+  font-size: 17px;
+  line-height: 24px;
+  color: var(--muted);
+}
+
+.lv-details {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  font-size: 17px;
+  line-height: 26px;
+}
+
+@media (min-width: 1024px) {
+  .lv-panel {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    column-gap: 48px;
+    align-items: end;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .drop[data-state],
+  .drop::before,
+  .drop::after,
+  .lab-cover-cell,
+  .lv-panel {
+    animation: none;
+    transition: none;
+  }
+}
