@@ -270,3 +270,44 @@
 html[data-theme="night"] :is(.liquid-top, .liquid-bottom) {
   display: none;
 }
+
+/* ---------------------------------------------------------------------------------------------
+   The pool (components/goo-pool.tsx). The goo sits behind the footer's words but never under
+   them: on a phone the words stay at the top and the pool fills the bottom; on a wide screen the
+   words are at the right, so the lava rises on the left.
+   --------------------------------------------------------------------------------------------- */
+
+.pool {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  min-height: 300px;
+}
+
+.pool-goo {
+  position: absolute;
+  z-index: -1;
+  right: 0;
+  bottom: -14%;
+  left: 0;
+  height: 62%;
+  pointer-events: none;
+}
+
+.pool-still {
+  position: absolute;
+  inset: 55% -10% -10%;
+  border-radius: 50% 50% 0 0 / 40% 40% 0 0;
+  background: #3366ff;
+}
+
+@media (min-width: 1024px) {
+  .pool {
+    min-height: 0;
+  }
+
+  .pool-goo {
+    right: 48%;
+    height: 84%;
+  }
+}

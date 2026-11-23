@@ -1,5 +1,6 @@
 import { contact } from "@/lib/content";
 import EmailCopy from "./email-copy";
+import GooPool from "./goo-pool";
 import GooWire from "./goo-wire";
 import withDrop from "./with-drop";
 
@@ -12,10 +13,7 @@ export default function Footer() {
         </h2>
         <EmailCopy email={contact.email} />
       </div>
-      <div
-        data-tone="night"
-        className="flex flex-col justify-end gap-3 pr-[var(--shell-pad-half)] pl-[var(--gutter)] py-12 lg:items-end lg:py-[72px]"
-      >
+      <GooPool className="flex flex-col gap-3 pr-[var(--shell-pad-half)] pl-[var(--gutter)] py-12 lg:items-end lg:justify-end lg:py-[72px]">
         <GooWire id="footer-links" shape="bar">
           <ul className="flex flex-wrap items-center font-medium">
             {contact.links.map((link, index) => (
@@ -39,7 +37,7 @@ export default function Footer() {
           </ul>
         </GooWire>
         <p className="t-label">© 2026 Abraham Rubio</p>
-      </div>
+      </GooPool>
     </footer>
   );
 }
