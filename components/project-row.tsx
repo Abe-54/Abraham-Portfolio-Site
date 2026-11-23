@@ -1,10 +1,11 @@
 import Image from "next/image";
 import { sideLabel, type Cover, type Project } from "@/lib/content";
+import { CoverBlob, CoverPour } from "./cover-goo";
 
 function ProjectCover({ cover, priority }: { cover: Cover; priority?: boolean }) {
   const contain = cover.fit === "contain";
   return (
-    <div className="cover-wipe absolute inset-0">
+    <div className="absolute inset-0">
       {contain && cover.src.blurDataURL ? (
         <div
           aria-hidden="true"
@@ -79,9 +80,11 @@ export default function ProjectRow({
         ))}
       </dl>
       <div className="cover-frame">
+        <CoverBlob id={`cover-${project.slug}`} />
         <div className="cover-card">
           <ProjectCover cover={project.cover} priority={priority} />
         </div>
+        <CoverPour id={`cover-${project.slug}`} />
       </div>
     </article>
   );
