@@ -7,40 +7,52 @@ import { Puddle, addSurface } from "@/lib/rain";
 /*
  * The footer's top edge is the last surface the rain reaches (lib/rain.ts). The drops that fall from
  * the History band land on it, and it takes them like a puddle: it dips where each one goes in, rings
- * out along the edge and throws a bead back up. On a wide screen the edge is the day half's rule and
- * the top of the night half; on a phone it is the rule.
+ * out along the edge and throws a bead back up. On a wide screen the edge runs along the tops of both
+ * halves; on a phone, along the day half.
  *
- * It draws that edge itself, over the real one, and only in the day theme with motion allowed; then the
- * real rule is hidden (styles/goo.css). Otherwise it draws nothing and the plain rule stays. It runs
- * only while a drop's rings are still moving.
+ * It draws that edge itself, over the real one, whenever motion is allowed; then the real rule is hidden
+ * (styles/goo.css). Where the colours above and below the edge differ, the edge is the line between
+ * them: the page ground above, the half's own ground below, each following the rings. In the day theme
+ * the day half is white under white, so there the edge is its black rule. In night theme the night half
+ * is black under black, so there only the rings show, in the blue of the rain. It runs only while a
+ * drop's rings are still moving.
  */
 
 // How far the drawing reaches above and below the footer's top edge.
 const PAD = 40;
 const BEADS = 9;
 
+type Range = [number, number];
+
 export default function FooterPuddle() {
   const svgRef = useRef<SVGSVGElement>(null);
-  const coverRef = useRef<SVGPathElement>(null);
-  const nightRef = useRef<SVGPathElement>(null);
+  const dayBelowRef = useRef<SVGPathElement>(null);
+  const dayAboveRef = useRef<SVGPathElement>(null);
+  const nightBelowRef = useRef<SVGPathElement>(null);
+  const nightAboveRef = useRef<SVGPathElement>(null);
   const ruleRef = useRef<SVGPathElement>(null);
+  const ringsRef = useRef<SVGPathElement>(null);
   const beadsRef = useRef<SVGGElement>(null);
 
   useEffect(() => {
     const svg = svgRef.current;
-    const cover = coverRef.current;
-    const nightEdge = nightRef.current;
+    const dayBelow = dayBelowRef.current;
+    const dayAbove = dayAboveRef.current;
+    const nightBelow = nightBelowRef.current;
+    const nightAbove = nightAboveRef.current;
     const rule = ruleRef.current;
+    const rings = ringsRef.current;
     const beadLayer = beadsRef.current;
     const footer = svg?.closest("footer");
     const dayHalf = footer?.querySelector<HTMLElement>(':scope > [data-tone="day"]');
     const nightHalf = footer?.querySelector<HTMLElement>(':scope > [data-tone="night"]');
-    if (!svg || !cover || !nightEdge || !rule || !beadLayer || !footer || !dayHalf || reducedMotion()) return;
+    if (!svg || !dayBelow || !dayAbove || !nightBelow || !nightAbove || !rule || !rings || !beadLayer) return;
+    if (!footer || !dayHalf || reducedMotion()) return;
     const beadEls = Array.from(beadLayer.querySelectorAll("circle"));
     const puddle = new Puddle();
-    // Where the rule runs, and where the night half meets the edge (a wide screen only), from the left.
-    let day: [number, number] = [0, 0];
-    let night: [number, number] | null = null;
+    // Where the day half meets the edge, and the night half (a wide screen only), from the left.
+    let day: Range = [0, 0];
+    let night: Range | null = null;
     let stop: (() => void) | null = null;
     footer.dataset.puddle = "";
 
@@ -55,18 +67,25 @@ export default function FooterPuddle() {
       return points;
     };
 
-    const draw = () => {
-      rule.setAttribute("d", `M${edge(day[0], day[1], 0.75).join(" L")}`);
-      if (night && !puddle.calm) {
-        const line = edge(night[0], night[1], 0);
-        // Where the edge rises, night fills up to it; where it dips, the page ground covers down to it
-        // (drawn second, so it wins). At rest neither is drawn and the real edge shows.
-        nightEdge.setAttribute("d", `M${night[0]},${PAD} L${line.join(" L")} L${night[1]},${PAD} Z`);
-        cover.setAttribute("d", `M${night[0]},0 L${line.join(" L")} L${night[1]},0 Z`);
-      } else {
-        cover.setAttribute("d", "");
-        nightEdge.setAttribute("d", "");
+    // Where the edge rises, the half's ground fills up to it; where it dips, the page ground covers down
+    // to it (drawn second, so it wins). At rest neither is drawn and the real edge shows.
+    const fill = (below: SVGPathElement, above: SVGPathElement, range: Range | null) => {
+      if (!range || puddle.calm) {
+        below.setAttribute("d", "");
+        above.setAttribute("d", "");
+        return;
       }
+      const line = edge(range[0], range[1], 0).join(" L");
+      below.setAttribute("d", `M${range[0]},${PAD} L${line} L${range[1]},${PAD} Z`);
+      above.setAttribute("d", `M${range[0]},0 L${line} L${range[1]},0 Z`);
+    };
+
+    const draw = () => {
+      const dark = document.documentElement.dataset.theme === "night";
+      rule.setAttribute("d", dark ? "" : `M${edge(day[0], day[1], 0.75).join(" L")}`);
+      fill(dayBelow, dayAbove, dark ? day : null);
+      fill(nightBelow, nightAbove, dark ? null : night);
+      rings.setAttribute("d", dark && night && !puddle.calm ? puddle.rings(() => PAD, night[0], night[1]) : "");
       beadEls.forEach((el, i) => {
         const bead = puddle.beads[i];
         if (!bead || bead.wait > 0) return el.setAttribute("r", "0");
@@ -102,28 +121,36 @@ export default function FooterPuddle() {
         return x >= box.left && x <= box.right ? box.top : null;
       },
       hit: (x, r, speed) => {
-        if (document.documentElement.dataset.theme === "night") return;
         puddle.hit(x - footer.getBoundingClientRect().left, r, speed);
         stop ??= animate(tick);
       },
     });
     const resize = new ResizeObserver(measure);
     resize.observe(footer);
+    // The rule is drawn only in the day theme, so a new theme redraws the edge at once.
+    const theme = new MutationObserver(draw);
+    theme.observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
     measure();
     return () => {
       stop?.();
       removeSurface();
       resize.disconnect();
+      theme.disconnect();
       delete footer.dataset.puddle;
     };
   }, []);
 
   return (
     <svg ref={svgRef} className="puddle" aria-hidden="true">
-      <g data-tone="night">
-        <path ref={nightRef} className="puddle-night" />
+      <g data-tone="day">
+        <path ref={dayBelowRef} className="puddle-fill" />
       </g>
-      <path ref={coverRef} className="puddle-cover" />
+      <g data-tone="night">
+        <path ref={nightBelowRef} className="puddle-fill" />
+      </g>
+      <path ref={dayAboveRef} className="puddle-fill" />
+      <path ref={nightAboveRef} className="puddle-fill" />
+      <path ref={ringsRef} className="puddle-rings" />
       <g data-tone="night">
         <g ref={beadsRef} className="puddle-beads">
           {Array.from({ length: BEADS }, (_, index) => (

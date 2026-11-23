@@ -18,10 +18,10 @@ import { Puddle, addSurface, surfaceBelow, type Surface } from "@/lib/rain";
  * Its top edge is such a surface. It sloshes as the page scrolls, and takes the drops from the band
  * above like a puddle takes rain.
  *
- * Both edges reach into the day bands next door, so they only show while those are day: in night theme
- * the neighbours are the same black and the edges stay hidden and asleep. No filter: every edge is a
- * computed path. It runs only while an edge is near the screen or a drop is still falling, and never
- * with reduced motion, which gets the edges at rest.
+ * Both edges reach into the day bands next door. In night theme those are the same black, so the liquid
+ * shows as the blue goo instead: blue drips and drops hanging from a thin rim along the band's bottom,
+ * and of the top surface only the rings where a drop lands (styles/goo.css). No filter: every edge is a computed path. It runs only while an edge is near
+ * the screen or a drop is still falling, and never with reduced motion, which gets the edges at rest.
  */
 
 const SLOSH: Feel = { stiffness: 90, damping: 7 };
@@ -114,16 +114,18 @@ const bulbOf = (drip: Drip) => drip.r * (0.7 + 0.5 * drip.fill * drip.fill);
 export default function NightEdges() {
   const topRef = useRef<SVGSVGElement>(null);
   const surfaceRef = useRef<SVGPathElement>(null);
+  const ringsRef = useRef<SVGPathElement>(null);
   const bottomRef = useRef<SVGSVGElement>(null);
   const dripsRef = useRef<SVGGElement>(null);
 
   useEffect(() => {
     const topSvg = topRef.current;
     const surfacePath = surfaceRef.current;
+    const ringsPath = ringsRef.current;
     const bottomSvg = bottomRef.current;
     const dripLayer = dripsRef.current;
     const band = topSvg?.closest<HTMLElement>(".liquid");
-    if (!topSvg || !surfacePath || !bottomSvg || !dripLayer || !band) return;
+    if (!topSvg || !surfacePath || !ringsPath || !bottomSvg || !dripLayer || !band) return;
     const still = reducedMotion();
     const paths = Array.from(dripLayer.querySelectorAll<SVGPathElement>(".liquid-drip"));
     const fallEls = Array.from(dripLayer.querySelectorAll<SVGEllipseElement>(".liquid-fall"));
@@ -167,18 +169,20 @@ export default function NightEdges() {
       modes[1].value * Math.sin(u * Math.PI * 3.3 + 1.1) +
       modes[2].value * Math.sin(u * Math.PI * 6.2 + 2.0) * 0.6;
 
+    // The top surface at column i: the meniscus, the scroll's slosh, and the rings of any drop that went
+    // in, kept inside its box so a hard slosh never dips below the band it sits on.
+    const surfaceAt = (i: number) => {
+      const u = Math.min(width, i * puddle.dx) / Math.max(1, width);
+      return Math.min(EDGE - 1, Math.max(6, LEVEL + meniscus(u) + slosh(u) + puddle.h[i]));
+    };
+
     const draw = () => {
       const w = width;
-      // The top: the meniscus, the scroll's slosh, and the rings of any drop that went in.
       let d = `M0,${EDGE}`;
-      for (let i = 0; i < puddle.h.length; i++) {
-        const x = Math.min(w, i * puddle.dx);
-        const u = x / Math.max(1, w);
-        // Kept inside its box, so a hard slosh never dips below the band it sits on.
-        const y = Math.min(EDGE - 1, Math.max(6, LEVEL + meniscus(u) + slosh(u) + puddle.h[i]));
-        d += ` L${n(x)},${n(y)}`;
-      }
+      for (let i = 0; i < puddle.h.length; i++) d += ` L${n(Math.min(w, i * puddle.dx))},${n(surfaceAt(i))}`;
       surfacePath.setAttribute("d", `${d} L${w},${EDGE} Z`);
+      // In night theme the surface is black on black: only its rings show.
+      ringsPath.setAttribute("d", night() && !puddle.calm ? puddle.rings((i) => surfaceAt(i) - puddle.h[i]) : "");
       beadEls.forEach((el, i) => {
         const bead = puddle.beads[i];
         if (!bead || bead.wait > 0) return el.setAttribute("r", "0");
@@ -249,12 +253,6 @@ export default function NightEdges() {
     };
 
     const tick = (dt: number) => {
-      if (night()) {
-        falls.length = 0;
-        puddle.beads.length = 0;
-        stop = null;
-        return false;
-      }
       clock += dt;
       // Once a frame, from real time: the scroll speed, and where the pointer is among the drips. The
       // spring steps within a frame share them, and the pointer is read before this frame draws.
@@ -363,7 +361,7 @@ export default function NightEdges() {
     };
 
     const wake = () => {
-      if (still || stop || night() || !(topOn || bottomOn || falls.length || !puddle.calm)) return;
+      if (still || stop || !(topOn || bottomOn || falls.length || !puddle.calm)) return;
       lastY = window.scrollY;
       lastT = performance.now();
       speed = 0;
@@ -401,7 +399,6 @@ export default function NightEdges() {
             return box.top + 1 - EDGE + LEVEL + meniscus((x - box.left) / Math.max(1, box.width));
           },
           hit: (x, r, fallSpeed) => {
-            if (night()) return;
             puddle.hit(x - band.getBoundingClientRect().left, r, fallSpeed);
             wake();
           },
@@ -426,8 +423,11 @@ export default function NightEdges() {
     );
     observer.observe(topSvg);
     observer.observe(bottomSvg);
-    // Back from night theme: start again.
-    const theme = new MutationObserver(wake);
+    // A new theme recolours the liquid; the rings only draw in night theme.
+    const theme = new MutationObserver(() => {
+      draw();
+      wake();
+    });
     theme.observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
     window.addEventListener("scroll", wake, { passive: true });
     if (!still) {
@@ -451,13 +451,16 @@ export default function NightEdges() {
     <>
       <svg ref={topRef} className="liquid-top" aria-hidden="true" preserveAspectRatio="none">
         <path ref={surfaceRef} />
+        <path ref={ringsRef} className="liquid-rings" />
         {Array.from({ length: BEADS }, (_, index) => (
           <circle key={index} className="liquid-bead" r="0" />
         ))}
       </svg>
       <svg ref={bottomRef} className="liquid-bottom" aria-hidden="true">
         <g ref={dripsRef}>
-          <rect x="0" y="-2" width="100%" height="3" />
+          {/* The seam where the drips meet the band; in night theme, a thin rim of goo they hang from. */}
+          <rect className="liquid-seam" x="0" y="-2" width="100%" height="3" />
+          <rect className="liquid-rim" x="0" y="-0.25" width="100%" height="1.5" />
           {DRIPS.map((_, index) => (
             <path key={index} className="liquid-drip" />
           ))}

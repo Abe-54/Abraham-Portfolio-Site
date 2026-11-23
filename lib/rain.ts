@@ -2,7 +2,8 @@
  * Rain. The night bands drip (components/night-edges.tsx), and every drop falls until it lands on the
  * next liquid surface below it: the top of the next night band, or the footer's top edge
  * (components/footer-puddle.tsx). A surface takes a drop the way a puddle takes rain: it dips where
- * the drop went in, rings out both ways along the edge, and throws a bead back up.
+ * the drop went in, rings out both ways along the edge, and throws a bead back up. In night theme the
+ * rain is the blue goo, and where a surface is black on black only its rings show.
  */
 
 export type Surface = {
@@ -123,6 +124,40 @@ export class Puddle {
       }
     }
     if (this.beads.some((bead) => bead.done)) this.beads = this.beads.filter((bead) => !bead.done);
+  }
+
+  /**
+   * Where the edge itself cannot be seen (black on black in night theme), only its rings show: the sliver
+   * between the resting line and the moving edge, wherever the edge still moves between x `from` and
+   * `to`, as one path. It tapers to nothing at both ends of every crest and as the rings die out.
+   * `rest(i)` is where column i rests.
+   */
+  rings(rest: (i: number) => number, from = 0, to = this.width) {
+    const { h, dx } = this;
+    const first = Math.max(0, Math.floor(from / dx));
+    const last = Math.min(h.length - 1, Math.ceil(to / dx));
+    const x = (i: number) => Math.min(to, Math.max(from, i * dx)).toFixed(1);
+    let d = "";
+    let run: number[] = [];
+    // Close a stretch: out along the moving edge, back along the resting line.
+    const close = () => {
+      if (run.length > 1) {
+        d += ` M${run.map((i) => `${x(i)},${(rest(i) + h[i]).toFixed(2)}`).join(" L")}`;
+        d += ` L${run.reverse().map((i) => `${x(i)},${rest(i).toFixed(2)}`).join(" L")} Z`;
+      }
+      run = [];
+    };
+    // Columns since the last moving one: a short calm between two crests keeps one stretch going.
+    let calm = 0;
+    for (let i = first; i <= last; i++) {
+      const moving = Math.abs(h[i]) > 0.15;
+      calm = moving ? 0 : calm + 1;
+      if (moving && !run.length && i > first) run.push(i - 1);
+      if (moving || (run.length && calm <= 3)) run.push(i);
+      else if (run.length) close();
+    }
+    close();
+    return d.trim();
   }
 
   get calm() {

@@ -376,13 +376,29 @@
   height: 260px;
 }
 
-/* In night theme the bands next door are the same black, so there is no edge to show. */
-html[data-theme="night"] :is(.liquid-top, .liquid-bottom) {
+/* In night theme the bands next door are the same black, so the liquid shows as the blue goo instead:
+   blue drips and drops hanging from a thin rim along the band's bottom, and of a surface only the rings
+   where a drop lands. */
+html[data-theme="night"] :is(.liquid-bottom, .liquid-bead, .puddle-beads) {
+  fill: #3366ff;
+}
+
+.liquid-rim,
+html[data-theme="night"] .liquid-seam {
   display: none;
 }
 
-/* The footer's top edge as a puddle for the rain (components/footer-puddle.tsx). It draws the rule
-   itself, so the real one steps aside while it does: day theme only, and never with reduced motion. */
+html[data-theme="night"] .liquid-rim {
+  display: inline;
+}
+
+.liquid-rings,
+.puddle-rings {
+  fill: #3366ff;
+}
+
+/* The footer's top edge as a puddle for the rain (components/footer-puddle.tsx). It draws the edge
+   itself, so the real rule steps aside while it does; with reduced motion it does not. */
 .puddle {
   position: absolute;
   z-index: 3;
@@ -395,8 +411,7 @@ html[data-theme="night"] :is(.liquid-top, .liquid-bottom) {
   pointer-events: none;
 }
 
-.puddle-cover,
-.puddle-night,
+.puddle-fill,
 .puddle-beads {
   fill: var(--ground);
 }
@@ -407,11 +422,7 @@ html[data-theme="night"] :is(.liquid-top, .liquid-bottom) {
   stroke-width: 1.5;
 }
 
-html[data-theme="night"] .puddle {
-  display: none;
-}
-
-html:not([data-theme="night"]) footer[data-puddle] > [data-tone="day"] {
+footer[data-puddle] > [data-tone="day"] {
   border-top-color: transparent;
 }
 
