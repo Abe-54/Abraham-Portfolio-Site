@@ -27,11 +27,6 @@ export default function Footer() {
             <ul className="flex flex-wrap items-center font-medium">
               {contact.links.map((link, index) => (
                 <li key={link.label} className="flex items-center">
-                  {index > 0 ? (
-                    <span aria-hidden="true" className="px-2 text-muted">
-                      ·
-                    </span>
-                  ) : null}
                   <a
                     href={link.href}
                     target="_blank"
@@ -41,6 +36,12 @@ export default function Footer() {
                   >
                     <span data-wire-over>{link.label}</span>
                   </a>
+                  {/* After each link, not before the next, so a wrapped line never starts with one. */}
+                  {index < contact.links.length - 1 ? (
+                    <span aria-hidden="true" className="px-2 text-muted">
+                      ·
+                    </span>
+                  ) : null}
                 </li>
               ))}
             </ul>
