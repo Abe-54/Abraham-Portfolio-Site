@@ -18,6 +18,10 @@ import { surfaceBelow, type Surface } from "@/lib/rain";
  * sections it passes and hidden behind the next night band, until it reaches the footer (lib/rain.ts),
  * whose lava it becomes (components/goo-pool.tsx).
  *
+ * When the page changes width (a phone turned over, a folding screen opened, a window dragged) the drips
+ * are hung again as a fresh load at that width would hang them: the old ones draw back into the edge
+ * while the new ones swell out of it.
+ *
  * Its top edge sloshes as the page scrolls.
  *
  * Both edges reach into the day bands next door. In night theme those are the same black, so the liquid
@@ -42,6 +46,12 @@ const MAX_DRIPS = 8;
 const DRIP_GAP = 30;
 // Seconds a drip takes to fill and let go: a range, so the drips never fall in step.
 const FILL: [number, number] = [3.2, 7.5];
+// A width that has moved this share since the drips were hung is a new width, not a scrollbar: they are
+// hung again once it has held still for a moment (ms), and take this long (s) to swell out of the edge
+// or draw back into it.
+const REHANG = 0.1;
+const SETTLE = 200;
+const HANG = 1.2;
 // How far a mouse pointer draws a drip: across, and below its tip.
 const REACH_X = 130;
 const REACH_Y = 220;
@@ -114,6 +124,9 @@ type Drip = ReturnType<typeof layout>[number] & {
   fill: number;
   period: number;
   phase: number;
+  // How far it has swelled out of the edge (1 when hanging), and whether it is drawing back into it.
+  size: number;
+  going: boolean;
 };
 
 type Fall = {
@@ -130,7 +143,7 @@ type Fall = {
 
 /** How long a drip hangs once it has filled this far, and its bulb. */
 const grownOf = (drip: Drip) => drip.rest + drip.fill * drip.fill * (14 + drip.r * 1.6);
-const bulbOf = (drip: Drip) => drip.r * (0.7 + 0.5 * drip.fill * drip.fill);
+const bulbOf = (drip: Drip) => drip.r * (0.7 + 0.5 * drip.fill * drip.fill) * ease(0, 1, drip.size);
 
 export default function NightEdges() {
   const topRef = useRef<SVGSVGElement>(null);
@@ -151,18 +164,25 @@ export default function NightEdges() {
     const paths = Array.from(dripLayer.querySelectorAll<SVGPathElement>(".liquid-drip"));
     const fallEls = Array.from(rainSvg.querySelectorAll<SVGEllipseElement>(".liquid-fall"));
     const modes = [spring(), spring(), spring()];
-    const drips: Drip[] = layout(band.clientWidth).map((drip) => ({
-      ...drip,
-      length: spring(drip.rest),
-      swing: spring(),
-      squash: spring(),
-      // Each starts part-filled, so they never all fall together.
-      fill: still ? 0.4 : Math.random(),
-      period: between(FILL),
-      phase: Math.random() * Math.PI * 2,
-    }));
-    const falls: Fall[] = [];
     let width = band.clientWidth;
+    // Hang a layout for the width now. One that swells out of the edge later starts as a bead with
+    // nothing in it; at the first look each starts part-filled, so they never all fall together.
+    const hang = (entering: boolean): Drip[] =>
+      layout(width).map((drip) => ({
+        ...drip,
+        length: spring(entering ? 0 : drip.rest),
+        swing: spring(),
+        squash: spring(),
+        fill: still ? 0.4 : entering ? 0 : Math.random(),
+        period: between(FILL),
+        phase: Math.random() * Math.PI * 2,
+        size: entering ? 0 : 1,
+        going: false,
+      }));
+    let drips = hang(false);
+    let laidAt = width;
+    let settle: ReturnType<typeof setTimeout> | undefined;
+    const falls: Fall[] = [];
     let clock = 0;
     let lastY = window.scrollY;
     let lastT = performance.now();
@@ -209,6 +229,7 @@ export default function NightEdges() {
           dripPath(drip.at * w, drip.length.value, bulb, pinch, drip.swing.value, drip.squash.value),
         );
       });
+      for (let i = drips.length; i < paths.length; i++) paths[i].removeAttribute("d");
       fallEls.forEach((el, i) => {
         const fall = falls[i];
         if (!fall || fall.wait > 0) return el.setAttribute("rx", "0");
@@ -293,6 +314,7 @@ export default function NightEdges() {
       step(modes[1], -kick * 0.013, SLOSH, dt);
       step(modes[2], kick * 0.009, SLOSH, dt);
       for (const drip of drips) {
+        drip.size = clamp(drip.size + (drip.going ? -dt : dt) / HANG, 0, 1);
         const x = drip.at * width;
         const bulb = bulbOf(drip);
         // Where the pointer is from the drip. On the drip or just under it, the pointer holds it.
@@ -301,7 +323,7 @@ export default function NightEdges() {
         const held = local.near && Math.abs(dx) < bulb + 22 && below < bulb + 34;
         // Filling only while the drips are near the screen (the rain is for someone to see), and not
         // while held.
-        if (bottomOn && !held) drip.fill = Math.min(1, drip.fill + dt / drip.period);
+        if (bottomOn && !held && !drip.going) drip.fill = Math.min(1, drip.fill + dt / drip.period);
         const swell = drip.fill * drip.fill;
         const grown = grownOf(drip);
         // Scrolling down tugs the drips longer and scrolling up squashes them, never enough to tear.
@@ -324,13 +346,15 @@ export default function NightEdges() {
           }
         }
         step(drip.swing, lean, SWING, dt);
-        step(drip.length, grown + tug + reach, LENGTH, dt);
+        step(drip.length, (grown + tug + reach) * ease(0, 1, drip.size), LENGTH, dt);
         // Stretching makes the bulb tall and narrow; springing back up makes it squat and wide.
         step(drip.squash, clamp(-drip.length.velocity / 520, -0.3, 0.3) + 0.03 * Math.sin(clock * 2.3 + drip.phase), SQUASH, dt);
         drip.squash.value = clamp(drip.squash.value, -0.4, 0.4);
-        // Full, or pulled well past its length, it lets go; never while the pointer holds it.
-        if (!held && (drip.fill >= 1 || (drip.length.value - grown > PLUCK && drip.fill > 0.45))) letGo(drip);
+        // Full, or pulled well past its length, it lets go; never while the pointer holds it, or once it
+        // is drawing back into the edge.
+        if (!held && !drip.going && (drip.fill >= 1 || (drip.length.value - grown > PLUCK && drip.fill > 0.45))) letGo(drip);
       }
+      for (let i = drips.length - 1; i >= 0; i--) if (drips[i].going && drips[i].size === 0) drips.splice(i, 1);
       for (const fall of falls) {
         if (fall.wait > 0) {
           fall.wait -= dt;
@@ -355,7 +379,7 @@ export default function NightEdges() {
         Math.abs(speed) < 4 &&
         Math.abs(drive) < 4 &&
         modes.every((m) => Math.abs(m.value) < 0.05 && Math.abs(m.velocity) < 0.5) &&
-        drips.every((drip) => Math.abs(drip.length.velocity) < 0.5) &&
+        drips.every((drip) => Math.abs(drip.length.velocity) < 0.5 && drip.size === 1) &&
         falls.length === 0;
       quiet = calm ? quiet + dt : 0;
       // While the drips are near the screen it keeps raining; otherwise it sleeps once all is still.
@@ -397,9 +421,28 @@ export default function NightEdges() {
       if (!event.relatedTarget) pointer.on = false;
     };
 
+    // A new width hangs the drips as a fresh load would; a scrollbar is not a new width. With someone
+    // watching, the old ones draw back into the edge while the new ones swell out of it, so none pops away
+    // mid-fill; unseen, or with reduced motion, they simply change.
+    const rehang = () => {
+      if (!width || Math.abs(width - laidAt) <= laidAt * REHANG) return;
+      if (still || !bottomOn) drips = hang(false);
+      else if (drips.some((drip) => drip.going)) {
+        settle = setTimeout(rehang, SETTLE);
+        return;
+      } else {
+        for (const drip of drips) drip.going = true;
+        drips.push(...hang(true));
+        wake();
+      }
+      laidAt = width;
+      draw();
+    };
     const resize = new ResizeObserver(() => {
       width = band.clientWidth;
       draw();
+      clearTimeout(settle);
+      settle = setTimeout(rehang, SETTLE);
     });
     resize.observe(band);
     const observer = new IntersectionObserver(
@@ -429,6 +472,7 @@ export default function NightEdges() {
     draw();
     return () => {
       stop?.();
+      clearTimeout(settle);
       resize.disconnect();
       observer.disconnect();
       theme.disconnect();
@@ -448,7 +492,8 @@ export default function NightEdges() {
           {/* The seam where the drips meet the band; in night theme, a thin rim of goo they hang from. */}
           <rect className="liquid-seam" x="0" y="-2" width="100%" height="3" />
           <rect className="liquid-rim" x="0" y="-0.25" width="100%" height="1.5" />
-          {Array.from({ length: MAX_DRIPS }, (_, index) => (
+          {/* Room for the old drips drawing back as the new ones swell out. */}
+          {Array.from({ length: MAX_DRIPS * 2 }, (_, index) => (
             <path key={index} className="liquid-drip" />
           ))}
         </g>
