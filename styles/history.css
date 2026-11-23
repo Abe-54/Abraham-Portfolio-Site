@@ -189,7 +189,8 @@
 }
 
 .lv[data-live] .lv-step:not([data-state="current"]) {
-  opacity: 0.42;
+  /* The faintest text on a passed or coming level (the blue level label) still meets AA at 4.5:1. */
+  opacity: 0.75;
 }
 
 .lv[data-live] .lv-step {

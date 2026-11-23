@@ -125,7 +125,7 @@ export default function Home() {
           <p className="font-display text-[22px] leading-[1.35] font-semibold tracking-[-0.02em] lg:text-[28px]">
             {toolkit.map((group, index) => (
               <span key={group[0]}>
-                {index > 0 ? <span className="text-[#A3A3A8]"> / </span> : null}
+                {index > 0 ? <span className="text-muted"> / </span> : null}
                 {group.join(", ")}
               </span>
             ))}
