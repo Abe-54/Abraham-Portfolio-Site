@@ -22,6 +22,12 @@
   animation: drop-fall 860ms both;
 }
 
+/* Scrolling back up, the drop lands the other way round: up from below, flattening against the top. */
+.drop[data-state="rise"] {
+  transform-origin: 50% 64%;
+  animation: drop-rise 860ms both;
+}
+
 /* Two droplets thrown out by the splat. */
 .drop::before,
 .drop::after {
@@ -45,6 +51,14 @@
   animation: drop-splash-right 860ms both;
 }
 
+.drop[data-state="rise"]::before {
+  animation: drop-splash-left-rise 860ms both;
+}
+
+.drop[data-state="rise"]::after {
+  animation: drop-splash-right-rise 860ms both;
+}
+
 @keyframes drop-fall {
   0% {
     opacity: 0;
@@ -64,6 +78,44 @@
 
   52% {
     transform: translateY(0.03em) scale(1.55, 0.5);
+  }
+
+  66% {
+    transform: scale(0.86, 1.16);
+  }
+
+  80% {
+    transform: scale(1.07, 0.94);
+  }
+
+  90% {
+    transform: scale(0.98, 1.02);
+  }
+
+  100% {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes drop-rise {
+  0% {
+    opacity: 0;
+    transform: translateY(1.2em) scale(0.55, 1.6);
+    animation-timing-function: cubic-bezier(0.55, 0, 1, 0.45);
+  }
+
+  10% {
+    opacity: 1;
+  }
+
+  40% {
+    transform: translateY(0) scale(0.8, 1.25);
+    animation-timing-function: cubic-bezier(0.2, 0.8, 0.3, 1);
+  }
+
+  52% {
+    transform: translateY(-0.03em) scale(1.55, 0.5);
   }
 
   66% {
@@ -136,8 +188,60 @@
   }
 }
 
+@keyframes drop-splash-left-rise {
+  0%,
+  50% {
+    opacity: 0;
+    transform: none;
+  }
+
+  54% {
+    opacity: 1;
+  }
+
+  72% {
+    transform: translate(-0.26em, 0.2em);
+  }
+
+  92% {
+    opacity: 1;
+    transform: translate(-0.34em, 0);
+  }
+
+  100% {
+    opacity: 0;
+    transform: translate(-0.34em, 0);
+  }
+}
+
+@keyframes drop-splash-right-rise {
+  0%,
+  50% {
+    opacity: 0;
+    transform: none;
+  }
+
+  54% {
+    opacity: 1;
+  }
+
+  72% {
+    transform: translate(0.2em, 0.14em);
+  }
+
+  92% {
+    opacity: 1;
+    transform: translate(0.27em, 0);
+  }
+
+  100% {
+    opacity: 0;
+    transform: translate(0.27em, 0);
+  }
+}
+
 @media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
-  :hover > .drop:is([data-state="rest"], [data-state="done"]) {
+  :hover > .drop[data-state="rest"] {
     animation: drop-jelly 620ms;
   }
 }
