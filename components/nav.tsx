@@ -176,6 +176,7 @@ function GooLayer({ filter }: { filter?: boolean }) {
 export default function Nav() {
   const pathname = usePathname();
   const nameRef = useRef<HTMLAnchorElement>(null);
+  const floatRef = useRef<HTMLDivElement>(null);
   const chipRef = useRef<HTMLElement>(null);
   const trackRef = useRef<HTMLDivElement>(null);
   const rowRef = useRef<HTMLDivElement>(null);
@@ -206,6 +207,37 @@ export default function Nav() {
     return () => {
       observer.disconnect();
       delete chip.dataset.docked;
+    };
+  }, []);
+
+  // Reading down the page, the chip and the switch tuck away above the window so they never sit over
+  // the words; scrolling back up or tabbing into them brings them back. Only a scroll the visitor drives
+  // tucks them, so a glide to a section after a click keeps the goo in view.
+  useEffect(() => {
+    const float = floatRef.current;
+    const name = nameRef.current;
+    if (!float || !name) return;
+    let lastY = window.scrollY;
+    let drivenAt = -Infinity;
+    const driven = () => (drivenAt = performance.now());
+    const show = () => delete float.dataset.tucked;
+    const onScroll = () => {
+      const y = window.scrollY;
+      const dy = y - lastY;
+      if (Math.abs(dy) < 6) return;
+      lastY = y;
+      if (dy < 0 || name.getBoundingClientRect().bottom > 0) show();
+      else if (performance.now() - drivenAt < 500 && !float.contains(document.activeElement)) float.dataset.tucked = "";
+    };
+    const inputs = ["wheel", "touchmove", "keydown"] as const;
+    inputs.forEach((type) => window.addEventListener(type, driven, { passive: true }));
+    window.addEventListener("scroll", onScroll, { passive: true });
+    float.addEventListener("focusin", show);
+    return () => {
+      inputs.forEach((type) => window.removeEventListener(type, driven));
+      window.removeEventListener("scroll", onScroll);
+      float.removeEventListener("focusin", show);
+      show();
     };
   }, []);
 
@@ -280,7 +312,7 @@ export default function Nav() {
 
       {/* The links and the theme switch float on their own and stay on screen: in the header row on
           wide screens, the switch at its end; under it on phones, side by side. */}
-      <div className="nav-float">
+      <div ref={floatRef} className="nav-float">
         <nav ref={chipRef} aria-label="Main" className="nav-chip">
           <Link href="/" aria-label="Abraham Rubio" className="nav-home">
             <span aria-hidden="true">A</span>
