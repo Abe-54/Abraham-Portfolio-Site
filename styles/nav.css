@@ -1,8 +1,8 @@
 /*
  * The name sits at the top of the page and scrolls away with it. The page links float in a chip, and
  * the theme switch beside it, and both stay on screen: from tablet width (46rem) the chip is centred
- * in the header row and the switch rests at the row's end; on phones, where the name, five links and
- * the switch can't share one row, the chip and the switch share the row under the name.
+ * in the header row and the switch rests at the row's end; on phones, where the name, the links and
+ * the switch can't share one row, the switch ends the name's row and the chip has the row under it.
  */
 :root {
   --head-h: 72px;
@@ -95,12 +95,18 @@ html[data-theme="night"] .nav-float {
   --chip-shadow: 0 10px 28px -10px rgb(0 0 0 / 0.75);
 }
 
-/* On a phone the switch follows the chip, centred on it. */
+/* On a phone the switch sits at the end of the name's row, so the chip has the full width under it.
+   It scrolls away with the name: once the name is gone (the initials have docked) it hides, which
+   also keeps Tab from landing on it off screen. */
 .nav-switch {
-  flex-shrink: 0;
-  margin-top: calc((var(--chip-h) - 44px) / 2);
-  margin-left: 8px;
+  position: absolute;
+  top: calc((var(--head-h) - 44px) / 2 - var(--head-h));
+  right: var(--shell-pad);
   pointer-events: auto;
+}
+
+.nav-chip[data-docked] + .nav-switch {
+  visibility: hidden;
 }
 
 /* Floating over the page with the chip, the switch casts the chip's shadow from under its track. */
@@ -124,14 +130,16 @@ html[data-theme="night"] .nav-float {
 
   /* The switch rests where the header row ends, level with the chip, and stays there. */
   .nav-switch {
-    position: absolute;
     inset-inline: 0;
     top: calc((var(--chip-h) - 44px) / 2);
     display: flex;
     justify-content: flex-end;
-    margin: 0;
     padding-inline: var(--shell-pad);
     pointer-events: none;
+  }
+
+  .nav-chip[data-docked] + .nav-switch {
+    visibility: visible;
   }
 
   .nav-switch .goo-switch {
@@ -214,9 +222,9 @@ html[data-theme="night"] .nav-float {
   align-items: center;
   height: 44px;
   padding-inline: 12px;
-  /* Phones tighten the links to fit the width the switch leaves them (92px), down to 8px; past that the
-     strip scrolls. */
-  padding-inline: clamp(8px, calc((100cqi - 92px - 271px) / 10), 14px);
+  /* Phones size the links to fill the chip with the initials docked: 273px is that chip less its link
+     padding. Below 8px a side the strip scrolls. */
+  padding-inline: clamp(8px, calc((100cqi - 273px) / 8), 14px);
   border-radius: 999px;
   font-size: 16px;
   font-weight: 500;
@@ -224,19 +232,19 @@ html[data-theme="night"] .nav-float {
   white-space: nowrap;
 }
 
-@media (max-width: 380px) {
+@media (max-width: 340px) {
   .nav-link {
-    padding-inline: clamp(8px, calc((100cqi - 92px - 256px) / 10), 14px);
+    padding-inline: 8px;
     font-size: 15px;
   }
 }
 
 /* In the header row the chip is centred on the page, so on a narrow tablet its links tighten until it
-   clears the name by 24px. 100cqi + 16px is the window's width, 271px the chip less its link padding,
+   clears the name by 24px. 100cqi + 16px is the window's width, 227px the chip less its link padding,
    147px the name at 20px. */
 @media (min-width: 46rem) {
   .nav-link {
-    padding-inline: clamp(8px, calc((100cqi + 16px - 271px - 2 * (var(--gutter) + 147px + 24px)) / 10), 14px);
+    padding-inline: clamp(8px, calc((100cqi + 16px - 227px - 2 * (var(--gutter) + 147px + 24px)) / 8), 14px);
   }
 }
 
