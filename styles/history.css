@@ -51,10 +51,23 @@
   height: 140px;
 }
 
-@container (min-width: 560px) {
+/* Tall enough for each level's name above or below it, from the width the names fit in (WIDE in
+   components/history.tsx). */
+@container (min-width: 688px) {
   .lv-map {
     height: 230px;
   }
+}
+
+/* A window too short for the stuck map to leave room to read in: the map scrolls with the levels
+   (components/history.tsx decides). It keeps its `top`, which the reading line measures from. */
+.lv[data-loose] .lv-cap,
+.lv[data-loose] .lv-stage::after {
+  display: none;
+}
+
+.lv[data-loose] .lv-stage {
+  position: static;
 }
 
 .lv-svg {
@@ -150,7 +163,7 @@
   color: var(--ink);
 }
 
-@media (min-width: 768px) {
+@container (min-width: 688px) {
   .lv-name {
     display: block;
   }

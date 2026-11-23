@@ -28,18 +28,30 @@ const STRAND = [0.74, 0.62, 0.5, 0.4, 0.3];
 const DWELL = 0.4;
 // The reading line, as a share of the height under the stuck map.
 const LINE = 0.4;
+// The map grows tall, with room for each level's name, from this width (styles/history.css).
+const WIDE = 688;
+// The stuck map, with the fade under it, may take at most this share of the window; past it, on a short
+// window, it scrolls with the levels instead of sticking (styles/history.css).
+const MOST = 0.5;
+const FADE = 24;
 
-/** Where the reading line sits in the window, and how far below the stuck map. */
+/**
+ * Where the reading line sits in the window, and how far below what is above it: the stuck map, or,
+ * where the map scrolls with the levels, the nav. The stage's `top` is where it sticks, under the nav,
+ * whether or not it is sticking.
+ */
 function readingLine(stage: HTMLElement) {
-  const stuckBottom = parseFloat(getComputedStyle(stage).top) + stage.offsetHeight;
-  const room = Math.round((window.innerHeight - stuckBottom) * LINE);
-  return { y: stuckBottom + room, room };
+  const style = getComputedStyle(stage);
+  const top = parseFloat(style.top);
+  const above = style.position === "sticky" ? top + stage.offsetHeight : top;
+  const room = Math.round((window.innerHeight - above) * LINE);
+  return { y: above + room, room };
 }
 
 type Layout = { w: number; h: number; nodes: { x: number; y: number }[]; d: string; r: number; dot: number; line: number };
 
 function layout(w: number): Layout {
-  const small = w < 560;
+  const small = w < WIDE;
   const h = small ? 140 : 230;
   const pad = small ? 34 : 80;
   const amp = small ? 16 : 34;
@@ -76,6 +88,26 @@ export default function History() {
     const resize = new ResizeObserver(measure);
     resize.observe(map);
     return () => resize.disconnect();
+  }, []);
+
+  // Whether the map sticks: only while it leaves room to read under it. A phone on its side, a short
+  // laptop window or a folding phone turned round all change it.
+  useEffect(() => {
+    const root = levelsRef.current;
+    const stage = stageRef.current;
+    if (!root || !stage) return;
+    const fit = () => {
+      const cover = parseFloat(getComputedStyle(stage).top) + stage.offsetHeight + FADE;
+      root.toggleAttribute("data-loose", cover > window.innerHeight * MOST);
+    };
+    fit();
+    const resize = new ResizeObserver(fit);
+    resize.observe(stage);
+    window.addEventListener("resize", fit, { passive: true });
+    return () => {
+      resize.disconnect();
+      window.removeEventListener("resize", fit);
+    };
   }, []);
 
   useEffect(() => {
