@@ -66,7 +66,7 @@ function layout(w: number): Layout {
     const mx = (a.x + b.x) / 2;
     d += ` C${mx},${a.y} ${mx},${b.y} ${b.x},${b.y}`;
   }
-  return { w, h, nodes, d, r: small ? 22 : 30, dot: small ? 11 : 14, line: small ? 7 : 10 };
+  return { w, h, nodes, d, r: small ? 15 : 20, dot: small ? 11 : 14, line: small ? 7 : 10 };
 }
 
 export default function History() {
