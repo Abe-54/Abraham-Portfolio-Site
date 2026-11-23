@@ -32,6 +32,12 @@ interface MetaBallsProps {
   style?: CSSProperties;
   /** Local addition: runs right after each frame is drawn, with what the frame was drawn from. */
   onDraw?: (canvas: HTMLCanvasElement, frame: MetaBallsFrame) => void;
+  /**
+   * Local addition: keep the goo to part of the box, given as shares of its width and height from the
+   * top left. Lava lives there, the pointer's ball is held there, and soft walls keep the edge of every
+   * ball inside it, so the canvas edge never cuts the goo.
+   */
+  area?: { left: number; right: number; top: number; bottom: number };
 }
 
 /** Local addition: the uniforms one frame was drawn with, so the same goo can be drawn elsewhere. */
@@ -232,7 +238,8 @@ const MetaBalls = ({
   paused = false,
   dpr,
   style,
-  onDraw
+  onDraw,
+  area
 }: MetaBallsProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -258,7 +265,8 @@ const MetaBalls = ({
     clickBurst,
     paused,
     dpr,
-    onDraw
+    onDraw,
+    area
   };
   const settingsRef = useRef(settings);
   settingsRef.current = settings;
@@ -324,6 +332,7 @@ const MetaBalls = ({
     let raf = 0;
     let last = 0;
     let dirty = true;
+    let placed = false;
 
     let resizePending = false;
     const applyResize = () => {
@@ -363,7 +372,32 @@ const MetaBalls = ({
     const release = (ball: Ball, look: Look) =>
       look.time === Infinity ? 1 : easeInOut((look.time - ball.delay) / 1.15);
 
+    // The part of the world the goo keeps to: the `area` share of the box, centre and half sizes.
+    const bounds = (s: typeof settings) => {
+      const halfWidth = (s.animationSize * view.width) / view.height / 2;
+      const halfHeight = s.animationSize / 2;
+      const a = s.area ?? { left: 0, right: 1, top: 0, bottom: 1 };
+      const left = -halfWidth + 2 * halfWidth * a.left;
+      const right = -halfWidth + 2 * halfWidth * a.right;
+      const top = halfHeight - 2 * halfHeight * a.top;
+      const bottom = halfHeight - 2 * halfHeight * a.bottom;
+      return { cx: (left + right) / 2, cy: (top + bottom) / 2, hw: (right - left) / 2, hh: (top - bottom) / 2 };
+    };
+    // How far past its centre a ball's edge reaches, with the goo it pulls around it.
+    const margin = (radius: number) => radius * VISIBLE * 1.25 + 0.4;
+
     const anchor = (ball: Ball, s: typeof settings, spread: number): [number, number] => {
+      if (s.area && s.motion === 'lava') {
+        const box = bounds(s);
+        const room = margin(ball.radius);
+        const hw = Math.max(0, box.hw - room);
+        const hh = Math.max(0, box.hh - room);
+        const cycle = Math.sin(phase * ball.rise * 1.6 + ball.start);
+        const x =
+          ball.lane * hw * 0.9 * Math.min(1, s.clumpFactor) + Math.sin(phase * 0.5 * ball.rise + ball.sway) * hw * 0.06;
+        const y = Math.sign(cycle) * Math.pow(Math.abs(cycle), 0.55) * hh;
+        return [box.cx + x * spread, box.cy + y * spread];
+      }
       const halfWidth = (s.animationSize * view.width) / view.height / 2;
       const halfHeight = s.animationSize / 2;
       const clump = Math.min(1.25, s.clumpFactor);
@@ -471,6 +505,19 @@ const MetaBalls = ({
         }
       }
 
+      // Soft walls: a ball pushed or pulled toward the edge of its area is pressed back inside it.
+      if (s.area) {
+        const box = bounds(s);
+        const over = (value: number, low: number, high: number) =>
+          value < low ? low - value : value > high ? high - value : 0;
+        for (let i = 0; i < count; i++) {
+          const ball = balls[i];
+          const room = margin(ball.radius * look.size);
+          ball.fx += 300 * over(ball.x, box.cx - box.hw + room, box.cx + box.hw - room);
+          ball.fy += 300 * over(ball.y, box.cy - box.hh + room, box.cy + box.hh - room);
+        }
+      }
+
       for (let i = 0; i < count; i++) {
         const ball = balls[i];
         ball.vx += ball.fx * h;
@@ -500,6 +547,13 @@ const MetaBalls = ({
           tx = Math.cos(clock * s.speed) * halfWidth * 0.3 * out;
           ty = Math.sin(clock * s.speed) * halfHeight * 0.3 * out;
         }
+      }
+      // With an area, the pointer's ball reaches toward the pointer but stays inside it.
+      if (s.area) {
+        const box = bounds(s);
+        const room = margin(s.cursorBallSize);
+        tx = clamp(tx, box.cx - box.hw + room, box.cx + box.hw - room);
+        ty = clamp(ty, box.cy - box.hh + room, box.cy + box.hh - room);
       }
       if (!cursor.ready) {
         cursor.x = tx;
@@ -600,6 +654,15 @@ const MetaBalls = ({
         clock += dt;
         const count = clamp(Math.round(s.ballCount), 0, MAX_BALLS);
         const look = presence();
+        // With an area, the goo starts from its middle rather than the middle of the box.
+        if (!placed && s.area) {
+          const box = bounds(s);
+          for (const ball of balls) {
+            ball.x = box.cx;
+            ball.y = box.cy;
+          }
+          placed = true;
+        }
         moveCursor(dt, s, look);
         const steps = Math.max(1, Math.ceil(dt / (1 / 240)));
         for (let i = 0; i < steps; i++) step(dt / steps, s, count, look);

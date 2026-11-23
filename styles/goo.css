@@ -281,6 +281,12 @@
   pointer-events: none;
 }
 
+/* In the footer pool the links' goo must not isolate: the white copy of the links drawn where the lava
+   passes (components/goo-ink.tsx) has to blend with the lava behind them. The pool isolates instead. */
+.pool .goo-wire {
+  isolation: auto;
+}
+
 /* What the goo gathers on stays above it. */
 .goo-wire [data-wire-over] {
   position: relative;
@@ -376,9 +382,9 @@ html[data-theme="night"] :is(.liquid-top, .liquid-bottom) {
 }
 
 /* ---------------------------------------------------------------------------------------------
-   The pool (components/goo-pool.tsx). The goo sits behind the footer's words but never under
-   them: on a phone the words stay at the top and the pool fills the bottom; on a wide screen the
-   words are at the right, so the lava rises on the left.
+   The pool (components/goo-pool.tsx). The goo's canvas covers the whole night half, behind the words.
+   The lava keeps a margin from every edge (set in the component), so no blob is ever cut off, and it
+   flows freely under the words: where it passes, they turn white (components/goo-ink.tsx).
    --------------------------------------------------------------------------------------------- */
 
 .pool {
@@ -391,18 +397,20 @@ html[data-theme="night"] :is(.liquid-top, .liquid-bottom) {
 .pool-goo {
   position: absolute;
   z-index: -1;
-  right: 0;
-  bottom: -14%;
-  left: 0;
-  height: 62%;
+  inset: 0;
   pointer-events: none;
 }
 
+/* With reduced motion: one still blob, whole, in the lava's area. */
 .pool-still {
   position: absolute;
-  inset: 55% -10% -10%;
-  border-radius: 50% 50% 0 0 / 40% 40% 0 0;
+  bottom: 8%;
+  left: 50%;
+  width: 34%;
+  aspect-ratio: 1.15;
+  border-radius: 58% 42% 55% 45% / 52% 48% 52% 48%;
   background: #3366ff;
+  translate: -50% 0;
 }
 
 @media (min-width: 1024px) {
@@ -410,8 +418,10 @@ html[data-theme="night"] :is(.liquid-top, .liquid-bottom) {
     min-height: 0;
   }
 
-  .pool-goo {
-    right: 48%;
-    height: 84%;
+  .pool-still {
+    bottom: 14%;
+    left: 8%;
+    width: 30%;
+    translate: none;
   }
 }

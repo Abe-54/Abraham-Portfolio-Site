@@ -4,7 +4,7 @@ import { useEffect, useRef } from "react";
 import { FRAGMENT, VERTEX, type MetaBallsFrame } from "./MetaBalls";
 
 /*
- * Text the portrait goo passes over turns white. The goo is painted above the text, so it hides the
+ * Text the goo passes over turns white: the portrait's goo over the hero, the pool's over the footer. The goo is painted above the text, so it hides the
  * real words, and each block below draws them again in white, only where the goo is.
  *
  * CSS cannot mask with a WebGL canvas, so each block keeps a small mirror canvas that draws the same
@@ -22,7 +22,16 @@ type Mirror = {
   loc: Record<string, WebGLUniformLocation | null>;
 };
 
-type Target = { canvas: HTMLCanvasElement; mirror: Mirror | null | undefined; drawn: boolean; mask: string };
+/** Which goo draws into a block: each goo only ever paints, and clears, its own blocks. */
+type Source = "portrait" | "pool";
+
+type Target = {
+  canvas: HTMLCanvasElement;
+  source: Source;
+  mirror: Mirror | null | undefined;
+  drawn: boolean;
+  mask: string;
+};
 
 const targets = new Set<Target>();
 
@@ -57,8 +66,8 @@ function createMirror(canvas: HTMLCanvasElement): Mirror | null {
   return { gl, loc };
 }
 
-/** Draw the goo's current frame into every block it overlaps. Called by the goo right after it draws. */
-export function paintInk(goo: HTMLCanvasElement, frame: MetaBallsFrame) {
+/** Draw a goo's current frame into every one of its blocks it overlaps. Called right after it draws. */
+function paint(source: Source, goo: HTMLCanvasElement, frame: MetaBallsFrame) {
   if (targets.size === 0) return;
   const g = goo.getBoundingClientRect();
   if (g.width === 0 || g.height === 0) return;
@@ -66,6 +75,7 @@ export function paintInk(goo: HTMLCanvasElement, frame: MetaBallsFrame) {
   const centerX = g.left + g.width / 2;
   const centerY = g.top + g.height / 2;
   for (const target of Array.from(targets)) {
+    if (target.source !== source) continue;
     const { canvas } = target;
     // The mirror covers the block plus a margin, so tall letters at its edge are never cut.
     const box = canvas.getBoundingClientRect();
@@ -94,7 +104,8 @@ export function paintInk(goo: HTMLCanvasElement, frame: MetaBallsFrame) {
     gl.uniform1f(loc.uGamma, frame.gamma);
     gl.uniform1f(loc.uThreshold, frame.threshold);
     gl.drawArrays(gl.TRIANGLES, 0, 3);
-    // The same round fade the goo's own mask gives it (.portrait-goo in hero.css).
+    // The same round fade the portrait goo's own mask gives it (.portrait-goo in hero.css).
+    if (source !== "portrait") continue;
     const mask = `radial-gradient(circle ${g.width / 2}px at ${centerX - box.left}px ${centerY - box.top}px, #000 88%, transparent 100%)`;
     if (mask !== target.mask) {
       target.mask = mask;
@@ -104,23 +115,36 @@ export function paintInk(goo: HTMLCanvasElement, frame: MetaBallsFrame) {
   }
 }
 
-/** Clear every copy, for when the goo stops drawing (reduced motion turned on). */
-export function clearInk() {
+/** For the portrait goo's onDraw. */
+export const paintInk = (goo: HTMLCanvasElement, frame: MetaBallsFrame) => paint("portrait", goo, frame);
+/** For the footer pool's onDraw. */
+export const paintPoolInk = (goo: HTMLCanvasElement, frame: MetaBallsFrame) => paint("pool", goo, frame);
+
+/** Clear every copy of one goo, for when it stops drawing (reduced motion turned on). */
+export function clearInk(source: Source = "portrait") {
   for (const target of Array.from(targets)) {
-    if (!target.drawn || !target.mirror) continue;
+    if (target.source !== source || !target.drawn || !target.mirror) continue;
     target.mirror.gl.clear(target.mirror.gl.COLOR_BUFFER_BIT);
     target.drawn = false;
   }
 }
 
 /** A block of text the goo can pass over. Its one child is rendered twice: for real, and as the ink. */
-export default function GooInk({ className, children }: { className?: string; children: React.ReactNode }) {
+export default function GooInk({
+  className,
+  source = "portrait",
+  children,
+}: {
+  className?: string;
+  source?: Source;
+  children: React.ReactNode;
+}) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
-    const target: Target = { canvas, mirror: undefined, drawn: false, mask: "" };
+    const target: Target = { canvas, source, mirror: undefined, drawn: false, mask: "" };
     targets.add(target);
     // Compiling the shader takes a few milliseconds, so it happens while the page is idle rather
     // than in the frame where the goo first reaches this block.
@@ -140,7 +164,7 @@ export default function GooInk({ className, children }: { className?: string; ch
       else window.clearTimeout(idle);
       targets.delete(target);
     };
-  }, []);
+  }, [source]);
 
   return (
     <div className={`goo-ink ${className ?? ""}`.trim()}>
