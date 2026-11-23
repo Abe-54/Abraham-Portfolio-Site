@@ -8,10 +8,27 @@
 }
 
 /* The map holds just under the nav chip while its levels scroll by. */
+.lv {
+  --lv-top: calc(var(--float-top) + var(--chip-h) + 8px);
+}
+
+/* Covers the strip between the window's top and the stuck map, so a level that has passed under the
+   map never shows again above it. It starts tucked behind the map and sticks to the top of the window
+   before any level can reach the strip; it never reaches above the levels, so the heading is never
+   covered. */
+.lv-cap {
+  position: sticky;
+  z-index: 1;
+  top: 0;
+  height: calc(var(--lv-top) + 1px);
+  margin-bottom: calc(-1 * (var(--lv-top) + 1px));
+  background: var(--ground);
+}
+
 .lv-stage {
   position: sticky;
   z-index: 1;
-  top: calc(var(--float-top) + var(--chip-h) + 8px);
+  top: var(--lv-top);
   padding-block: 4px 12px;
   background: var(--ground);
   container-type: inline-size;

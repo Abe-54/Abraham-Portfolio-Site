@@ -4,8 +4,8 @@ import { useEffect, useRef, useState } from "react";
 import { GROW, animate, reducedMotion, settled, spring, step, type Feel } from "@/lib/goo";
 import { history } from "@/lib/content";
 import GooFilter from "./goo-filter";
-import Drop from "./goo-drop";
 import NightEdges from "./night-edges";
+import withDrop from "./with-drop";
 
 /*
  * History as a level map. The map sticks under the nav while the levels scroll up beneath it, oldest
@@ -232,11 +232,12 @@ export default function History() {
       <div className="flex flex-col gap-3">
         <p className="t-label t-tag">History</p>
         <h2 id="history-title" className="t-section">
-          How I got here<Drop />
+          {withDrop("How I got here.")}
         </h2>
       </div>
 
       <div ref={levelsRef} className="lv" data-live={live || undefined}>
+        <div className="lv-cap" aria-hidden="true" />
         <div ref={stageRef} className="lv-stage">
           <div ref={mapRef} className="lv-map">
             {geo ? (
