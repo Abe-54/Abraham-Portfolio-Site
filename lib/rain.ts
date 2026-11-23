@@ -59,7 +59,9 @@ export class Puddle {
       this.v = new Float32Array(n);
     }
     this.width = width;
-    this.dx = width / (n - 1);
+    // Never finer than half a column: an edge measured at no width at all (a window minimised or
+    // hidden for a moment) would divide by zero, and one only a few pixels wide would ring out of control.
+    this.dx = Math.max(COLUMN / 2, width / (n - 1));
   }
 
   /** The edge's offset at x, in pixels below its resting line. */
