@@ -175,7 +175,7 @@ function GooLayer({ filter }: { filter?: boolean }) {
 export default function Nav() {
   const pathname = usePathname();
   const nameRef = useRef<HTMLAnchorElement>(null);
-  const chipRef = useRef<HTMLDivElement>(null);
+  const chipRef = useRef<HTMLElement>(null);
   const trackRef = useRef<HTMLDivElement>(null);
   const rowRef = useRef<HTMLDivElement>(null);
   const listRef = useRef<HTMLUListElement>(null);
@@ -274,14 +274,13 @@ export default function Nav() {
           <Link ref={nameRef} href="/" className="site-name">
             Abraham Rubio
           </Link>
-          <ThemeSwitch />
         </div>
       </header>
 
-      {/* The links float on their own and stay on screen: in the header row on wide screens, under it
-          on phones. */}
-      <nav aria-label="Main" className="nav-float">
-        <div ref={chipRef} className="nav-chip">
+      {/* The links and the theme switch float on their own and stay on screen: in the header row on
+          wide screens, the switch at its end; under it on phones, side by side. */}
+      <div className="nav-float">
+        <nav ref={chipRef} aria-label="Main" className="nav-chip">
           <Link href="/" aria-label="Abraham Rubio" className="nav-home">
             <span aria-hidden="true">A</span>
             <span aria-hidden="true">R</span>
@@ -318,8 +317,11 @@ export default function Nav() {
               </div>
             </div>
           </div>
+        </nav>
+        <div className="nav-switch">
+          <ThemeSwitch />
         </div>
-      </nav>
+      </div>
     </>
   );
 }

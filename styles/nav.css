@@ -1,7 +1,8 @@
 /*
- * The name and the theme switch sit at the top of the page and scroll away with it. The page links
- * float in a chip that stays on screen: centred in the header row from tablet width (46rem), under it
- * on phones, where the name, five links and the switch can't share one row.
+ * The name sits at the top of the page and scrolls away with it. The page links float in a chip, and
+ * the theme switch beside it, and both stay on screen: from tablet width (46rem) the chip is centred
+ * in the header row and the switch rests at the row's end; on phones, where the name, five links and
+ * the switch can't share one row, the chip and the switch share the row under the name.
  */
 :root {
   --head-h: 72px;
@@ -66,7 +67,8 @@ html {
   letter-spacing: -0.02em;
 }
 
-/* The chip's holder takes no room: it hangs the chip in the header, then keeps it on screen. */
+/* The chip's holder takes no room: it hangs the chip and the switch in the header, then keeps them on
+   screen. */
 .nav-float {
   --chip: #ffffff;
   --chip-border: #e6e6e6;
@@ -93,6 +95,23 @@ html[data-theme="night"] .nav-float {
   --chip-shadow: 0 10px 28px -10px rgb(0 0 0 / 0.75);
 }
 
+/* On a phone the switch follows the chip, centred on it. */
+.nav-switch {
+  flex-shrink: 0;
+  margin-top: calc((var(--chip-h) - 44px) / 2);
+  margin-left: 8px;
+  pointer-events: auto;
+}
+
+/* Floating over the page with the chip, the switch casts the chip's shadow from under its track. */
+.nav-switch .goo-switch::before {
+  position: absolute;
+  inset: 3px 1px;
+  border-radius: 999px;
+  box-shadow: var(--chip-shadow);
+  content: "";
+}
+
 @media (min-width: 46rem) {
   .site-head {
     padding-bottom: 0;
@@ -101,6 +120,22 @@ html[data-theme="night"] .nav-float {
   .nav-float {
     margin-top: calc(var(--float-top) - var(--head-h) - 1px);
     margin-bottom: calc(var(--head-h) + 1px - var(--float-top));
+  }
+
+  /* The switch rests where the header row ends, level with the chip, and stays there. */
+  .nav-switch {
+    position: absolute;
+    inset-inline: 0;
+    top: calc((var(--chip-h) - 44px) / 2);
+    display: flex;
+    justify-content: flex-end;
+    margin: 0;
+    padding-inline: var(--shell-pad);
+    pointer-events: none;
+  }
+
+  .nav-switch .goo-switch {
+    pointer-events: auto;
   }
 }
 
@@ -114,6 +149,7 @@ html[data-theme="night"] .nav-float {
   position: relative;
   display: flex;
   align-items: center;
+  min-width: 0;
   max-width: 100%;
   border: 1px solid var(--chip-border);
   border-radius: 999px;
@@ -178,8 +214,9 @@ html[data-theme="night"] .nav-float {
   align-items: center;
   height: 44px;
   padding-inline: 12px;
-  /* Phones tighten the links to fit the width they have, down to 8px; past that the strip scrolls. */
-  padding-inline: clamp(8px, calc((100cqi - 271px) / 10), 14px);
+  /* Phones tighten the links to fit the width the switch leaves them (92px), down to 8px; past that the
+     strip scrolls. */
+  padding-inline: clamp(8px, calc((100cqi - 92px - 271px) / 10), 14px);
   border-radius: 999px;
   font-size: 16px;
   font-weight: 500;
@@ -189,7 +226,7 @@ html[data-theme="night"] .nav-float {
 
 @media (max-width: 380px) {
   .nav-link {
-    padding-inline: clamp(8px, calc((100cqi - 256px) / 10), 14px);
+    padding-inline: clamp(8px, calc((100cqi - 92px - 256px) / 10), 14px);
     font-size: 15px;
   }
 }
