@@ -118,10 +118,10 @@
   }
 }
 
-/* The goo behind the cover, peeking out at the corner the cover poured from. */
+/* The goo behind the cover, peeking out at the corner the cover poured from, never past the gutter. */
 .cover-blob {
   position: absolute;
-  right: -22px;
+  right: calc(-1 * min(22px, var(--gutter)));
   bottom: -20px;
   width: 96px;
   height: 80px;
