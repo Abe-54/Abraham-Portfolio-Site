@@ -45,7 +45,8 @@ interface MetaBallsProps {
   pointerReach?: boolean;
   /**
    * Local addition, for lava with an area: how many of the `ballCount` balls are there from the start.
-   * The rest come one at a time, poured in through `pourRef`. Leave it out and every ball is there.
+   * The rest come one at a time, poured in through `pourRef`. Leave it out and every ball is there. When it
+   * changes later, that many balls swell in, or flow into the nearest ball, and the ones poured in stay.
    */
   fill?: number;
   /**
@@ -385,6 +386,8 @@ const MetaBalls = ({
     // drops on their way into a ball, and any drop poured before the first frame knew where anything is.
     const initialFill = settingsRef.current.fill;
     let filled = initialFill === undefined ? MAX_BALLS : clamp(Math.round(initialFill), 0, MAX_BALLS);
+    // The `fill` last asked for, so a later one adds or takes away the difference.
+    let asked = filled;
     balls.forEach((ball, index) => {
       ball.grow = index < filled ? 1 : 0;
     });
@@ -763,6 +766,39 @@ const MetaBalls = ({
         }
       }
     };
+    // One more ball swells where it would hang in the lava.
+    const addBall = (s: typeof settings, look: Look) => {
+      const ball = balls[filled++];
+      Object.assign(ball, { vx: 0, vy: 0, a: 0, b: 0, va: 0, vb: 0, ox: 0, oy: 0, grow: 0, fresh: 0, sink: 0 });
+      [ball.ax, ball.ay] = anchor(ball, s, release(ball, look));
+      ball.x = ball.ax;
+      ball.y = ball.ay;
+    };
+    // One fewer: the last ball flows into the nearest, as a poured drop does, and swells it for a moment.
+    const removeBall = () => {
+      const ball = balls[--filled];
+      const into = nearest(ball.x, ball.y, filled);
+      if (into < 0) return;
+      const drop = visitors.find(visitor => visitor.feeds < 0);
+      if (drop) {
+        const { x, y, vx, vy, a, b, va, vb, radius, grow, fresh } = ball;
+        Object.assign(drop, { x, y, vx, vy, a, b, va, vb, radius, grow, fresh, ox: 0, oy: 0, sink: 0, feeds: into });
+      } else {
+        const target = balls[into];
+        target.grow = Math.min(1.6, Math.hypot(target.grow, (ball.radius * ball.grow) / target.radius));
+      }
+    };
+    // The pool changes size under a running engine, as the footer crosses from narrow to wide: `fill` moves,
+    // and `ballCount` may drop below the balls there. A ball more or fewer comes and goes as above; the
+    // balls poured in meanwhile stay.
+    const refill = (s: typeof settings, look: Look) => {
+      if (s.fill === undefined) return;
+      const next = clamp(Math.round(s.fill), 0, MAX_BALLS);
+      const room = clamp(Math.round(s.ballCount), 0, MAX_BALLS);
+      for (; asked < next; asked++) if (filled < room) addBall(s, look);
+      for (; asked > next; asked--) if (filled > 0) removeBall();
+      while (filled > room) removeBall();
+    };
     // Until the first frame has placed the goo in its area, drops wait for it.
     const pour: Pour = (...drop) => {
       if (placed) land(...drop);
@@ -903,7 +939,6 @@ const MetaBalls = ({
       const s = settingsRef.current;
       if (!s.paused && dt > 1e-4) {
         clock += dt;
-        const count = Math.min(filled, clamp(Math.round(s.ballCount), 0, MAX_BALLS));
         const look = presence();
         // With an area, the goo starts from its middle rather than the middle of the box.
         if (!placed && s.area) {
@@ -915,6 +950,8 @@ const MetaBalls = ({
           placed = true;
           for (const drop of pending.splice(0)) land(...drop);
         }
+        refill(s, look);
+        const count = Math.min(filled, clamp(Math.round(s.ballCount), 0, MAX_BALLS));
         if (s.pointerReach) pickReacher(s, count, look);
         else moveCursor(dt, s, look);
         const steps = Math.max(1, Math.ceil(dt / (1 / 240)));
