@@ -9,9 +9,11 @@ import { surfaceBelow, type Surface } from "@/lib/rain";
  *
  * Its bottom edge drips. Each drip slowly fills and swells, pinches at the neck, lets go of a drop and
  * springs back up to start again, every few seconds on its own clock, so the band rains whether or not
- * the page moves. The drips are soft: they sway on their own, stretch and jiggle. Scrolling tugs at them
- * but never tears a drop off. A mouse pointer that comes near draws them: they lean after it and reach
- * down toward it, brushing through one flicks it, and a full drip pulled far enough lets go. A drop
+ * the page moves. They hang unevenly, bunched in places and far apart in others, different on every
+ * band. The drips are thick, like syrup: they sway on their own and stretch, then settle without
+ * bouncing. Scrolling tugs at them but never tears a drop off. A mouse pointer that comes near draws
+ * them: they lean after it and reach down toward it, and brushing through one flicks it. A pointer on a
+ * drip, or just under it, holds it: it stops filling and lets go only once the pointer moves off. A drop
  * wobbles as it falls, at a gentle pace and behind everything on the page: behind the words of the
  * sections it passes and hidden behind the next night band, until it reaches the footer (lib/rain.ts),
  * whose lava it becomes (components/goo-pool.tsx).
@@ -25,23 +27,19 @@ import { surfaceBelow, type Surface } from "@/lib/rain";
  */
 
 const SLOSH: Feel = { stiffness: 90, damping: 7 };
-// The drips are soft: a bouncy length, a slow pendulum swing, and a quick jelly squash of the bulb.
-const LENGTH: Feel = { stiffness: 60, damping: 4.5 };
-const SWING: Feel = { stiffness: 26, damping: 2.2 };
-const SQUASH: Feel = { stiffness: 240, damping: 7 };
-// A falling drop's own wobble, from the pinch that let it go.
-const WOBBLE: Feel = { stiffness: 300, damping: 6 };
+// The drips are thick, like syrup rather than jelly: their length, swing and the squash of the bulb
+// all ease back to rest with at most a small overshoot.
+const LENGTH: Feel = { stiffness: 45, damping: 9 };
+const SWING: Feel = { stiffness: 20, damping: 5 };
+const SQUASH: Feel = { stiffness: 200, damping: 18 };
+// A falling drop rounds out from the pinch that let it go, without wobbling on the way down.
+const WOBBLE: Feel = { stiffness: 260, damping: 18 };
 // How a drop falls: it speeds up to a gentle top speed, goo through air rather than a stone.
 const FALL_GRAVITY = 950;
 const FALL_TOP = 560;
-// Where the drips hang (share of the width), how long they hang at rest, and their bulb.
-const DRIPS = [
-  { at: 0.11, rest: 10, r: 6 },
-  { at: 0.27, rest: 22, r: 8 },
-  { at: 0.52, rest: 8, r: 5 },
-  { at: 0.69, rest: 30, r: 10 },
-  { at: 0.88, rest: 16, r: 7 },
-];
+// The most drips a band has, and how close two may hang, in pixels.
+const MAX_DRIPS = 8;
+const DRIP_GAP = 30;
 // Seconds a drip takes to fill and let go: a range, so the drips never fall in step.
 const FILL: [number, number] = [3.2, 7.5];
 // How far a mouse pointer draws a drip: across, and below its tip.
@@ -86,7 +84,30 @@ function dripPath(x: number, length: number, r: number, pinch: number, swing: nu
   return `M${n(x - a)},0 C${n(x - a * 0.4)},0 ${n(bx - neck - back)},${n(top)} ${n(bx - rx)},${n(by)} A${n(rx)},${n(ry)} 0 0 0 ${n(bx + rx)},${n(by)} C${n(bx + neck - back)},${n(top)} ${n(x + a * 0.4)},0 ${n(x + a)},0 Z`;
 }
 
-type Drip = (typeof DRIPS)[number] & {
+/**
+ * Where a band's drips hang (share of the width), how long they hang at rest, and their bulb. Dropped
+ * at random along the edge, so they bunch in places and leave gaps in others, a few more on a wide band;
+ * drawn again while one stretch of the edge is left bare for more than about a third of it.
+ */
+function layout(width: number) {
+  const count = clamp(Math.round(width / 240), 3, MAX_DRIPS - 1) + (Math.random() < 0.5 ? 1 : 0);
+  const gap = DRIP_GAP / Math.max(1, width);
+  const bare = Math.max(0.3, 1.6 / (count + 1));
+  let spots: number[] = [];
+  for (let attempt = 0; attempt < 20; attempt++) {
+    spots = [];
+    for (let tries = 0; spots.length < count && tries < 200; tries++) {
+      const at = 0.04 + Math.random() * 0.92;
+      if (spots.every((spot) => Math.abs(spot - at) >= gap)) spots.push(at);
+    }
+    spots.sort((a, b) => a - b);
+    const ends = [0, ...spots, 1];
+    if (ends.every((at, i) => i === 0 || at - ends[i - 1] <= bare)) break;
+  }
+  return spots.map((at) => ({ at, rest: 6 + Math.random() * 26, r: 4.5 + Math.random() * 5.5 }));
+}
+
+type Drip = ReturnType<typeof layout>[number] & {
   length: Spring;
   swing: Spring;
   squash: Spring;
@@ -130,7 +151,7 @@ export default function NightEdges() {
     const paths = Array.from(dripLayer.querySelectorAll<SVGPathElement>(".liquid-drip"));
     const fallEls = Array.from(rainSvg.querySelectorAll<SVGEllipseElement>(".liquid-fall"));
     const modes = [spring(), spring(), spring()];
-    const drips: Drip[] = DRIPS.map((drip) => ({
+    const drips: Drip[] = layout(band.clientWidth).map((drip) => ({
       ...drip,
       length: spring(drip.rest),
       swing: spring(),
@@ -181,7 +202,7 @@ export default function NightEdges() {
       // The bottom: each drip swells as it fills, and its neck narrows just before it lets go, or as it
       // is pulled long.
       drips.forEach((drip, i) => {
-        const bulb = bulbOf(drip) * (1 + 0.04 * Math.sin(clock * 2.3 + drip.phase));
+        const bulb = bulbOf(drip) * (1 + 0.02 * Math.sin(clock * 2.3 + drip.phase));
         const pinch = Math.max(ease(0.7, 1, drip.fill), 0.8 * ease(0, PLUCK, drip.length.value - grownOf(drip)));
         paths[i].setAttribute(
           "d",
@@ -231,10 +252,10 @@ export default function NightEdges() {
       drop(x, y, bulb * 0.92, drip.swing.velocity * 0.5, clamp(drip.length.velocity * 0.3, 20, 160));
       // A speck from the neck follows it down a moment later.
       drop(x - drip.swing.value * 0.3, y - bulb * 1.4, bulb * 0.3, drip.swing.velocity * 0.3, 10, 0.07);
-      // The drip springs back up, wobbling squat and wide, and starts to fill again.
+      // The drip draws back up, a little squat and wide, and starts to fill again.
       drip.length.value = drip.rest * 0.55;
       drip.length.velocity = -40;
-      drip.squash.velocity += 5;
+      drip.squash.velocity += 3;
       drip.fill = 0;
       drip.period = between(FILL);
     };
@@ -272,29 +293,30 @@ export default function NightEdges() {
       step(modes[1], -kick * 0.013, SLOSH, dt);
       step(modes[2], kick * 0.009, SLOSH, dt);
       for (const drip of drips) {
-        // Filling only while the drips are near the screen; the rain is for someone to see.
-        if (bottomOn) drip.fill = Math.min(1, drip.fill + dt / drip.period);
+        const x = drip.at * width;
+        const bulb = bulbOf(drip);
+        // Where the pointer is from the drip. On the drip or just under it, the pointer holds it.
+        const dx = local.x - (x + drip.swing.value);
+        const below = local.y - drip.length.value;
+        const held = local.near && Math.abs(dx) < bulb + 22 && below < bulb + 34;
+        // Filling only while the drips are near the screen (the rain is for someone to see), and not
+        // while held.
+        if (bottomOn && !held) drip.fill = Math.min(1, drip.fill + dt / drip.period);
         const swell = drip.fill * drip.fill;
         const grown = grownOf(drip);
-        const x = drip.at * width;
         // Scrolling down tugs the drips longer and scrolling up squashes them, never enough to tear.
         const tug = clamp(kick * 0.018 * (0.6 + drip.r / 10), -drip.rest * 0.5, 30);
         // A breeze of its own, so no two drips ever hang alike, stronger as it fills.
         let lean = (Math.sin(clock * 0.9 + drip.phase) * 2.6 + Math.sin(clock * 2.1 + drip.phase * 1.7) * 1.2) * (0.6 + swell);
         let reach = 0;
         if (local.near) {
-          const bx = x + drip.swing.value;
-          const dx = local.x - bx;
-          const below = local.y - drip.length.value;
           const pull = (1 - Math.min(1, Math.abs(dx) / REACH_X)) ** 1.5 * (1 - Math.min(1, Math.max(0, below) / REACH_Y));
           if (pull > 0) {
-            // It leans after the pointer and, the fuller it is, reaches down toward it and swells.
+            // It leans after the pointer and, the fuller it is, reaches down toward it.
             lean += clamp(dx * 0.8, -40, 40) * pull;
             if (below > 0) reach = Math.min(100, below * 0.8) * pull * (0.5 + 0.5 * swell);
-            drip.fill = Math.min(1, drip.fill + dt * pull * 0.25);
           }
           // Brushing through the bulb flicks it the way the pointer was going.
-          const bulb = bulbOf(drip);
           if (Math.hypot(dx, local.y - (drip.length.value - bulb)) < bulb + 16) {
             const blend = Math.min(1, dt * 25);
             drip.swing.velocity += (clamp(pointer.vx * 0.5, -380, 380) - drip.swing.velocity) * blend;
@@ -304,9 +326,10 @@ export default function NightEdges() {
         step(drip.swing, lean, SWING, dt);
         step(drip.length, grown + tug + reach, LENGTH, dt);
         // Stretching makes the bulb tall and narrow; springing back up makes it squat and wide.
-        step(drip.squash, clamp(-drip.length.velocity / 520, -0.3, 0.3) + 0.06 * Math.sin(clock * 2.3 + drip.phase), SQUASH, dt);
+        step(drip.squash, clamp(-drip.length.velocity / 520, -0.3, 0.3) + 0.03 * Math.sin(clock * 2.3 + drip.phase), SQUASH, dt);
         drip.squash.value = clamp(drip.squash.value, -0.4, 0.4);
-        if (drip.fill >= 1 || (drip.length.value - grown > PLUCK && drip.fill > 0.45)) letGo(drip);
+        // Full, or pulled well past its length, it lets go; never while the pointer holds it.
+        if (!held && (drip.fill >= 1 || (drip.length.value - grown > PLUCK && drip.fill > 0.45))) letGo(drip);
       }
       for (const fall of falls) {
         if (fall.wait > 0) {
@@ -425,7 +448,7 @@ export default function NightEdges() {
           {/* The seam where the drips meet the band; in night theme, a thin rim of goo they hang from. */}
           <rect className="liquid-seam" x="0" y="-2" width="100%" height="3" />
           <rect className="liquid-rim" x="0" y="-0.25" width="100%" height="1.5" />
-          {DRIPS.map((_, index) => (
+          {Array.from({ length: MAX_DRIPS }, (_, index) => (
             <path key={index} className="liquid-drip" />
           ))}
         </g>
