@@ -98,6 +98,13 @@ html[data-theme="night"] {
   }
 }
 
+/* The page's goo, drips and blobs may reach past its sides; the body clips them, so the page never
+   scrolls sideways. The root needs a value of its own for that: without one, the body's overflow is
+   handed to the window instead (as `hidden`) and the body clips nothing. */
+html {
+  overflow-x: clip;
+}
+
 /* The body is a column at least the window's height, so the footer of a short page meets the bottom. */
 body {
   display: flex;
