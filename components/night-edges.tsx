@@ -16,7 +16,8 @@ import { Puddle, addSurface, surfaceBelow, type Surface } from "@/lib/rain";
  * (lib/rain.ts): the top of the next night band, or the footer.
  *
  * Its top edge is such a surface. It sloshes as the page scrolls, and takes the drops from the band
- * above like a puddle takes rain.
+ * above like a puddle takes rain. Each one it takes fills the drip below it a little sooner, so in the
+ * end all the rain reaches the footer, where it becomes the lava (components/goo-pool.tsx).
  *
  * Both edges reach into the day bands next door. In night theme those are the same black, so the liquid
  * shows as the blue goo instead: blue drips and drops hanging from a thin rim along the band's bottom,
@@ -399,7 +400,12 @@ export default function NightEdges() {
             return box.top + 1 - EDGE + LEVEL + meniscus((x - box.left) / Math.max(1, box.width));
           },
           hit: (x, r, fallSpeed) => {
-            puddle.hit(x - band.getBoundingClientRect().left, r, fallSpeed);
+            const local = x - band.getBoundingClientRect().left;
+            puddle.hit(local, r, fallSpeed);
+            // The drop joins the band: the drip below where it went in fills faster, so the rain carries
+            // on down the page until it reaches the footer's pool.
+            const below = drips.reduce((a, b) => (Math.abs(b.at * width - local) < Math.abs(a.at * width - local) ? b : a));
+            below.fill = Math.min(1, below.fill + 0.08 + r / 60);
             wake();
           },
         });

@@ -379,7 +379,7 @@
 /* In night theme the bands next door are the same black, so the liquid shows as the blue goo instead:
    blue drips and drops hanging from a thin rim along the band's bottom, and of a surface only the rings
    where a drop lands. */
-html[data-theme="night"] :is(.liquid-bottom, .liquid-bead, .puddle-beads) {
+html[data-theme="night"] :is(.liquid-bottom, .liquid-bead) {
   fill: #3366ff;
 }
 
@@ -411,8 +411,7 @@ html[data-theme="night"] .liquid-rim {
   pointer-events: none;
 }
 
-.puddle-fill,
-.puddle-beads {
+.puddle-fill {
   fill: var(--ground);
 }
 

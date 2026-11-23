@@ -1,16 +1,21 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import type { Rain } from "./footer-puddle";
 import { clearInk, paintPoolInk } from "./goo-ink";
-import MetaBalls from "./MetaBalls";
+import MetaBalls, { type Pour } from "./MetaBalls";
 
 /*
- * The page ends where the goo settles: a slow lava pool behind the whole footer, both halves, the same
- * metaballs as the portrait rising and sinking in lanes. One blob follows the pointer anywhere in the
- * footer; let go, it drifts on with the lava from wherever it was left instead of going home. The lava
- * flows behind the words, and where it passes under them they are drawn again in white
- * (components/goo-ink.tsx), so every line stays readable on the blue. Soft walls keep every blob whole:
- * nothing is cut by an edge.
+ * The page ends where the rain settles: a slow lava pool behind the whole footer, both halves, the same
+ * metaballs as the portrait rising and sinking in lanes, and made of the rain. It starts part-full. Each
+ * drop that falls into the footer (components/footer-puddle.tsx) comes through the edge where it landed
+ * and swells into a new blob, turning from the colour it fell in to the goo's blue, until the pool is
+ * full; after that each drop flows into the nearest blob and swells it for a moment.
+ *
+ * One blob follows the pointer anywhere in the footer; let go, it drifts on with the lava from wherever
+ * it was left instead of going home. The lava flows behind the words, and where it passes under them
+ * they are drawn again in white (components/goo-ink.tsx), so every line stays readable on the blue. Soft
+ * walls keep every blob whole: nothing is cut by an edge, except a drop the moment it comes through.
  *
  * Put it first inside the footer, which must isolate. It starts only once the footer comes near, so it
  * costs nothing while the page loads, and it sleeps whenever it is off screen or the day/night sweep is
@@ -23,6 +28,14 @@ const WIDE = "(min-width: 1024px)";
 const SCALE = { wide: 13, narrow: 11 };
 // Enough blobs to spread over both halves: side by side on a wide screen, stacked on a phone.
 const BALLS = { wide: 18, narrow: 15 };
+// How many of them are there before it rains.
+const BASE = { wide: 8, narrow: 7 };
+// Smaller than any drop a drip lets go of and larger than the speck that follows it down
+// (components/night-edges.tsx): a speck only ever joins a blob.
+const SPECK = 3.65;
+// The colour the rain falls in: the night bands' ground in the day theme (app/globals.css), the goo's
+// own blue at night.
+const DROP = { day: "#0b0b0c", night: "#3366FF" };
 // Room kept between the lava and the footer's edges, in pixels.
 const EDGE = 14;
 
@@ -44,6 +57,10 @@ export default function GooPool() {
   const [wide, setWide] = useState(false);
   const [height, setHeight] = useState(300);
   const [area, setArea] = useState<Area | null>(null);
+  const [night, setNight] = useState(false);
+  // Drops that fell into the footer before the lava started: it starts with a blob for each.
+  const [caught, setCaught] = useState(0);
+  const pourRef = useRef<Pour | null>(null);
 
   useEffect(() => {
     const element = ref.current;
@@ -74,12 +91,26 @@ export default function GooPool() {
     resize.observe(element);
     const onSweep = (event: Event) => setHeld((event as CustomEvent<boolean>).detail);
     window.addEventListener("theme-sweep", onSweep);
+    const footer = element.closest("footer");
+    const onRain = (event: Event) => {
+      const { x, y, r, speed } = (event as CustomEvent<Rain>).detail;
+      const join = r < SPECK;
+      if (pourRef.current) pourRef.current(x, y, r, speed, join);
+      else if (!join) setCaught((count) => count + 1);
+    };
+    footer?.addEventListener("goo-rain", onRain);
+    const readTheme = () => setNight(document.documentElement.dataset.theme === "night");
+    readTheme();
+    const theme = new MutationObserver(readTheme);
+    theme.observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
     return () => {
       motion.removeEventListener("change", sync);
       width.removeEventListener("change", sync);
       observer.disconnect();
       resize.disconnect();
       window.removeEventListener("theme-sweep", onSweep);
+      footer?.removeEventListener("goo-rain", onRain);
+      theme.disconnect();
     };
   }, []);
 
@@ -100,6 +131,9 @@ export default function GooPool() {
           cursorRoams
           paused={!inView || held}
           ballCount={BALLS[size]}
+          fill={Math.min(BALLS[size], BASE[size] + caught)}
+          pourRef={pourRef}
+          dropColor={night ? DROP.night : DROP.day}
           clumpFactor={1}
           cursorBallSize={1.5}
           hoverSmoothness={0.07}

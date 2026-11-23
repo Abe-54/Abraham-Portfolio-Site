@@ -6,9 +6,10 @@ import { Puddle, addSurface } from "@/lib/rain";
 
 /*
  * The footer's top edge is the last surface the rain reaches (lib/rain.ts). The drops that fall from
- * the History band land on it, and it takes them like a puddle: it dips where each one goes in, rings
- * out along the edge and throws a bead back up. On a wide screen the edge runs along the tops of both
- * halves; on a phone, along the day half.
+ * the History band land on it, and it takes them like a puddle: it dips where each one goes in and
+ * rings out along the edge, and the drop goes on through into the footer's lava, which hears a
+ * `goo-rain` event for each one (components/goo-pool.tsx). On a wide screen the edge runs along the
+ * tops of both halves; on a phone, along the day half.
  *
  * It draws that edge itself, over the real one, whenever motion is allowed; then the real rule is hidden
  * (styles/goo.css). Where the colours above and below the edge differ, the edge is the line between
@@ -18,9 +19,11 @@ import { Puddle, addSurface } from "@/lib/rain";
  * drop's rings are still moving.
  */
 
+/** The `goo-rain` event's detail: a drop of radius `r` px went into the footer at window point (x, y). */
+export type Rain = { x: number; y: number; r: number; speed: number };
+
 // How far the drawing reaches above and below the footer's top edge.
 const PAD = 40;
-const BEADS = 9;
 
 type Range = [number, number];
 
@@ -32,7 +35,6 @@ export default function FooterPuddle() {
   const nightAboveRef = useRef<SVGPathElement>(null);
   const ruleRef = useRef<SVGPathElement>(null);
   const ringsRef = useRef<SVGPathElement>(null);
-  const beadsRef = useRef<SVGGElement>(null);
 
   useEffect(() => {
     const svg = svgRef.current;
@@ -42,13 +44,11 @@ export default function FooterPuddle() {
     const nightAbove = nightAboveRef.current;
     const rule = ruleRef.current;
     const rings = ringsRef.current;
-    const beadLayer = beadsRef.current;
     const footer = svg?.closest("footer");
     const dayHalf = footer?.querySelector<HTMLElement>(':scope > [data-tone="day"]');
     const nightHalf = footer?.querySelector<HTMLElement>(':scope > [data-tone="night"]');
-    if (!svg || !dayBelow || !dayAbove || !nightBelow || !nightAbove || !rule || !rings || !beadLayer) return;
+    if (!svg || !dayBelow || !dayAbove || !nightBelow || !nightAbove || !rule || !rings) return;
     if (!footer || !dayHalf || reducedMotion()) return;
-    const beadEls = Array.from(beadLayer.querySelectorAll("circle"));
     const puddle = new Puddle();
     // Where the day half meets the edge, and the night half (a wide screen only), from the left.
     let day: Range = [0, 0];
@@ -86,13 +86,6 @@ export default function FooterPuddle() {
       fill(dayBelow, dayAbove, dark ? day : null);
       fill(nightBelow, nightAbove, dark ? null : night);
       rings.setAttribute("d", dark && night && !puddle.calm ? puddle.rings(() => PAD, night[0], night[1]) : "");
-      beadEls.forEach((el, i) => {
-        const bead = puddle.beads[i];
-        if (!bead || bead.wait > 0) return el.setAttribute("r", "0");
-        el.setAttribute("cx", bead.x.toFixed(1));
-        el.setAttribute("cy", (PAD + bead.y).toFixed(1));
-        el.setAttribute("r", bead.r.toFixed(2));
-      });
     };
 
     const measure = () => {
@@ -121,8 +114,11 @@ export default function FooterPuddle() {
         return x >= box.left && x <= box.right ? box.top : null;
       },
       hit: (x, r, speed) => {
-        puddle.hit(x - footer.getBoundingClientRect().left, r, speed);
+        const box = footer.getBoundingClientRect();
+        // No splash: the drop goes on into the footer, where the lava takes it (components/goo-pool.tsx).
+        puddle.hit(x - box.left, r, speed, false);
         stop ??= animate(tick);
+        footer.dispatchEvent(new CustomEvent<Rain>("goo-rain", { detail: { x, y: box.top, r, speed } }));
       },
     });
     const resize = new ResizeObserver(measure);
@@ -151,13 +147,6 @@ export default function FooterPuddle() {
       <path ref={dayAboveRef} className="puddle-fill" />
       <path ref={nightAboveRef} className="puddle-fill" />
       <path ref={ringsRef} className="puddle-rings" />
-      <g data-tone="night">
-        <g ref={beadsRef} className="puddle-beads">
-          {Array.from({ length: BEADS }, (_, index) => (
-            <circle key={index} r="0" />
-          ))}
-        </g>
-      </g>
       <g data-tone="day">
         <path ref={ruleRef} className="puddle-rule" />
       </g>

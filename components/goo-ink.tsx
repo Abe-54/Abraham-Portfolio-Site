@@ -55,11 +55,12 @@ function createMirror(canvas: HTMLCanvasElement): Mirror | null {
   gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 3, -1, -1, 3]), gl.STATIC_DRAW);
   gl.enableVertexAttribArray(0);
   gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 0, 0);
-  const names = ["uResolution", "uScale", "uBalls", "uShapes", "uCount", "uGamma", "uThreshold", "uColor", "uCursorColor", "uVariant", "uOpaque"];
+  const names = ["uResolution", "uScale", "uBalls", "uShapes", "uCount", "uGamma", "uThreshold", "uColor", "uCursorColor", "uDropColor", "uVariant", "uOpaque"];
   const loc = Object.fromEntries(names.map((name) => [name, gl.getUniformLocation(program, name)]));
   // White goo with soft edges, transparent around it: the solid variant, never opaque.
   gl.uniform3f(loc.uColor, 1, 1, 1);
   gl.uniform3f(loc.uCursorColor, 1, 1, 1);
+  gl.uniform3f(loc.uDropColor, 1, 1, 1);
   gl.uniform1i(loc.uVariant, 0);
   gl.uniform1f(loc.uOpaque, 0);
   gl.clearColor(0, 0, 0, 0);
