@@ -34,7 +34,7 @@ export default function FooterPuddle() {
     const beadLayer = beadsRef.current;
     const footer = svg?.closest("footer");
     const dayHalf = footer?.querySelector<HTMLElement>(':scope > [data-tone="day"]');
-    const nightHalf = footer?.querySelector<HTMLElement>(":scope > .pool");
+    const nightHalf = footer?.querySelector<HTMLElement>(':scope > [data-tone="night"]');
     if (!svg || !cover || !nightEdge || !rule || !beadLayer || !footer || !dayHalf || reducedMotion()) return;
     const beadEls = Array.from(beadLayer.querySelectorAll("circle"));
     const puddle = new Puddle();

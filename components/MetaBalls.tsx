@@ -38,6 +38,12 @@ interface MetaBallsProps {
    * ball inside it, so the canvas edge never cuts the goo.
    */
   area?: { left: number; right: number; top: number; bottom: number };
+  /**
+   * Local addition, for lava with an area: when the pointer leaves, its ball does not go home. It keeps
+   * the speed it was let go with and drifts on from where it was, rising and sinking like the rest of the
+   * lava, so it joins whichever blob is near instead of always the same one.
+   */
+  cursorRoams?: boolean;
 }
 
 /** Local addition: the uniforms one frame was drawn with, so the same goo can be drawn elsewhere. */
@@ -239,7 +245,8 @@ const MetaBalls = ({
   dpr,
   style,
   onDraw,
-  area
+  area,
+  cursorRoams = false
 }: MetaBallsProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -266,7 +273,8 @@ const MetaBalls = ({
     paused,
     dpr,
     onDraw,
-    area
+    area,
+    cursorRoams
   };
   const settingsRef = useRef(settings);
   settingsRef.current = settings;
@@ -316,6 +324,9 @@ const MetaBalls = ({
     const shapeData = new Float32Array(SLOTS * 4);
     const balls = Array.from({ length: MAX_BALLS }, (_, index) => createBall(index));
     const idle = createBall(MAX_BALLS + 7);
+    // The lava path the pointer's ball drifts along once the pointer lets it go (cursorRoams).
+    const roam = createBall(MAX_BALLS + 11);
+    let roaming = false;
     const cursor = { x: 0, y: 0, vx: 0, vy: 0, a: 0, b: 0, va: 0, vb: 0, pulse: 0, pulseVelocity: 0, ready: false };
     const pointer = { x: 0, y: 0, inside: false };
     const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -531,7 +542,55 @@ const MetaBalls = ({
       }
     };
 
+    // Let go, the pointer's ball takes a lava path of its own that starts exactly where it is, in a new
+    // lane and at a new pace each time, heading the way it was already going.
+    const letGo = (s: typeof settings) => {
+      const box = bounds(s);
+      roam.radius = s.cursorBallSize;
+      roam.rise = 0.55 + Math.random() * 0.7;
+      roam.sway = Math.random() * Math.PI * 2;
+      const room = margin(roam.radius);
+      const hw = Math.max(1e-3, box.hw - room);
+      const hh = Math.max(1e-3, box.hh - room);
+      const across = Math.sin(phase * 0.5 * roam.rise + roam.sway) * 0.06;
+      roam.lane = clamp(((cursor.x - box.cx) / hw - across) / (0.9 * Math.min(1, s.clumpFactor)), -1, 1);
+      const u = clamp((cursor.y - box.cy) / hh, -1, 1);
+      const c = Math.asin(Math.sign(u) * Math.pow(Math.abs(u), 1 / 0.55));
+      roam.start = (cursor.vy >= 0 ? c : Math.PI - c) - phase * roam.rise * 1.6;
+      roaming = true;
+    };
+
+    const roamCursor = (dt: number, s: typeof settings) => {
+      if (!cursor.ready) {
+        // Never held yet: it starts somewhere in the lava, not in the middle.
+        Object.assign(roam, { radius: s.cursorBallSize, lane: Math.random() * 2 - 1, start: Math.random() * Math.PI * 2 });
+        [cursor.x, cursor.y] = anchor(roam, s, 1);
+        cursor.ready = true;
+        roaming = true;
+      }
+      if (!roaming) letGo(s);
+      const [tx, ty] = anchor(roam, s, 1);
+      // A soft spring, so the speed it was let go with carries it on a while before the lava takes it.
+      cursor.vx += (4 * (tx - cursor.x) - 2.6 * cursor.vx) * dt;
+      cursor.vy += (4 * (ty - cursor.y) - 2.6 * cursor.vy) * dt;
+      cursor.x += cursor.vx * dt;
+      cursor.y += cursor.vy * dt;
+      // Whole inside the area: a fling that would carry it past an edge bounces softly off it.
+      const box = bounds(s);
+      const room = margin(s.cursorBallSize);
+      const keep = (value: number, velocity: number, low: number, high: number): [number, number] =>
+        value < low ? [low, Math.abs(velocity) * 0.3] : value > high ? [high, -Math.abs(velocity) * 0.3] : [value, velocity];
+      [cursor.x, cursor.vx] = keep(cursor.x, cursor.vx, box.cx - box.hw + room, box.cx + box.hw - room);
+      [cursor.y, cursor.vy] = keep(cursor.y, cursor.vy, box.cy - box.hh + room, box.cy + box.hh - room);
+    };
+
     const moveCursor = (dt: number, s: typeof settings, look: Look) => {
+      const held = pointer.inside && s.enableMouseInteraction;
+      if (s.cursorRoams && s.area && s.motion === 'lava' && !held) {
+        roamCursor(dt, s);
+        return;
+      }
+      roaming = false;
       let tx: number;
       let ty: number;
       if (pointer.inside && s.enableMouseInteraction) {

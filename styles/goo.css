@@ -281,9 +281,9 @@
   pointer-events: none;
 }
 
-/* In the footer pool the links' goo must not isolate: the white copy of the links drawn where the lava
-   passes (components/goo-ink.tsx) has to blend with the lava behind them. The pool isolates instead. */
-.pool .goo-wire {
+/* In the footer the links' goo must not isolate: the white copy of the links drawn where the lava
+   passes (components/goo-ink.tsx) has to blend with the lava behind them. The footer isolates instead. */
+.footer .goo-wire {
   isolation: auto;
 }
 
@@ -416,43 +416,61 @@ html:not([data-theme="night"]) footer[data-puddle] > [data-tone="day"] {
 }
 
 /* ---------------------------------------------------------------------------------------------
-   The pool (components/goo-pool.tsx). The goo's canvas covers the whole night half, behind the words.
-   The lava keeps a margin from every edge (set in the component), so no blob is ever cut off, and it
-   flows freely under the words: where it passes, they turn white (components/goo-ink.tsx).
+   The pool (components/goo-pool.tsx). The goo's canvas covers the whole footer, both halves, behind the
+   words. The lava keeps a margin from every edge (set in the component), so no blob is ever cut off, and
+   it flows freely under the words: where it passes, they turn white (components/goo-ink.tsx).
+   A half's own ground would be painted over the canvas, so each half paints it on a layer below instead.
    --------------------------------------------------------------------------------------------- */
 
-.pool {
+.footer > [data-tone] {
   position: relative;
-  isolation: isolate;
-  overflow: hidden;
-  min-height: 300px;
+  background: none;
+}
+
+.footer > [data-tone]::before {
+  content: "";
+  position: absolute;
+  z-index: -2;
+  inset: 0;
+  background: var(--ground);
 }
 
 .pool-goo {
   position: absolute;
   z-index: -1;
   inset: 0;
+  overflow: hidden;
   pointer-events: none;
 }
 
-/* With reduced motion: one still blob, whole, in the lava's area. */
-.pool-still {
-  position: absolute;
-  bottom: 8%;
-  left: 50%;
-  width: 34%;
-  aspect-ratio: 1.15;
-  border-radius: 58% 42% 55% 45% / 52% 48% 52% 48%;
-  background: #3366ff;
-  translate: -50% 0;
+.footer-night {
+  min-height: 300px;
 }
 
 @media (min-width: 1024px) {
-  .pool {
+  .footer-night {
     min-height: 0;
   }
+}
 
-  .pool-still {
+/* With reduced motion there is no lava: one still blob, whole, in the night half and clear of the words. */
+@media (prefers-reduced-motion: reduce) {
+  .footer-night::after {
+    content: "";
+    position: absolute;
+    z-index: -1;
+    bottom: 8%;
+    left: 50%;
+    width: 34%;
+    aspect-ratio: 1.15;
+    border-radius: 58% 42% 55% 45% / 52% 48% 52% 48%;
+    background: #3366ff;
+    translate: -50% 0;
+  }
+}
+
+@media (min-width: 1024px) and (prefers-reduced-motion: reduce) {
+  .footer-night::after {
     bottom: 14%;
     left: 8%;
     width: 30%;

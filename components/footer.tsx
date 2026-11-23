@@ -8,15 +8,20 @@ import withDrop from "./with-drop";
 
 export default function Footer() {
   return (
-    <footer id="contact" data-nav="contact" className="relative grid scroll-mt-4 lg:grid-cols-2">
+    <footer id="contact" data-nav="contact" className="footer relative isolate grid scroll-mt-4 lg:grid-cols-2">
+      <GooPool />
       <FooterPuddle />
       <div data-tone="day" className="flex flex-col gap-5 border-t-[1.5px] border-rule pr-[var(--gutter)] pl-[var(--shell-pad-half)] py-14 lg:py-[72px] lg:pr-14">
-        <h2 className="font-display text-[40px] leading-[1.04] font-extrabold tracking-[-0.035em] lg:text-[56px]">
-          {withDrop("Say hi, any shift.")}
-        </h2>
-        <EmailCopy email={contact.email} />
+        <GooInk source="pool">
+          <h2 className="font-display text-[40px] leading-[1.04] font-extrabold tracking-[-0.035em] lg:text-[56px]">
+            {withDrop("Say hi, any shift.")}
+          </h2>
+        </GooInk>
+        <GooInk source="pool">
+          <EmailCopy email={contact.email} />
+        </GooInk>
       </div>
-      <GooPool className="flex flex-col gap-3 pr-[var(--shell-pad-half)] pl-[var(--gutter)] py-12 lg:items-end lg:justify-end lg:py-[72px]">
+      <div data-tone="night" className="footer-night flex flex-col gap-3 pr-[var(--shell-pad-half)] pl-[var(--gutter)] py-12 lg:items-end lg:justify-end lg:py-[72px]">
         <GooWire id="footer-links" shape="bar">
           <GooInk source="pool">
             <ul className="flex flex-wrap items-center font-medium">
@@ -44,7 +49,7 @@ export default function Footer() {
         <GooInk source="pool">
           <p className="t-label">© 2026 Abraham Rubio</p>
         </GooInk>
-      </GooPool>
+      </div>
     </footer>
   );
 }
