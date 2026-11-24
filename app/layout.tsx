@@ -12,6 +12,8 @@ const body = Inter_Tight({ subsets: ["latin"], variable: "--font-inter-tight" })
 const mono = Geist_Mono({ subsets: ["latin"], variable: "--font-geist-mono" });
 
 export const metadata: Metadata = {
+  // Canonical links resolve against the live site, not whichever preview served the page.
+  metadataBase: new URL("https://abraham-r.vercel.app"),
   title: { default: "Abraham Rubio", template: "%s · Abraham Rubio" },
   description: "Full-stack developer by day, indie game dev by night.",
 };
