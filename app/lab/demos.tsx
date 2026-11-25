@@ -41,7 +41,7 @@ function Demo({
           <span className="lab-chip">{library}</span>
           {cost.map((c) => (
             <span key={c} className="lab-chip" data-cost={c}>
-              {c === "none" ? "No new packages" : c === "motion" ? "Adds motion (~35 kB)" : "Adds a pixel font"}
+              {c === "none" ? "No new packages" : c === "motion" ? "Adds motion (~50 kB)" : "Adds a pixel font"}
             </span>
           ))}
         </div>
