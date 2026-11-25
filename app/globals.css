@@ -257,6 +257,7 @@ html[data-sweep]::view-transition-new(root) {
     font-size: clamp(18px, 1.32vw, 19px);
     line-height: 1.55;
     color: var(--muted);
+    text-wrap: pretty;
   }
 
   .t-link {

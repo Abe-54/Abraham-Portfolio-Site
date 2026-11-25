@@ -17,8 +17,8 @@ export default function Hero() {
           <GooInk>
             <div className="hero-copy">
               <p className="t-label">By day</p>
-              <h2 className="t-hero hero-title">Full-stack developer.</h2>
-              <p className="hero-text">I build web apps with React, TypeScript and Next.js.</p>
+              <h2 className="t-hero hero-title">AI software engineer.</h2>
+              <p className="hero-text">I build AI tools and web apps with TypeScript and Python.</p>
             </div>
           </GooInk>
           <a href="#work" className="btn btn-solid hero-btn press">
@@ -32,9 +32,9 @@ export default function Hero() {
             <div className="hero-night-copy">
               <p className="t-label t-tag">By night</p>
               <h2 className="t-hero hero-title hero-title-night">
-                Indie game <span className="text-accent">dev.</span>
+                Game <span className="text-accent">developer.</span>
               </h2>
-              <p className="hero-text">I make playful worlds in Unity and C#.</p>
+              <p className="hero-text">I build games and tools in Unity and C#.</p>
             </div>
           </GooInk>
           <a href={marketDashUrl} target="_blank" rel="noopener" className="btn btn-blue hero-btn press">

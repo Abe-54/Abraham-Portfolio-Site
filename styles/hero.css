@@ -46,6 +46,8 @@
   font-size: 18px;
   line-height: 1.55;
   color: var(--muted);
+  /* A two-line sub line never ends on one lonely word. */
+  text-wrap: pretty;
 }
 
 .hero-night-copy {

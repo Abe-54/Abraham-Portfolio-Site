@@ -84,13 +84,13 @@ export default function Home() {
         <div className="flex max-w-[720px] flex-col gap-7 xl:w-[720px] xl:shrink-0">
           <h2 className="t-label">Hi, I&apos;m Abraham</h2>
           <p className="t-statement">
-            By day I write software for New Jersey: tools that help towns plan affordable housing, and an
-            AI workspace for state staff. <span className="text-link">By night I make games.</span>
+            By day I build an AI workspace for state staff, and tools that help New Jersey towns plan affordable
+            housing. <span className="text-link">By night I make games.</span>
           </p>
           <p className="t-lede">
-            I studied computer science and game programming at Bloomfield College, where I ran the games club for
-            three years and led a team of five to ship Market Dash. I care about clean code and clear UX, and I like
-            to ship.
+            I studied computer science and game programming at Bloomfield College and led a team of five to ship
+            Market Dash. I also built Schedule Reader, a Discord bot using Google Gemini to read schedule photos and
+            update a calendar. It saves me over 2 hours a month.
           </p>
         </div>
         <GooWire id="focus" shape="bead" className="xl:flex-1 xl:pt-11">

@@ -157,7 +157,7 @@ export const sampleNoteBody: NoteBlock[] = [
 ];
 
 export const focus = [
-  { title: "Public services", body: "Housing and staff tools for the state of New Jersey." },
+  { title: "AI software", body: "AI workspace for state staff and a Gemini Discord bot." },
   { title: "Full-stack products", body: "Database to UI, with Next.js, Prisma and AWS." },
   { title: "Games", body: "Gameplay, UI and editor tools in Unity." },
 ];
