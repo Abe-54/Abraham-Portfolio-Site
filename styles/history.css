@@ -1,0 +1,243 @@
+/* History: a level map that sticks while the levels scroll up under it (components/history.tsx). */
+
+.history {
+  display: flex;
+  flex-direction: column;
+  gap: 40px;
+  padding-block: 88px 96px;
+}
+
+/* The map holds just under the nav chip while its levels scroll by. */
+.lv {
+  --lv-top: calc(var(--float-top) + var(--chip-h) + 8px);
+}
+
+/* Covers the strip between the window's top and the stuck map, so a level that has passed under the
+   map never shows again above it. It starts tucked behind the map and sticks to the top of the window
+   before any level can reach the strip; it never reaches above the levels, so the heading is never
+   covered. */
+.lv-cap {
+  position: sticky;
+  z-index: 1;
+  top: 0;
+  height: calc(var(--lv-top) + 1px);
+  margin-bottom: calc(-1 * (var(--lv-top) + 1px));
+  background: var(--ground);
+}
+
+.lv-stage {
+  position: sticky;
+  z-index: 1;
+  top: var(--lv-top);
+  padding-block: 4px 12px;
+  background: var(--ground);
+  container-type: inline-size;
+}
+
+/* Levels slip under the map through a short fade rather than a hard edge. */
+.lv-stage::after {
+  content: "";
+  position: absolute;
+  top: 100%;
+  right: 0;
+  left: 0;
+  height: 24px;
+  background: linear-gradient(var(--ground), transparent);
+  pointer-events: none;
+}
+
+.lv-map {
+  position: relative;
+  height: 140px;
+}
+
+/* Tall enough for each level's name above or below it, from the width the names fit in (WIDE in
+   components/history.tsx). */
+@container (min-width: 688px) {
+  .lv-map {
+    height: 230px;
+  }
+}
+
+/* A window too short for the stuck map to leave room to read in: the map scrolls with the levels
+   (components/history.tsx decides). It keeps its `top`, which the reading line measures from. */
+.lv[data-loose] .lv-cap,
+.lv[data-loose] .lv-stage::after {
+  display: none;
+}
+
+.lv[data-loose] .lv-stage {
+  position: static;
+}
+
+.lv-svg {
+  position: absolute;
+  inset: 0;
+  overflow: visible;
+}
+
+.lv-path {
+  fill: none;
+  stroke: #3366ff;
+  stroke-dasharray: 1 10;
+  stroke-linecap: round;
+  stroke-opacity: 0.6;
+  stroke-width: 3;
+}
+
+.lv-trail {
+  fill: none;
+  stroke: #3366ff;
+  stroke-linecap: round;
+}
+
+.lv-node {
+  position: absolute;
+  display: grid;
+  place-items: center;
+  width: 56px;
+  height: 56px;
+  margin: -28px 0 0 -28px;
+  border-radius: 50%;
+  color: #ffffff;
+  cursor: pointer;
+}
+
+.lv-node:focus-visible {
+  outline: 2px solid #ffffff;
+  outline-offset: 4px;
+}
+
+.lv-num {
+  position: relative;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1;
+  transition: transform 200ms var(--ease-out);
+}
+
+.lv-node[aria-current="step"] .lv-num {
+  transform: scale(1.5);
+}
+
+.lv-caption {
+  position: absolute;
+  left: 50%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  white-space: nowrap;
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+
+.lv-caption.below {
+  top: calc(100% + 4px);
+}
+
+.lv-caption.above {
+  bottom: calc(100% + 4px);
+  flex-direction: column-reverse;
+}
+
+.lv-year {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+  transition: color 150ms var(--ease-out);
+}
+
+.lv-node[aria-current="step"] .lv-year {
+  color: var(--tag);
+}
+
+.lv-name {
+  display: none;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+@container (min-width: 688px) {
+  .lv-name {
+    display: block;
+  }
+}
+
+/* The levels: plain text, oldest first. */
+.lv-steps {
+  display: flex;
+  flex-direction: column;
+}
+
+.lv-step {
+  display: grid;
+  gap: 16px;
+  padding-block: 28px 36px;
+  border-top: 1px solid var(--hairline);
+}
+
+/* Once the map is live, each level is at least as tall as the room above the reading line (set by
+   the script), so the one being read is always in full view; it stands out and the rest step back. */
+.lv[data-live] .lv-step {
+  min-height: calc(var(--lv-room, 0px) + 24px);
+}
+
+.lv[data-live] .lv-step:not([data-state="current"]) {
+  /* The faintest text on a passed or coming level (the blue level label) still meets AA at 4.5:1. */
+  opacity: 0.75;
+}
+
+.lv[data-live] .lv-step {
+  transition: opacity 300ms var(--ease-out);
+}
+
+.lv-step-level {
+  color: var(--tag);
+}
+
+.lv-title {
+  font-family: var(--font-display);
+  font-size: clamp(30px, 3.4vw, 48px);
+  font-weight: 800;
+  line-height: 1.05;
+  letter-spacing: -0.03em;
+}
+
+.lv-org {
+  font-size: 17px;
+  line-height: 24px;
+  color: var(--muted);
+}
+
+.lv-details {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  font-size: 17px;
+  line-height: 26px;
+}
+
+@media (min-width: 1024px) {
+  .history {
+    padding-block: 120px;
+  }
+
+  .lv-step {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    column-gap: 48px;
+    align-content: start;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lv-num,
+  .lv[data-live] .lv-step {
+    transition: none;
+  }
+}

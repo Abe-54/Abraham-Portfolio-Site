@@ -1,0 +1,465 @@
+/*
+ * The name sits at the top of the page and scrolls away with it. The page links float in a chip, and
+ * the theme switch beside it, and both stay on screen: from tablet width (46rem) the chip is centred
+ * in the header row and the switch rests at the row's end; on phones, where the name, the links and
+ * the switch can't share one row, the switch ends the name's row and the chip has the row under it.
+ */
+:root {
+  --head-h: 72px;
+  --chip-h: 58px;
+  --float-top: 12px;
+}
+
+@media (min-width: 46rem) {
+  :root {
+    /* The chip centred in the row, 12px from its top: where it stays when the page scrolls. */
+    --head-h: 82px;
+  }
+}
+
+@media (min-width: 64rem) {
+  :root {
+    --head-h: 96px;
+    /* Centred in the header row. */
+    --float-top: 19px;
+  }
+}
+
+/* Anchor jumps and keyboard focus never land under the chip. */
+html {
+  scroll-padding-top: calc(var(--float-top) + var(--chip-h) + 12px);
+}
+
+/* Except the chip's own links and the switch: they are always on screen, and without this focusing one
+   scrolls the page to bring it out from "under" itself. */
+.nav-float :is(a, button) {
+  scroll-margin-top: calc(-1 * (var(--float-top) + var(--chip-h) + 12px));
+}
+
+/* Links to a section on the same page glide there. A new page still opens in place (data-scroll-behavior
+   on <html> tells the router to jump), and reduced motion keeps every jump. */
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
+.site-head {
+  position: relative;
+  /* On a phone the chip sits in this space under the row. */
+  padding-bottom: calc(var(--chip-h) + 12px);
+  border-bottom: 1px solid var(--hairline);
+  background: var(--ground);
+}
+
+.site-head-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 4px 12px;
+  min-height: var(--head-h);
+  padding-block: 8px;
+}
+
+.site-name {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  font-family: var(--font-display);
+  font-size: 20px;
+  font-weight: 800;
+  line-height: 28px;
+  letter-spacing: -0.02em;
+}
+
+/* The chip's holder takes no room: it hangs the chip and the switch in the header, then keeps them on
+   screen. */
+.nav-float {
+  --chip: #ffffff;
+  --chip-border: #e6e6e6;
+  --chip-shadow: 0 1px 2px rgb(11 11 12 / 0.06), 0 12px 32px -10px rgb(11 11 12 / 0.22);
+  position: sticky;
+  z-index: 30;
+  top: var(--float-top);
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  height: 0;
+  margin-top: calc(-1 * (var(--chip-h) + 13px));
+  margin-bottom: calc(var(--chip-h) + 13px);
+  padding-inline: 8px;
+  /* The chip's links size themselves to this width (.nav-link). */
+  container-type: inline-size;
+  /* The empty width beside the chip belongs to the page. */
+  pointer-events: none;
+}
+
+/* Tucked away while the page is read downward (components/nav.tsx). It fades where it is rather than
+   leaving the window, so a link focused from the keyboard is already on screen and the page never
+   jumps to it. */
+.nav-float > * {
+  transition:
+    opacity 200ms ease,
+    translate 280ms var(--ease-out);
+}
+
+.nav-float[data-tucked] > * {
+  opacity: 0;
+  translate: 0 -16px;
+}
+
+.nav-float[data-tucked] * {
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nav-float > * {
+    transition: none;
+  }
+}
+
+html[data-theme="night"] .nav-float {
+  --chip: #161618;
+  --chip-border: #2a2a2d;
+  --chip-shadow: 0 10px 28px -10px rgb(0 0 0 / 0.75);
+}
+
+/* On a phone the switch sits at the end of the name's row, so the chip has the full width under it.
+   It scrolls away with the name: once the name is gone (the initials have docked) it hides, which
+   also keeps Tab from landing on it off screen. */
+.nav-switch {
+  position: absolute;
+  top: calc((var(--head-h) - 44px) / 2 - var(--head-h));
+  right: var(--shell-pad);
+  pointer-events: auto;
+}
+
+.nav-chip[data-docked] + .nav-switch {
+  visibility: hidden;
+}
+
+/* Floating over the page with the chip, the switch casts the chip's shadow from under its track. */
+.nav-switch .goo-switch::before {
+  position: absolute;
+  inset: 3px 1px;
+  border-radius: 999px;
+  box-shadow: var(--chip-shadow);
+  content: "";
+}
+
+@media (min-width: 46rem) {
+  .site-head {
+    padding-bottom: 0;
+  }
+
+  .nav-float {
+    margin-top: calc(var(--float-top) - var(--head-h) - 1px);
+    margin-bottom: calc(var(--head-h) + 1px - var(--float-top));
+  }
+
+  /* The switch rests where the header row ends, level with the chip, and stays there. */
+  .nav-switch {
+    inset-inline: 0;
+    top: calc((var(--chip-h) - 44px) / 2);
+    display: flex;
+    justify-content: flex-end;
+    padding-inline: var(--shell-pad);
+    pointer-events: none;
+  }
+
+  .nav-chip[data-docked] + .nav-switch {
+    visibility: visible;
+  }
+
+  .nav-switch .goo-switch {
+    pointer-events: auto;
+  }
+}
+
+@media (min-width: 64rem) {
+  .site-name {
+    font-size: 22px;
+  }
+}
+
+.nav-chip {
+  position: relative;
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  max-width: 100%;
+  border: 1px solid var(--chip-border);
+  border-radius: 999px;
+  background: var(--chip);
+  box-shadow: var(--chip-shadow);
+  color: var(--ink);
+  pointer-events: auto;
+}
+
+/* The links' strip. On a phone it can be wider than the chip, and then it scrolls sideways in it. */
+.nav-track {
+  min-width: 0;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  /* Rounded by a clip-path, which cuts the finished row as one picture. A border-radius clip is cut layer
+     by layer in Firefox, so the black backing of the labels' white copy showed as a grey arc on the curve. */
+  clip-path: inset(0 round 999px);
+  scrollbar-width: none;
+}
+
+.nav-track::-webkit-scrollbar {
+  display: none;
+}
+
+/* An end with links scrolled out of view fades out (components/nav.tsx marks which). */
+.nav-track[data-fade="end"] {
+  -webkit-mask-image: linear-gradient(to right, #000000 calc(100% - 36px), transparent);
+  mask-image: linear-gradient(to right, #000000 calc(100% - 36px), transparent);
+}
+
+.nav-track[data-fade="start"] {
+  -webkit-mask-image: linear-gradient(to left, #000000 calc(100% - 36px), transparent);
+  mask-image: linear-gradient(to left, #000000 calc(100% - 36px), transparent);
+}
+
+.nav-track[data-fade="both"] {
+  -webkit-mask-image: linear-gradient(to right, transparent, #000000 36px, #000000 calc(100% - 36px), transparent);
+  mask-image: linear-gradient(to right, transparent, #000000 36px, #000000 calc(100% - 36px), transparent);
+}
+
+.nav-row {
+  position: relative;
+  /* The white copy of the labels blends with the row alone, never with the page behind it. */
+  isolation: isolate;
+  display: flex;
+  width: max-content;
+  padding: 6px;
+  /* Square, so the copy's black backing has a solid row under every pixel. A rounded end left it a grey
+     arc beside the initials; the strip (.nav-track) still clips the row to a pill. */
+  background: var(--chip);
+}
+
+.nav-list {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.nav-link {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  height: 44px;
+  padding-inline: 12px;
+  /* Phones size the links to fill the chip with the initials docked: 273px is that chip less its link
+     padding. Below 8px a side the strip scrolls. */
+  padding-inline: clamp(8px, calc((100cqi - 273px) / 8), 14px);
+  border-radius: 999px;
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 20px;
+  white-space: nowrap;
+}
+
+@media (max-width: 340px) {
+  .nav-link {
+    padding-inline: 8px;
+    font-size: 15px;
+  }
+}
+
+/* In the header row the chip is centred on the page, so on a narrow tablet its links tighten until it
+   clears the name by 24px. 100cqi + 16px is the window's width, 227px the chip less its link padding,
+   147px the name at 20px. */
+@media (min-width: 46rem) {
+  .nav-link {
+    padding-inline: clamp(8px, calc((100cqi + 16px - 227px - 2 * (var(--gutter) + 147px + 24px)) / 8), 14px);
+  }
+}
+
+/* The initials: hidden while the name is in view, then they dock at the chip's start and rise in. They
+   sit outside the strip, so they stay put when it scrolls. */
+.nav-home {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 0;
+  height: 44px;
+  margin-left: 0;
+  overflow: hidden;
+  border-radius: 999px;
+  visibility: hidden;
+  font-family: var(--font-display);
+  font-size: 18px;
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -0.03em;
+  transition:
+    width 240ms var(--ease-out),
+    margin-left 240ms var(--ease-out),
+    visibility 0s linear 240ms;
+}
+
+.nav-chip[data-docked] .nav-home {
+  width: 40px;
+  margin-left: 6px;
+  visibility: visible;
+  transition:
+    width 300ms var(--ease-out),
+    margin-left 300ms var(--ease-out),
+    visibility 0s;
+}
+
+.nav-home span {
+  display: inline-block;
+  opacity: 0;
+  transform: translateY(80%);
+  transition:
+    opacity 120ms ease,
+    transform 160ms ease;
+}
+
+.nav-chip[data-docked] .nav-home span {
+  opacity: 1;
+  transform: none;
+  transition:
+    opacity 200ms ease 120ms,
+    transform 420ms cubic-bezier(0.34, 1.56, 0.64, 1) 120ms;
+}
+
+.nav-chip[data-docked] .nav-home span + span {
+  transition-delay: 180ms;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nav-home,
+  .nav-home span,
+  .nav-chip[data-docked] .nav-home,
+  .nav-chip[data-docked] .nav-home span {
+    transition: none;
+  }
+}
+
+/* Without JS the current page's link fills itself. With JS the goo does it. */
+.nav-chip:not([data-goo]) .nav-link[aria-current] {
+  background: #3366ff;
+  color: #ffffff;
+}
+
+/* The colour fades only into hover, so a theme swap or a new page never fades it. */
+@media (hover: hover) and (pointer: fine) {
+  .nav-link:not([aria-current]):hover,
+  .nav-home:hover {
+    color: var(--link);
+  }
+
+  .nav-link:not([aria-current]):hover {
+    transition: color 150ms ease;
+  }
+}
+
+/* The goo layers (components/nav-goo.ts), clipped to the row so an overshoot squashes against its edge. */
+.nav-goo {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  clip-path: inset(0 round 999px);
+  fill: #3366ff;
+  pointer-events: none;
+}
+
+/* White labels where the goo is, black elsewhere, screened onto the row: only the white shows. */
+.nav-ink {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  overflow: hidden;
+  border-radius: inherit;
+  background: #000000;
+  mix-blend-mode: screen;
+  pointer-events: none;
+}
+
+.nav-ink .nav-goo {
+  fill: #ffffff;
+}
+
+.nav-ink-text {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: flex;
+  padding: 6px;
+  background: #000000;
+  color: #ffffff;
+  mix-blend-mode: multiply;
+}
+
+.goo-switch {
+  position: relative;
+  flex-shrink: 0;
+  width: 84px;
+  height: 44px;
+}
+
+.goo-switch svg {
+  position: absolute;
+  inset: 2px 0;
+  width: 84px;
+  height: 40px;
+  overflow: visible;
+}
+
+.goo-switch > svg > svg {
+  position: static;
+  width: 14px;
+  height: 14px;
+}
+
+.gs-track {
+  fill: #ffffff;
+  stroke: #0b0b0c;
+}
+
+html[data-theme="night"] .gs-track {
+  fill: #1c1c20;
+  stroke: #3a3a3f;
+}
+
+.gs-move {
+  fill: #3366ff;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+/* Where the knob rests: by the theme until the switch has been used, then by the last choice. */
+html[data-theme="night"] .goo-switch:not([data-knob]) .gs-move,
+.goo-switch[data-knob="night"] .gs-move {
+  transform: translateX(44px);
+}
+
+.gs-icon {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  color: #0b0b0c;
+}
+
+html[data-theme="night"] .gs-icon {
+  color: #a3a3a8;
+}
+
+/* The icon under the knob is white. */
+html:not([data-theme="night"]) .goo-switch:not([data-lit]) .gs-sun,
+html[data-theme="night"] .goo-switch:not([data-lit]) .gs-moon,
+.goo-switch[data-lit="day"] .gs-sun,
+.goo-switch[data-lit="night"] .gs-moon {
+  color: #ffffff;
+}

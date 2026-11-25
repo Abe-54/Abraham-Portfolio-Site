@@ -1,0 +1,113 @@
+/* Until the first note is written, the list is one ruled row saying so. */
+.notes-empty {
+  padding-block: 28px;
+  border-top: 1px solid var(--rule);
+  border-bottom: 1px solid var(--hairline);
+  color: var(--muted);
+}
+
+.note-list > .note-row:first-child {
+  border-top-color: var(--rule);
+}
+
+.note-list > .note-row:last-child {
+  border-bottom: 1px solid var(--hairline);
+}
+
+.note-row {
+  position: relative;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  grid-template-areas: "date meta" "main main";
+  gap: 12px 16px;
+  padding-block: 28px;
+  border-top: 1px solid var(--hairline);
+}
+
+.note-date {
+  grid-area: date;
+}
+
+.note-meta {
+  grid-area: meta;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.note-main {
+  grid-area: main;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.note-title {
+  font-family: var(--font-display);
+  font-size: clamp(24px, 2.361vw, 34px);
+  font-weight: 700;
+  line-height: 1.18;
+  letter-spacing: -0.025em;
+  transition: color 150ms ease;
+}
+
+.note-link::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+}
+
+[data-note-side="night"] {
+  color: var(--link);
+}
+
+@media (min-width: 1024px) {
+  .note-row {
+    grid-template-columns: 120px minmax(0, 1fr) 150px;
+    grid-template-areas: "date main meta";
+    align-items: start;
+    gap: 40px;
+    padding-block: 36px;
+  }
+
+  .note-date,
+  .note-meta {
+    padding-top: 10px;
+  }
+
+  .note-meta {
+    flex-direction: column;
+    align-items: flex-end;
+    justify-content: flex-start;
+  }
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .note-row:hover .note-title {
+    color: var(--link);
+  }
+}
+
+.next-note-title {
+  overflow-wrap: break-word;
+}
+
+/* Enlarged text on a phone (20em is 320px at the default size): the title takes the full width and the
+   arrow moves below it, so long words in the title are not squeezed beside the arrow. */
+@media (width < 20em) {
+  .next-note {
+    flex-wrap: wrap;
+  }
+}
+
+.next-note-arrow {
+  transition: transform 200ms var(--ease-out);
+}
+
+@media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+  .next-note:hover .next-note-arrow {
+    transform: translateX(6px);
+  }
+}

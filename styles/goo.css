@@ -1,0 +1,503 @@
+/*
+ * The goo as a system: one blue material with one habit, it gathers where you are. It marks (the drop
+ * that ends every heading), it follows (lists, covers, buttons) and it carries (night sections, History,
+ * the footer). Hover effects only where there is a real pointer; reduced motion keeps it all still.
+ */
+
+/* The drop: the full stop at the end of a heading ---------------------------------------------- */
+
+.drop {
+  position: relative;
+  display: inline-block;
+  color: #3366ff;
+  /* About the baseline, so the splat flattens onto the line the letters sit on. */
+  transform-origin: 50% 78%;
+}
+
+.drop[data-state="armed"] {
+  opacity: 0;
+}
+
+.drop[data-state="fall"] {
+  animation: drop-fall 860ms both;
+}
+
+/* Scrolling back up, the drop lands the other way round: up from below, flattening against the top. */
+.drop[data-state="rise"] {
+  transform-origin: 50% 64%;
+  animation: drop-rise 860ms both;
+}
+
+/* Two droplets thrown out by the splat. */
+.drop::before,
+.drop::after {
+  content: "";
+  position: absolute;
+  bottom: 0.2em;
+  left: 50%;
+  width: 0.075em;
+  height: 0.075em;
+  margin-left: -0.0375em;
+  border-radius: 50%;
+  background: currentColor;
+  opacity: 0;
+}
+
+.drop[data-state="fall"]::before {
+  animation: drop-splash-left 860ms both;
+}
+
+.drop[data-state="fall"]::after {
+  animation: drop-splash-right 860ms both;
+}
+
+.drop[data-state="rise"]::before {
+  animation: drop-splash-left-rise 860ms both;
+}
+
+.drop[data-state="rise"]::after {
+  animation: drop-splash-right-rise 860ms both;
+}
+
+@keyframes drop-fall {
+  0% {
+    opacity: 0;
+    transform: translateY(-1.4em) scale(0.55, 1.6);
+    /* A falling thing speeds up. */
+    animation-timing-function: cubic-bezier(0.55, 0, 1, 0.45);
+  }
+
+  10% {
+    opacity: 1;
+  }
+
+  40% {
+    transform: translateY(0) scale(0.8, 1.25);
+    animation-timing-function: cubic-bezier(0.2, 0.8, 0.3, 1);
+  }
+
+  52% {
+    transform: translateY(0.03em) scale(1.55, 0.5);
+  }
+
+  66% {
+    transform: scale(0.86, 1.16);
+  }
+
+  80% {
+    transform: scale(1.07, 0.94);
+  }
+
+  90% {
+    transform: scale(0.98, 1.02);
+  }
+
+  100% {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes drop-rise {
+  0% {
+    opacity: 0;
+    transform: translateY(1.2em) scale(0.55, 1.6);
+    animation-timing-function: cubic-bezier(0.55, 0, 1, 0.45);
+  }
+
+  10% {
+    opacity: 1;
+  }
+
+  40% {
+    transform: translateY(0) scale(0.8, 1.25);
+    animation-timing-function: cubic-bezier(0.2, 0.8, 0.3, 1);
+  }
+
+  52% {
+    transform: translateY(-0.03em) scale(1.55, 0.5);
+  }
+
+  66% {
+    transform: scale(0.86, 1.16);
+  }
+
+  80% {
+    transform: scale(1.07, 0.94);
+  }
+
+  90% {
+    transform: scale(0.98, 1.02);
+  }
+
+  100% {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes drop-splash-left {
+  0%,
+  50% {
+    opacity: 0;
+    transform: none;
+  }
+
+  54% {
+    opacity: 1;
+  }
+
+  72% {
+    transform: translate(-0.26em, -0.2em);
+  }
+
+  92% {
+    opacity: 1;
+    transform: translate(-0.34em, 0);
+  }
+
+  100% {
+    opacity: 0;
+    transform: translate(-0.34em, 0);
+  }
+}
+
+@keyframes drop-splash-right {
+  0%,
+  50% {
+    opacity: 0;
+    transform: none;
+  }
+
+  54% {
+    opacity: 1;
+  }
+
+  72% {
+    transform: translate(0.2em, -0.14em);
+  }
+
+  92% {
+    opacity: 1;
+    transform: translate(0.27em, 0);
+  }
+
+  100% {
+    opacity: 0;
+    transform: translate(0.27em, 0);
+  }
+}
+
+@keyframes drop-splash-left-rise {
+  0%,
+  50% {
+    opacity: 0;
+    transform: none;
+  }
+
+  54% {
+    opacity: 1;
+  }
+
+  72% {
+    transform: translate(-0.26em, 0.2em);
+  }
+
+  92% {
+    opacity: 1;
+    transform: translate(-0.34em, 0);
+  }
+
+  100% {
+    opacity: 0;
+    transform: translate(-0.34em, 0);
+  }
+}
+
+@keyframes drop-splash-right-rise {
+  0%,
+  50% {
+    opacity: 0;
+    transform: none;
+  }
+
+  54% {
+    opacity: 1;
+  }
+
+  72% {
+    transform: translate(0.2em, 0.14em);
+  }
+
+  92% {
+    opacity: 1;
+    transform: translate(0.27em, 0);
+  }
+
+  100% {
+    opacity: 0;
+    transform: translate(0.27em, 0);
+  }
+}
+
+@media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+  :hover > .drop[data-state="rest"] {
+    animation: drop-jelly 620ms;
+  }
+}
+
+@keyframes drop-jelly {
+  20% {
+    transform: scale(1.32, 0.74);
+  }
+
+  40% {
+    transform: scale(0.84, 1.2);
+  }
+
+  60% {
+    transform: scale(1.1, 0.92);
+  }
+
+  80% {
+    transform: scale(0.97, 1.03);
+  }
+}
+
+/* Goo on lists: a bead behind a list's numbers, a bar under a row of links --------------------- */
+
+.goo-wire {
+  position: relative;
+  isolation: isolate;
+}
+
+.goo-wire-svg {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  pointer-events: none;
+}
+
+/* In the footer the links' goo must not isolate: the white copy of the links drawn where the lava
+   passes (components/goo-ink.tsx) has to blend with the lava behind them. The footer isolates instead. */
+.footer .goo-wire {
+  isolation: auto;
+}
+
+/* What the goo gathers on stays above it. */
+.goo-wire [data-wire-over] {
+  position: relative;
+  z-index: 1;
+}
+
+/* The number turns white once the bead has reached it, and back at once when it leaves. */
+.goo-wire[data-shape="bead"] [data-wire-over] {
+  transition: color 120ms var(--ease-out);
+}
+
+.goo-wire[data-shape="bead"] [data-wire-active] [data-wire-over] {
+  color: #ffffff;
+  transition-delay: 110ms;
+}
+
+/* Buttons flood: goo pours in from where the pointer enters (components/goo-flood.tsx) ---------- */
+
+.btn:has(> .goo-flood) {
+  --flood: #3366ff;
+  --flood-ink: #ffffff;
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+}
+
+.btn-solid:has(> .goo-flood) {
+  --flood: var(--solid-flood);
+  --flood-ink: var(--solid-flood-ink);
+}
+
+/* Blue is already the goo's colour, so a blue button floods white. */
+.btn-blue:has(> .goo-flood) {
+  --flood: #ffffff;
+  --flood-ink: #3366ff;
+}
+
+/* Over the button's own fill, under its label. */
+.goo-flood {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  fill: var(--flood);
+  pointer-events: none;
+}
+
+/* The label takes the flooded colour once the goo has reached most of it, and goes back at once. */
+@media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+  .btn:has(> .goo-flood):hover {
+    color: var(--flood-ink);
+    transition:
+      transform 160ms var(--ease-out),
+      color 150ms var(--ease-out) 170ms;
+  }
+}
+
+/* Night is liquid: the edges of a full-width night band (components/night-edges.tsx) ------------- */
+
+.liquid {
+  position: relative;
+}
+
+.liquid-top,
+.liquid-bottom {
+  position: absolute;
+  z-index: 2;
+  left: 0;
+  display: block;
+  width: 100%;
+  overflow: visible;
+  fill: var(--ground);
+  pointer-events: none;
+}
+
+/* The surface sits on the band's top edge and reaches up into the band above. */
+.liquid-top {
+  bottom: calc(100% - 1px);
+  height: 90px;
+}
+
+/* The drips hang from the band's bottom edge into the band below. */
+.liquid-bottom {
+  top: calc(100% - 1px);
+  height: 260px;
+}
+
+/* The drops fall behind everything on the page: behind the words of the sections they pass, and hidden
+   behind the next night band, until they reach the footer. Same place as the drips. */
+.liquid-rain {
+  position: absolute;
+  z-index: -1;
+  top: calc(100% - 1px);
+  left: 0;
+  display: block;
+  width: 100%;
+  height: 1px;
+  overflow: visible;
+  fill: var(--ground);
+  pointer-events: none;
+}
+
+/* In night theme the bands next door are the same black, so the liquid shows as the blue goo instead:
+   blue drips and drops hanging from a thin rim along the band's bottom, and of the footer's edge only
+   the rings where a drop lands. */
+html[data-theme="night"] :is(.liquid-bottom, .liquid-rain) {
+  fill: #3366ff;
+}
+
+.liquid-rim,
+html[data-theme="night"] .liquid-seam {
+  display: none;
+}
+
+html[data-theme="night"] .liquid-rim {
+  display: inline;
+}
+
+.puddle-rings {
+  fill: #3366ff;
+}
+
+/* The footer's top edge as a puddle for the rain (components/footer-puddle.tsx). It draws the edge
+   itself, so the real rule steps aside while it does; with reduced motion it does not. */
+.puddle {
+  position: absolute;
+  z-index: 3;
+  top: -40px;
+  left: 0;
+  display: block;
+  width: 100%;
+  height: 80px;
+  overflow: visible;
+  pointer-events: none;
+}
+
+.puddle-fill {
+  fill: var(--ground);
+}
+
+.puddle-rule {
+  fill: none;
+  stroke: var(--rule);
+  stroke-width: 1.5;
+}
+
+footer[data-puddle] > [data-tone="day"] {
+  border-top-color: transparent;
+}
+
+/* ---------------------------------------------------------------------------------------------
+   The pool (components/goo-pool.tsx). The goo's canvas covers the whole footer, both halves, behind the
+   words. The lava keeps a margin from every edge (set in the component), so no blob is ever cut off, and
+   it flows freely under the words: where it passes, they turn white (components/goo-ink.tsx).
+   A half's own ground would be painted over the canvas, so each half paints it on a layer below instead.
+   --------------------------------------------------------------------------------------------- */
+
+.footer > [data-tone] {
+  position: relative;
+  background: none;
+}
+
+.footer > [data-tone]::before {
+  content: "";
+  position: absolute;
+  z-index: -2;
+  inset: 0;
+  background: var(--ground);
+}
+
+.pool-goo {
+  position: absolute;
+  z-index: -1;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.footer-night {
+  min-height: 300px;
+}
+
+@media (min-width: 1024px) {
+  .footer-night {
+    min-height: 0;
+  }
+}
+
+/* With reduced motion there is no lava: one still blob, whole, in the night half and clear of the words. */
+@media (prefers-reduced-motion: reduce) {
+  .footer-night::after {
+    content: "";
+    position: absolute;
+    z-index: -1;
+    bottom: 8%;
+    left: 50%;
+    width: 34%;
+    aspect-ratio: 1.15;
+    border-radius: 58% 42% 55% 45% / 52% 48% 52% 48%;
+    background: #3366ff;
+    translate: -50% 0;
+  }
+}
+
+@media (min-width: 1024px) and (prefers-reduced-motion: reduce) {
+  .footer-night::after {
+    bottom: 14%;
+    left: 8%;
+    width: 30%;
+    translate: none;
+  }
+}

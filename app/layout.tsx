@@ -1,54 +1,53 @@
-import Footer from "@/components/footer";
-import Header from "@/components/header";
-import ThemeSwitch from "@/components/theme-switch";
-import ActiveSectionContextProvider from "@/context/active-section-context";
-import ThemeContextProvider from "@/context/theme-context";
 import { Analytics } from "@vercel/analytics/react";
-import { Inter, Lexend } from "next/font/google";
-import { Toaster } from "react-hot-toast";
+import type { Metadata, Viewport } from "next";
+import { Bricolage_Grotesque, Geist_Mono, Inter_Tight } from "next/font/google";
+import Footer from "@/components/footer";
+import Nav from "@/components/nav";
+import RevealObserver from "@/components/reveal-observer";
+import RouteScroll from "@/components/route-scroll";
 import "./globals.css";
 
-const lexend = Lexend({ subsets: ["latin"], display: "swap" });
+const display = Bricolage_Grotesque({ subsets: ["latin"], axes: ["opsz"], variable: "--font-bricolage" });
+const body = Inter_Tight({ subsets: ["latin"], variable: "--font-inter-tight" });
+const mono = Geist_Mono({ subsets: ["latin"], variable: "--font-geist-mono" });
 
-export const metadata = {
-  title: "Abraham | Personal Portfolio",
-  description: "Abraham is a full-stack developer based in Newark, NJ.",
+export const metadata: Metadata = {
+  title: { default: "Abraham Rubio", template: "%s · Abraham Rubio" },
+  description:
+    "AI software engineer by day, game developer by night. I build New Jersey housing tools, an AI workspace for state staff, and games in Unity.",
 };
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export const viewport: Viewport = {
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#ffffff" },
+    { media: "(prefers-color-scheme: dark)", color: "#0b0b0c" },
+  ],
+};
+
+const themeScript = `try{var t=localStorage.getItem("theme");if(t!=="day"&&t!=="night")t=matchMedia("(prefers-color-scheme: dark)").matches?"night":"day";document.documentElement.dataset.theme=t;document.querySelectorAll('meta[name="theme-color"]').forEach(function(m){m.setAttribute("content",t==="night"?"#0b0b0c":"#ffffff")})}catch(e){}`;
+
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <>
+    <html
+      data-scroll-behavior="smooth"
+      lang="en"
+      suppressHydrationWarning
+      className={`${display.variable} ${body.variable} ${mono.variable}`}
+    >
       <head>
-        <link
-          rel="stylesheet"
-          href="https://cdn.jsdelivr.net/gh/devicons/devicon@v2.15.1/devicon.min.css"
-        />
+        <script dangerouslySetInnerHTML={{ __html: themeScript }} />
       </head>
-
-      <html lang="en" className="scroll-smooth">
-        <body
-          suppressHydrationWarning={true}
-          className={`${lexend.className} relative sm:pt-14 lg:pt-0 transition-all`}
-        >
-          <div className="bg-[#e2fbf8] absolute -top-24 -z-10 right-44 h-101 w-101 rounded-full blur-[10rem] sm:w-275 dark:bg-[#627194]" />
-          <div className="bg-[#dbd7fb] absolute -top-4 -z-10 -left-140 h-101 w-120 rounded-full blur-[10rem] sm:w-275 md:-left-132 lg:-left-112 xl:-left-60 2xl:-left-20 dark:bg-[#676394]" />
-
-          <ThemeContextProvider>
-            <ActiveSectionContextProvider>
-              <Header />
-              {children}
-              <Analytics />
-              <Toaster position="top-right" />
-              <Footer />
-              <ThemeSwitch aria-pressed="false" aria-label="Toggle theme" />
-            </ActiveSectionContextProvider>
-          </ThemeContextProvider>
-        </body>
-      </html>
-    </>
+      <body>
+        <a href="#main" className="skip-link">
+          Skip to content
+        </a>
+        <Nav />
+        {children}
+        <RouteScroll />
+        <Footer />
+        <RevealObserver />
+        <Analytics />
+      </body>
+    </html>
   );
 }

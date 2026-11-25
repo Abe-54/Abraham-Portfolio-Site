@@ -1,181 +1,382 @@
 @import "tailwindcss";
-@import "tw-animate-css";
-
-/* Custom dark variant */
-@custom-variant dark (&:where(.dark, .dark *));
-
-/* Base variables */
-html {
-  --line-color: #e5e7eb;
-}
-
-html.dark {
-  --line-color: rgba(255, 255, 255, 0.2);
-}
-
-/* Tailwind v4 theme variables */
-@theme {
-  --color-primary: #599fc0;
-  --color-primary-hover: #1e6f94;
-
-  --color-light-mode-text: #081d27;
-  --color-light-mode-background: #ffffff;
-  --color-light-mode-secondary: #cae2ec;
-  --color-light-mode-accent: #17303b;
-
-  --color-dark-mode-text: #ffffff;
-  --color-dark-mode-background: #081d27;
-  --color-dark-mode-secondary: #081216;
-  --color-dark-mode-accent: #428aa9;
-
-  --background-image-gradient-radial: radial-gradient(var(--tw-gradient-stops));
-  --background-image-gradient-conic: conic-gradient(
-    from 180deg at 50% 50%,
-    var(--tw-gradient-stops)
-  );
-}
-
-/* Custom utility using CSS var */
-.borderBlack {
-  border: 1px solid var(--line-color);
-}
+@import "../styles/nav.css";
+@import "../styles/hero.css";
+@import "../styles/projects.css";
+@import "../styles/notes.css";
+@import "../styles/history.css";
+@import "../styles/footer.css";
+@import "../styles/goo.css";
 
 @theme inline {
-  --radius-sm: calc(var(--radius) - 4px);
-  --radius-md: calc(var(--radius) - 2px);
-  --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) + 4px);
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --color-card: var(--card);
-  --color-card-foreground: var(--card-foreground);
-  --color-popover: var(--popover);
-  --color-popover-foreground: var(--popover-foreground);
-  /* Note: Avoid mapping --color-primary to --primary here to prevent cycles,
-     since :root maps --primary -> --color-primary. */
-  --color-secondary: var(--secondary);
-  --color-secondary-foreground: var(--secondary-foreground);
+  --color-ground: var(--ground);
+  --color-ink: var(--ink);
   --color-muted: var(--muted);
-  --color-muted-foreground: var(--muted-foreground);
-  --color-accent: var(--accent);
-  --color-accent-foreground: var(--accent-foreground);
-  --color-destructive: var(--destructive);
-  --color-border: var(--border);
-  --color-input: var(--input);
-  --color-ring: var(--ring);
-  --color-chart-1: var(--chart-1);
-  --color-chart-2: var(--chart-2);
-  --color-chart-3: var(--chart-3);
-  --color-chart-4: var(--chart-4);
-  --color-chart-5: var(--chart-5);
-  --color-sidebar: var(--sidebar);
-  --color-sidebar-foreground: var(--sidebar-foreground);
-  --color-sidebar-primary: var(--sidebar-primary);
-  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
-  --color-sidebar-accent: var(--sidebar-accent);
-  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
-  --color-sidebar-border: var(--sidebar-border);
-  --color-sidebar-ring: var(--sidebar-ring);
+  --color-hairline: var(--hairline);
+  --color-rule: var(--rule);
+  --color-link: var(--link);
+  --color-slot: var(--slot);
+  --color-tag: var(--tag);
+  --color-accent: #3366ff;
+  --color-night: #0b0b0c;
+
+  --font-display: var(--font-bricolage), system-ui, sans-serif;
+  --font-body: var(--font-inter-tight), system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, monospace;
 }
 
-/* Map Shadcn/Tailwind tokens to the existing project palette (light mode) */
+:root,
+[data-tone="day"] {
+  --ground: #ffffff;
+  --ink: #0b0b0c;
+  --muted: #5c5c61;
+  --hairline: #e6e6e6;
+  --rule: #0b0b0c;
+  --link: #2357e8;
+  --slot: #f1f1f2;
+  --tag: #5c5c61;
+  --button: #0b0b0c;
+  /* The goo that floods a solid button, and its label once flooded. */
+  --solid-flood: #3366ff;
+  --solid-flood-ink: #ffffff;
+}
+
+/* Pages with and without a scrollbar share the same centre line. */
+html {
+  scrollbar-gutter: stable;
+}
+
+html[data-theme="night"],
+[data-tone="night"],
+[data-side="night"] {
+  --ground: #0b0b0c;
+  --ink: #ffffff;
+  --muted: #a3a3a8;
+  --hairline: #2a2a2d;
+  --rule: #ffffff;
+  --link: #7c9cff;
+  --slot: #1a1a1d;
+  --tag: #7c9cff;
+  --button: #3366ff;
+  --solid-flood: #ffffff;
+  --solid-flood-ink: #3366ff;
+}
+
 :root {
-  --radius: 0.625rem;
-
-  /* base */
-  --background: var(--color-light-mode-background);
-  --foreground: var(--color-light-mode-text);
-
-  /* surfaces */
-  --card: var(--color-light-mode-background);
-  --card-foreground: var(--color-light-mode-text);
-  --popover: var(--color-light-mode-background);
-  --popover-foreground: var(--color-light-mode-text);
-
-  /* brand */
-  --primary: var(--color-primary);
-  --primary-foreground: #ffffff; /* ensures contrast on primary */
-
-  /* supporting */
-  --secondary: var(--color-light-mode-secondary);
-  --secondary-foreground: var(--color-light-mode-accent);
-  --muted: var(--color-light-mode-secondary);
-  --muted-foreground: var(--color-light-mode-accent);
-  --accent: var(--color-light-mode-accent);
-  --accent-foreground: #ffffff;
-
-  /* feedback */
-  --destructive: oklch(0.577 0.245 27.325);
-
-  /* UI */
-  --border: var(--line-color);
-  --input: var(--line-color);
-  --ring: var(--color-primary);
-
-  /* charts/sidebar (kept; adjust later if needed) */
-  --chart-1: oklch(0.646 0.222 41.116);
-  --chart-2: oklch(0.6 0.118 184.704);
-  --chart-3: oklch(0.398 0.07 227.392);
-  --chart-4: oklch(0.828 0.189 84.429);
-  --chart-5: oklch(0.769 0.188 70.08);
-
-  --sidebar: var(--color-light-mode-background);
-  --sidebar-foreground: var(--color-light-mode-text);
-  --sidebar-primary: var(--color-primary);
-  --sidebar-primary-foreground: #ffffff;
-  --sidebar-accent: var(--color-light-mode-secondary);
-  --sidebar-accent-foreground: var(--color-light-mode-accent);
-  --sidebar-border: var(--line-color);
-  --sidebar-ring: var(--color-primary);
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+  --gutter: 20px;
+  /* The side padding of every full-width band. Below 1280 it is the gutter. */
+  --shell-pad: var(--gutter);
+  --shell-pad-half: var(--gutter);
+  color-scheme: light;
 }
 
-/* Dark mode maps to the project's dark palette */
-.dark {
-  --background: var(--color-dark-mode-background);
-  --foreground: var(--color-dark-mode-text);
-
-  --card: var(--color-dark-mode-secondary);
-  --card-foreground: var(--color-dark-mode-text);
-  --popover: var(--color-dark-mode-secondary);
-  --popover-foreground: var(--color-dark-mode-text);
-
-  --primary: var(--color-primary);
-  --primary-foreground: var(--color-dark-mode-text);
-
-  --secondary: var(--color-dark-mode-secondary);
-  --secondary-foreground: var(--color-dark-mode-text);
-  --muted: var(--color-dark-mode-secondary);
-  --muted-foreground: var(--color-dark-mode-accent);
-  --accent: var(--color-dark-mode-accent);
-  --accent-foreground: var(--color-dark-mode-text);
-
-  --destructive: oklch(0.704 0.191 22.216);
-
-  --border: rgba(255, 255, 255, 0.1);
-  --input: rgba(255, 255, 255, 0.15);
-  --ring: var(--color-dark-mode-accent);
-
-  --chart-1: oklch(0.488 0.243 264.376);
-  --chart-2: oklch(0.696 0.17 162.48);
-  --chart-3: oklch(0.769 0.188 70.08);
-  --chart-4: oklch(0.627 0.265 303.9);
-  --chart-5: oklch(0.645 0.246 16.439);
-
-  --sidebar: var(--color-dark-mode-secondary);
-  --sidebar-foreground: var(--color-dark-mode-text);
-  --sidebar-primary: var(--color-primary);
-  --sidebar-primary-foreground: var(--color-dark-mode-text);
-  --sidebar-accent: var(--color-dark-mode-accent);
-  --sidebar-accent-foreground: var(--color-dark-mode-text);
-  --sidebar-border: rgba(255, 255, 255, 0.1);
-  --sidebar-ring: var(--color-dark-mode-accent);
+html[data-theme="night"] {
+  color-scheme: dark;
 }
 
-@layer base {
-  * {
-    @apply border-border outline-ring/50;
+@media (min-width: 768px) {
+  :root {
+    --gutter: 40px;
   }
-  body {
-    @apply bg-background text-foreground;
+}
+
+/*
+ * One content cap for the whole site, taken from the hero stage. The stage is 1440 units wide with a
+ * 64-unit inset, and a unit grows with the width up to 1.25px, so the stage stops at 1800px and its
+ * content at 1312 units: 41/45 of the width, at most 1640px. Every band keeps painting its ground edge
+ * to edge; only its padding grows, so its content shares the hero copy's left edge and the stage's
+ * right inset. The percentages resolve against the band that uses the value, so it must be full width.
+ * Up to a 1440px band this works out to less than the 64px gutter, so nothing moves there.
+ */
+@media (min-width: 1280px) {
+  :root {
+    --gutter: 64px;
+    --shell-pad: max(var(--gutter), calc((100% - min(100% * 41 / 45, 1640px)) / 2));
+    /* The same edge for a box that is exactly half of a full-width band (the footer halves). */
+    --shell-pad-half: max(var(--gutter), calc(100% - min(100% * 41 / 45, 820px)));
+  }
+}
+
+/* The page's goo, drips and blobs may reach past its sides; the body clips them, so the page never
+   scrolls sideways. The root needs a value of its own for that: without one, the body's overflow is
+   handed to the window instead (as `hidden`) and the body clips nothing. */
+html {
+  overflow-x: clip;
+}
+
+/* The body is a column at least the window's height, so the footer of a short page meets the bottom. */
+body {
+  display: flex;
+  flex-direction: column;
+  min-height: 100svh;
+  background: var(--ground);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 17px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: clip;
+}
+
+body > main {
+  flex: 1 0 auto;
+}
+
+[data-tone],
+[data-side] {
+  background: var(--ground);
+  color: var(--ink);
+}
+
+:focus-visible {
+  outline: 2px solid #3366ff;
+  outline-offset: 3px;
+}
+
+/* main takes focus from the skip link; the ring belongs on the link, not around the page. */
+main[tabindex="-1"]:focus {
+  outline: none;
+}
+
+.skip-link {
+  position: absolute;
+  z-index: 50;
+  top: 14px;
+  left: var(--shell-pad);
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding-inline: 18px;
+  border-radius: 999px;
+  background: #3366ff;
+  color: #ffffff;
+  font-weight: 600;
+}
+
+.skip-link:not(:focus) {
+  width: 1px;
+  height: 1px;
+  min-height: 0;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* Colours change with the theme in one step instead of running their hover fades. */
+html[data-theme-swap] :is(.nav-link, .t-link, .footer-link, .email-copy, .note-title) {
+  transition: none !important;
+}
+
+/* From its first frame the new page shows only inside the knob; the switch then opens the circle. */
+html[data-sweep]::view-transition-new(root) {
+  clip-path: circle(var(--sweep-r) at var(--sweep-x) var(--sweep-y));
+}
+
+/* The ring that rides the edge of the day/night circle. Sized and placed by the switch. */
+.theme-ring {
+  position: fixed;
+  z-index: 100;
+  box-sizing: border-box;
+  border: 0 solid #3366ff;
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+
+@layer components {
+  .shell {
+    padding-inline: var(--shell-pad);
+  }
+
+  .t-label {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    font-weight: 500;
+    line-height: 16px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  .t-tag {
+    color: var(--tag);
+  }
+
+  .t-hero {
+    font-family: var(--font-display);
+    font-weight: 800;
+    letter-spacing: -0.04em;
+    overflow-wrap: break-word;
+  }
+
+  .t-section {
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: clamp(40px, 4.444vw, 64px);
+    line-height: 1;
+    letter-spacing: -0.035em;
+    overflow-wrap: break-word;
+  }
+
+  /* Enlarged text on a phone (20em is 320px at the default size, so this never applies at 100%): a
+     display word can be wider than the column. Hyphenate it rather than cut off a letter or two. */
+  @media (width < 20em) {
+    .t-hero,
+    .t-section,
+    .next-note-title {
+      hyphens: auto;
+      hyphenate-limit-chars: 6 3 3;
+    }
+  }
+
+  .t-statement {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: clamp(28px, 2.778vw, 40px);
+    line-height: 1.25;
+    letter-spacing: -0.025em;
+  }
+
+  .t-item {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: clamp(22px, 1.806vw, 26px);
+    line-height: 32px;
+    letter-spacing: -0.02em;
+  }
+
+  .t-lede {
+    font-size: clamp(18px, 1.32vw, 19px);
+    line-height: 1.55;
+    color: var(--muted);
+    text-wrap: pretty;
+  }
+
+  .t-link {
+    color: var(--link);
+    font-weight: 600;
+    text-decoration: underline 1px;
+    text-underline-position: from-font;
+    transition: color 150ms ease;
+  }
+
+  .press {
+    transition: transform 160ms var(--ease-out);
+  }
+
+  .press:active {
+    transform: scale(0.97);
+  }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    min-height: 48px;
+    padding: 12px 22px;
+    border-radius: 999px;
+    font-size: 16px;
+    font-weight: 600;
+    line-height: 20px;
+    white-space: nowrap;
+  }
+
+  .btn-solid {
+    background: var(--button);
+    color: #ffffff;
+  }
+
+  .btn-outline {
+    border: 1.5px solid var(--rule);
+    color: var(--ink);
+  }
+
+  .btn-blue {
+    background: #3366ff;
+    color: #ffffff;
+  }
+
+  .sample-tag {
+    display: inline-flex;
+    align-items: center;
+    height: 22px;
+    padding-inline: 8px;
+    border: 1px solid var(--hairline);
+    border-radius: 999px;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .t-link:hover {
+    color: var(--ink);
+  }
+}
+
+/* Entrances: set only by RevealObserver, so server HTML and failed bundles stay readable. */
+[data-entrance="pending"] {
+  opacity: 0;
+  transform: translateY(8px);
+}
+
+[data-entrance="shown"] {
+  transition:
+    opacity 300ms var(--ease-out) var(--delay, 0ms),
+    transform 300ms var(--ease-out) var(--delay, 0ms);
+}
+
+/* A project row paints its own full-width band, so the band is always there and only what is
+   inside it fades in. */
+.project-row[data-entrance="pending"] {
+  opacity: 1;
+  transform: none;
+}
+
+.project-row[data-entrance="pending"] > * {
+  opacity: 0;
+  transform: translateY(8px);
+}
+
+.project-row[data-entrance="shown"] > * {
+  transition:
+    opacity 300ms var(--ease-out) var(--delay, 0ms),
+    transform 300ms var(--ease-out) var(--delay, 0ms);
+}
+
+.project-row[data-entrance]:focus-within > * {
+  opacity: 1;
+  transform: none;
+  transition: none;
+}
+
+/* Keyboard focus never lands on something hidden or still fading in. */
+[data-entrance]:focus-within {
+  opacity: 1;
+  transform: none;
+  transition: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-entrance="pending"],
+  .project-row[data-entrance="pending"] > * {
+    transform: none;
+  }
+
+  .press:active {
+    transform: none;
   }
 }

@@ -1,0 +1,142 @@
+.email-copy {
+  min-height: 44px;
+  font-size: 20px;
+  font-weight: 500;
+  line-height: 24px;
+  text-align: left;
+  text-decoration: underline 1px;
+  text-underline-position: from-font;
+  overflow-wrap: anywhere;
+  transition:
+    transform 160ms var(--ease-out),
+    color 150ms ease;
+}
+
+/* The address and its pop share a row. The pop is in the flow, so when large text leaves no room
+   beside the address it moves under it instead of pushing past the edge of the page. */
+.email-copy-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  column-gap: 4px;
+  align-self: flex-start;
+}
+
+.email-pop {
+  overflow: visible;
+  pointer-events: none;
+  opacity: 0;
+}
+
+.email-copy-row .email-pop {
+  flex: none;
+  width: 84px;
+  height: 62px;
+  /* Takes no more height than the 44px address button it sits beside. */
+  margin-block: -9px;
+}
+
+/* On the recruiter strip button the tick pops inside the button itself while its label steps aside. */
+.email-pop-over {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 60px;
+  height: 44px;
+  margin: -22px 0 0 -30px;
+}
+
+.email-pop-shape,
+.email-pop-drop {
+  fill: #3366ff;
+}
+
+.email-pop-disc {
+  fill: #ffffff;
+}
+
+.email-pop-tick {
+  stroke: #3366ff;
+}
+
+/* The button is black by day and blue by night, so its pop is drawn in white to stand out on both. */
+.email-pop-over .email-pop-shape,
+.email-pop-over .email-pop-drop {
+  fill: #ffffff;
+}
+
+.email-pop-over .email-pop-disc {
+  fill: #3366ff;
+}
+
+.email-pop-over .email-pop-tick {
+  stroke: #ffffff;
+}
+
+/* The label steps aside at once as the tick pops in, and returns only once the tick has faded out,
+   so the two never share a frame. */
+[data-phase="idle"] > button .email-copy-label {
+  transition: opacity 150ms var(--ease-out);
+}
+
+[data-phase="in"] > button .email-copy-label,
+[data-phase="out"] > button .email-copy-label {
+  opacity: 0;
+}
+
+.email-pop[data-phase="in"] {
+  opacity: 1;
+  transition: opacity 150ms var(--ease-out);
+}
+
+.email-pop[data-phase="out"] {
+  transition: opacity 240ms var(--ease-out);
+}
+
+.email-pop-blob {
+  transform-box: fill-box;
+  transform-origin: center;
+  transform: scale(0.85);
+}
+
+.email-pop-drop {
+  opacity: 0;
+  transform: translate(var(--from-x), var(--from-y)) scale(0.6);
+}
+
+/* Both visible phases hold the end state, so a repeat copy or the fade never restarts the pop. */
+[data-phase="in"] .email-pop-blob,
+[data-phase="out"] .email-pop-blob,
+[data-phase="in"] .email-pop-drop,
+[data-phase="out"] .email-pop-drop {
+  opacity: 1;
+  transform: none;
+}
+
+[data-phase="in"] .email-pop-blob {
+  transition: transform 300ms var(--ease-out);
+}
+
+[data-phase="in"] .email-pop-drop {
+  transition:
+    transform 300ms var(--ease-out),
+    opacity 150ms var(--ease-out);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .email-copy:hover,
+  .footer-link:hover {
+    color: var(--link);
+  }
+}
+
+.footer-link {
+  transition: color 150ms ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .email-pop-blob,
+  .email-pop-drop {
+    transform: none;
+  }
+}
