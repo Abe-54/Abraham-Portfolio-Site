@@ -1,0 +1,15 @@
+/* Press Start 2P is self-hosted through next/font as --font-retro (app/lab/layout.tsx), not fetched from Google at runtime. */
+.retro {
+  font-family:
+    var(--font-retro, "Press Start 2P"),
+    system-ui,
+    -apple-system,
+    sans-serif;
+  line-height: 1.5;
+  letter-spacing: 0.5px;
+}
+
+.pixelated {
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+}

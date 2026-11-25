@@ -7,6 +7,9 @@
 @import "../styles/footer.css";
 @import "../styles/goo.css";
 
+/* dark: follows the site switch (and the night halves), not the OS setting. */
+@custom-variant dark (&:where(html[data-theme="night"] *, [data-tone="night"], [data-tone="night"] *, [data-side="night"], [data-side="night"] *));
+
 @theme inline {
   --color-ground: var(--ground);
   --color-ink: var(--ink);
@@ -18,6 +21,25 @@
   --color-tag: var(--tag);
   --color-accent: #3366ff;
   --color-night: #0b0b0c;
+
+  /* shadcn registry components name colours their own way; these point those names at the site tokens.
+     The site keeps --color-muted as its grey text, so shadcn's bg-muted reads as that grey. */
+  --color-background: var(--ground);
+  --color-foreground: var(--ink);
+  --color-card: var(--ground);
+  --color-card-foreground: var(--ink);
+  --color-popover: var(--ground);
+  --color-popover-foreground: var(--ink);
+  --color-primary: var(--button);
+  --color-primary-foreground: #ffffff;
+  --color-secondary: var(--slot);
+  --color-secondary-foreground: var(--ink);
+  --color-muted-foreground: var(--muted);
+  --color-accent-foreground: #ffffff;
+  --color-border: var(--hairline);
+  --color-input: var(--hairline);
+  --color-ring: var(--ink);
+  --color-destructive: #e5484d;
 
   --font-display: var(--font-bricolage), system-ui, sans-serif;
   --font-body: var(--font-inter-tight), system-ui, sans-serif;

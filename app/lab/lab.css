@@ -1,0 +1,63 @@
+/* The flare lab: candidate components from shadcn registries, shown in the site's own type and colour. */
+
+.lab-card {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 20px;
+  border: 1.5px solid var(--hairline);
+  border-radius: 20px;
+  background: var(--ground);
+  min-width: 0;
+}
+
+.lab-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 8px;
+  align-items: center;
+}
+
+.lab-chip {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 3px 8px;
+  border-radius: 999px;
+  border: 1px solid var(--hairline);
+  color: var(--muted);
+}
+
+.lab-chip[data-cost="none"] {
+  color: var(--link);
+  border-color: currentColor;
+}
+
+/* Raw shadcn variables for the canvas games, which read them with getComputedStyle. Scoped to the game,
+   because the site already uses --muted for its grey text. */
+.shadcn-vars {
+  --background: var(--ground);
+  --foreground: var(--ink);
+  --primary: var(--button);
+  --primary-foreground: #ffffff;
+  --secondary: var(--slot);
+  --accent: #3366ff;
+  --muted-foreground: var(--muted);
+  --border: var(--hairline);
+  --ring: var(--ink);
+  --destructive: #e5484d;
+}
+
+.lab-beam-node {
+  display: grid;
+  place-items: center;
+  width: 64px;
+  height: 64px;
+  border-radius: 999px;
+  border: 1.5px solid var(--ink);
+  background: var(--ground);
+  font-size: 26px;
+  position: relative;
+  z-index: 1;
+}
