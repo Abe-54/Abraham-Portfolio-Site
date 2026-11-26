@@ -5,54 +5,15 @@ import GooInk from "@/components/goo-ink";
 import GooWire from "@/components/goo-wire";
 import Hero from "@/components/hero";
 import History from "@/components/history";
-import NightEdges from "@/components/night-edges";
 import NoteRow from "@/components/note-row";
-import ProjectRow from "@/components/project-row";
 import withDrop from "@/components/with-drop";
-import { contact, focus, notes, projects, showNotes, sideLabel, toolkit, type Side } from "@/lib/content";
+import WorkSection from "@/components/work-section";
+import { contact, focus, notes, showNotes, toolkit } from "@/lib/content";
 
 const glance = [
   { label: "Now", value: "Software Engineer, NJ Dept. of Community Affairs" },
   { label: "Education", value: "B.S. CS & Game Programming, 2025" },
 ];
-
-function WorkSection({
-  side,
-  id,
-  title,
-  children,
-}: {
-  side: Side;
-  id: string;
-  title: string;
-  children?: React.ReactNode;
-}) {
-  return (
-    <section
-      id={id}
-      data-nav="projects"
-      data-side={side}
-      aria-labelledby={`${id}-title`}
-      className={`shell flex scroll-mt-4 flex-col pt-20 pb-16 lg:pt-[120px] lg:pb-28 ${side === "night" ? "liquid" : ""}`}
-    >
-      {side === "night" ? <NightEdges /> : null}
-      <div className="flex flex-col gap-3 border-b-[1.5px] border-rule pb-6">
-        <p className="t-label t-tag">{sideLabel[side].long}</p>
-        <h2 id={`${id}-title`} className="t-section">
-          {withDrop(title)}
-        </h2>
-      </div>
-      <div className="pt-2">
-        {projects
-          .filter((project) => project.side === side)
-          .map((project) => (
-            <ProjectRow key={project.slug} project={project} />
-          ))}
-      </div>
-      {children}
-    </section>
-  );
-}
 
 export default function Home() {
   return (
@@ -79,6 +40,10 @@ export default function Home() {
           </a>
         </div>
       </section>
+
+      {/* Proof first: the projects come before the introduction. */}
+      <WorkSection side="day" toolkit={toolkit} />
+      <WorkSection side="night" />
 
       <section id="about" data-nav="about" className="shell flex scroll-mt-4 flex-col gap-12 pt-20 pb-8 lg:py-28 xl:flex-row xl:items-start xl:gap-24">
         <div className="flex max-w-[720px] flex-col gap-7 xl:w-[720px] xl:shrink-0">
@@ -119,20 +84,6 @@ export default function Home() {
         </GooWire>
       </section>
 
-      <WorkSection side="day" id="work" title={"Built for New\u00A0Jersey."}>
-        <div className="flex flex-col gap-4 pt-8">
-          <p className="t-label">Toolkit</p>
-          <p className="font-display text-[22px] leading-[1.35] font-semibold tracking-[-0.02em] lg:text-[28px]">
-            {toolkit.map((group, index) => (
-              <span key={group[0]}>
-                {index > 0 ? <span className="text-muted"> / </span> : null}
-                {group.join(", ")}
-              </span>
-            ))}
-          </p>
-        </div>
-      </WorkSection>
-      <WorkSection side="night" id="games" title="Worlds, after hours." />
 
       {showNotes ? (
         <section id="notes" aria-labelledby="notes-title" data-nav="notes" className="shell flex scroll-mt-4 flex-col gap-10 py-20 lg:gap-12 lg:py-28">

@@ -10,8 +10,8 @@ import ThemeSwitch from "./theme-switch";
 // In page order. On the home page every link glides to its section (`hash`); elsewhere Projects and
 // Notes open their own pages. `section` matches the data-nav marks on the home page's sections.
 const links = [
-  { label: "About", section: "about", hash: "#about" },
   { label: "Projects", section: "projects", hash: "#work", page: "/projects" },
+  { label: "About", section: "about", hash: "#about" },
   ...(showNotes ? [{ label: "Notes", section: "notes", hash: "#notes", page: "/notes" }] : []),
   { label: "History", section: "history", hash: "#history" },
   { label: "Contact", section: "contact", hash: "#contact" },
